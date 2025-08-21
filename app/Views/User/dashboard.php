@@ -120,6 +120,9 @@
           <div class="indicator-card mb-2" data-indicator="ketenagakerjaan">
             <i class="fas fa-heart me-2 text-primary"></i>Ketenagakerjaan
           </div>
+          <div class="indicator-card mb-2" data-indicator="kesejahteraan">
+            <i class="fas fa-heart me-2 text-primary"></i>Kesejahteraan
+          </div>
         </div>
       </div>
     </div>
