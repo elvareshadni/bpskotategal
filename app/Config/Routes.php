@@ -14,3 +14,6 @@ $routes->get('/user/beranda', 'User::beranda');
 // Route untuk halaman auth (login, register, dll.)
 $routes->get('/auth/register', 'Home::register');
 $routes->get('/auth/forget', 'Home::forget');
+
+// API (proxy CSV -> JSON)
+$routes->get('api/indikator', 'Indicators::index'); // dipakai oleh fetch() di JS
