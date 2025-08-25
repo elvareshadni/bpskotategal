@@ -59,21 +59,21 @@
         <div id="indicator-placeholder" class="map-placeholder border rounded p-5 text-center bg-white shadow-sm">
           <div id="indicator-container" class="border rounded p-4 bg-white shadow-sm">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-              <div>
+              <div class="pe-2">
                 <h3 id="indicator-title" class="mb-1">Pilih indikator di panel kanan</h3>
-                <small id="indicator-subtitle" class="text-muted"></small>
+                <small id="indicator-subtitle" class="text-muted d-block"></small>
               </div>
 
-              <div class="d-flex align-items-center gap-2 flex-wrap">
-                <select id="subindicator-select" class="form-select">
+              <div class="d-flex align-items-center gap-2 flex-wrap controls-wrap">
+                <select id="subindicator-select" class="form-select form-select-sm">
                   <option value="">-</option>
                 </select>
 
                 <!-- dropdown tahun khusus pie distribusi -->
-                <select id="year-left" class="form-select d-none"></select>
-                <select id="year-right" class="form-select d-none"></select>
+                <select id="year-left" class="form-select form-select-sm d-none"></select>
+                <select id="year-right" class="form-select form-select-sm d-none"></select>
 
-                <button id="refresh-btn" class="btn btn-outline-primary">
+                <button id="refresh-btn" class="btn btn-outline-primary btn-sm">
                   <i class="fas fa-rotate"></i>
                 </button>
               </div>
@@ -81,10 +81,14 @@
 
             <div class="row g-4">
               <div class="col-lg-6">
-                <canvas id="chartLine" height="220"></canvas>
+                <div class="chart-panel border rounded p-3 bg-white">
+                  <canvas id="chartLine" height="220"></canvas>
+                </div>
               </div>
               <div class="col-lg-6">
-                <canvas id="chartBar" height="220"></canvas>
+                <div class="chart-panel border rounded p-3 bg-white">
+                  <canvas id="chartBar" height="220"></canvas>
+                </div>
               </div>
             </div>
           </div>
@@ -190,6 +194,16 @@
 <?= $this->section('scripts'); ?>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js" integrity="sha512-Y51n9mtKTVBh3Jbx5pZSJNDDMyY+yGe77DGtBPzRlgsf/YLCh13kSZ3JmfHGzYFCmOndraf0sQgfM654b7dJ3w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
+  // Global defaults biar rapi konsisten
+  Chart.defaults.responsive = true;
+  Chart.defaults.maintainAspectRatio = false;
+  Chart.defaults.font.size = 12;
+  Chart.defaults.elements.line.tension = 0.25;
+  Chart.defaults.plugins.legend.position = 'bottom';
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
+  Chart.defaults.plugins.legend.labels.boxWidth = 10;
+  Chart.defaults.plugins.legend.labels.boxHeight = 10;
+
   /** ================= CONFIG SUMBER CSV (dari Controller) ================= */
   const INDICATOR_SOURCES = <?= json_encode($csvMap ?? [], JSON_UNESCAPED_SLASHES) ?>;
 
@@ -312,6 +326,31 @@
           patterns: [/transportasi/i],
           type: 'pivotRow'
         },
+        {
+          label: 'Informasi, Komunikasi, dan Jasa Keuangan',
+          patterns: [/informasi|komunikasi|jasa.*keuangan/i],
+          type: 'pivotRow'
+        },
+        {
+          label: 'Rekreasi, Olahraga, dan Budaya',
+          patterns: [/rekreasi|olahraga|budaya/i],
+          type: 'pivotRow'
+        },
+        {
+          label: 'Pendidikan',
+          patterns: [/pendidikan/i],
+          type: 'pivotRow'
+        },
+        {
+          label: 'Penyediaan Makanan dan Minuman/Restoran',
+          patterns: [/restoran|penyediaan.*makanan.*minuman/i],
+          type: 'pivotRow'
+        },
+        {
+          label: 'Perawatan Pribadi dan Jasa Lainnya',
+          patterns: [/perawatan.*pribadi|jasa.*lain/i],
+          type: 'pivotRow'
+        },
       ]
     },
     'INDEKS PEMBANGUNAN MANUSIA': {
@@ -342,6 +381,11 @@
         {
           label: 'Pengeluaran per Kapita yang Disesuaikan',
           patterns: [/pengeluaran.*disesuaikan/i],
+          type: 'pivotRow'
+        },
+        {
+          label: 'PPP (Poverty Power Parity)',
+          patterns: [/ppp|purchasing.*power.*parity/i],
           type: 'pivotRow'
         },
       ]
@@ -421,6 +465,12 @@
   const $refresh = document.getElementById('refresh-btn');
   const $yearL = document.getElementById('year-left');
   const $yearR = document.getElementById('year-right');
+  // Aktifkan 'charts-mode' pada placeholder jika #indicator-container ada
+  const $placeholder = document.getElementById('indicator-placeholder');
+  if ($placeholder && document.getElementById('indicator-container')) {
+    $placeholder.classList.add('charts-mode');
+  }
+
 
   const zwsRE = /\u00A0|\u200B/g;
   const sanitizeHeader = (h) => String(h || '').replace(/^\uFEFF/, '').replace(zwsRE, '').trim();
@@ -496,6 +546,14 @@
     return -1;
   }
 
+  function attachLegendClass(chart) {
+    // Tambahkan kelas ke container legend untuk padding custom
+    const id = chart.canvas?.parentElement;
+    if (!id) return;
+    const legends = id.querySelectorAll('legend');
+    legends.forEach(l => l.classList.add('chartjs-legend-bottom'));
+  }
+
   /** ============= RENDER ============= */
   function renderPivotSeries(rowIdxs, yearCols, customLabels = null) {
     const labels = yearCols.slice();
@@ -549,6 +607,8 @@
         }
       }
     });
+    attachLegendClass(lineChart);
+    attachLegendClass(barChart);
   }
 
   function renderPieDualPivot(rowIdxs, yearCols, yearLeft, yearRight) {
@@ -594,7 +654,20 @@
         }
       }
     });
+    attachLegendClass(lineChart);
+    attachLegendClass(barChart);
   }
+
+  const ro = new ResizeObserver(() => {
+    if (lineChart) lineChart.resize();
+    if (barChart) barChart.resize();
+  });
+  document.querySelectorAll('.chart-panel').forEach(p => ro.observe(p));
+  window.addEventListener('orientationchange', () => {
+    if (lineChart) lineChart.resize();
+    if (barChart) barChart.resize();
+  });
+
 
   /** ============= DROPDOWN BUILDER (PIVOT-ONLY) ============= */
   function buildDropdown(cardKey, columns) {
@@ -713,8 +786,13 @@
 
     lastCardKey = cardKey;
     $title.textContent = humanize(cardKey);
-    $subtitle.textContent = '2019-2024';
-    resetCharts(); // penting: bersihkan sisa grafik kartu sebelumnya
+    $subtitle.textContent = '2019–2024';
+
+    // bersihkan kontrol dulu
+    resetCharts();
+    $select.innerHTML = '<option value="">— Pilih Opsi —</option>';
+    $yearL.classList.add('d-none');
+    $yearR.classList.add('d-none');
 
     const {
       columns,
@@ -726,16 +804,21 @@
       usableOptions,
       yearCols
     } = buildDropdown(cardKey, columns);
-
-    // auto pilih opsi pertama kalau ada
     if (usableOptions.length) {
       $select.value = '0';
       renderFromSelection(usableOptions, yearCols);
+    } else {
+      // tampilkan placeholder bila dataset kosong
+      const c1 = ctx('chartLine');
+      c1.canvas.getContext && c1.canvas.getContext('2d');
+      const c2 = ctx('chartBar');
+      c2.canvas.getContext && c2.canvas.getContext('2d');
     }
 
     $select.onchange = () => renderFromSelection(usableOptions, yearCols);
     $refresh.onclick = () => loadIndicatorByCard(cardEl, true);
   }
+
 
   /** Pasang listener untuk semua .indicator-card */
   document.querySelectorAll('.indicator-card').forEach(el => {

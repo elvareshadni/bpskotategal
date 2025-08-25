@@ -109,13 +109,75 @@
   height: 580px;
 }
 
-/* dropdown indikator biar rapi */
+/* --- Controls --- */
 #subindicator-select {
-  min-width: 320px;
+  min-width: 260px;
+  max-width: 420px;
 }
-
-/* dua dropdown tahun saat pie dual */
 #year-left,
 #year-right {
-  min-width: 140px;
+  min-width: 120px;
+  max-width: 160px;
+}
+
+@media (max-width: 992px) {
+  .controls-wrap {
+    width: 100%;
+  }
+  #subindicator-select,
+  #year-left,
+  #year-right {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+/* --- Chart cards --- */
+.chart-panel {
+  min-height: 320px;
+}
+.chart-panel canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Legend biar nggak nabrak */
+.chartjs-legend-bottom {
+  padding-top: 0.5rem;
+}
+
+/* Default tampilan placeholder (untuk peta/empty state) */
+#indicator-placeholder.map-placeholder {
+  /* sudah ada style asli Anda — biarkan */
+}
+
+/* Saat memuat chart, jadikan placeholder fleksibel & transparan */
+#indicator-placeholder.charts-mode {
+  height: auto; /* penting: jangan fixed */
+  min-height: 0; /* hilangkan batas minimal */
+  padding: 0; /* biar kartu di dalamnya yang atur padding */
+  background: transparent; /* hilangkan background dashed */
+  border: 0; /* hilangkan border dashed */
+}
+
+/* Pastikan kartu chart tidak melebihi lebar placeholder */
+#indicator-placeholder.charts-mode > #indicator-container {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  margin-top: 0.25rem; /* jarak aman dari judul */
+}
+
+/* Jaga jarak aman di bawah judul section */
+.section-title.mb-4 {
+  margin-bottom: 1.5rem !important;
+}
+
+.chart-header select {
+  min-width: 120px;
+}
+@media (max-width: 576px) {
+  .chart-header select {
+    min-width: 100px;
+  }
 }
