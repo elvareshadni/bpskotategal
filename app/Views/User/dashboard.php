@@ -194,200 +194,226 @@
   const INDICATOR_SOURCES = <?= json_encode($csvMap ?? [], JSON_UNESCAPED_SLASHES) ?>;
 
   /** ================== KONFIGURASI MENU ==================
-   * Setiap kartu indikator memetakan ke satu CSV key + daftar opsi.
-   * Masing2 opsi berisi:
-   *  - label     : teks di dropdown
-   *  - patterns  : array regex utk mencari kolom aktual (1 regex = 1 seri)
-   *  - type      : 'series' (line/bar) atau 'pieDual' (dua pie utk 2 tahun)
+   * Tambah 'scope.kelompok' supaya baris terfilter sesuai kartu.
+   * Untuk sheet pivot: patterns mencocokkan nama baris (SubIndikator/Kelompok).
+   * type:
+   *  - 'pivotRow'      : 1 baris -> 1 seri
+   *  - 'pivotMulti'    : N baris -> N seri (mis. Laki-laki & Perempuan)
+   *  - 'pieDualPivot'  : 3 baris -> 2 pie utk 2 tahun
    */
   const MENU = {
     'LUAS_WILAYAH': {
       key: 'LUAS_KEPENDUDUKAN',
+      scope: {
+        kelompok: /^luas\s*wilayah/i
+      },
       options: [{
-        label: 'Luas Wilayah (km2)',
-        patterns: [/luas.*wilayah/i],
-        type: 'series'
-      }, ]
+        label: 'Luas Wilayah',
+        patterns: [/luas\s*wilayah/i],
+        type: 'pivotRow',
+      }]
     },
     'KEPENDUDUKAN': {
       key: 'LUAS_KEPENDUDUKAN',
+      scope: {
+        kelompok: /^kependudukan/i
+      },
       options: [{
-          label: 'Jumlah penduduk',
-          patterns: [/jumlah.*penduduk/i],
-          type: 'series'
+          label: 'Jumlah Penduduk',
+          patterns: [/^jumlah\s*penduduk/i],
+          type: 'pivotRow'
         },
         {
-          label: 'Jumlah penduduk per gender',
-          patterns: [/laki/i, /perempuan/i],
-          type: 'series'
+          label: 'Laki-laki & Perempuan',
+          patterns: [/(\W|^)-?\s*laki/i, /(\W|^)-?\s*perempuan/i],
+          type: 'pivotMulti'
         },
         {
           label: 'Angka Ketergantungan',
           patterns: [/ketergantungan/i],
-          type: 'series'
+          type: 'pivotRow'
         },
         {
           label: 'Kepadatan Penduduk',
           patterns: [/kepadatan/i],
-          type: 'series'
+          type: 'pivotRow'
         },
         {
           label: 'Sex Ratio',
-          patterns: [/sex.*ratio/i],
-          type: 'series'
+          patterns: [/sex\s*ratio|rasio\s*jenis\s*kelamin/i],
+          type: 'pivotRow'
         },
       ]
     },
     'KEMISKINAN': {
       key: 'ANGKA_KEMISKINAN',
+      scope: {
+        kelompok: /^angka\s*kemiskinan/i
+      },
       options: [{
           label: 'Persentase Penduduk Miskin',
           patterns: [/persentase.*miskin/i],
-          type: 'series'
+          type: 'pivotRow'
         },
         {
-          label: 'Indeks Kedalaman Kemiskinan',
-          patterns: [/kedalaman.*kemiskinan/i],
-          type: 'series'
+          label: 'Indeks Kedalaman Kemiskinan (P1)',
+          patterns: [/kedalaman.*kemiskinan|p1\b/i],
+          type: 'pivotRow'
         },
         {
-          label: 'Indeks Keparahan Kemiskinan',
-          patterns: [/keparahan.*kemiskinan/i],
-          type: 'series'
+          label: 'Indeks Keparahan Kemiskinan (P2)',
+          patterns: [/keparahan.*kemiskinan|p2\b/i],
+          type: 'pivotRow'
         },
         {
           label: 'Garis Kemiskinan',
           patterns: [/garis.*kemiskinan/i],
-          type: 'series'
+          type: 'pivotRow'
         },
       ]
     },
     'INFLASI UMUM': {
       key: 'INFLASI_UMUM',
+      scope: {
+        kelompok: /^inflasi\s*umum/i
+      },
       options: [{
           label: 'Data Inflasi',
-          patterns: [/inflasi.*umum/i],
-          type: 'series'
+          patterns: [/inflasi\s*umum/i],
+          type: 'pivotRow'
         },
         {
           label: 'Makanan, Minuman, dan Tembakau',
           patterns: [/makanan.*minuman.*tembakau/i],
-          type: 'series'
+          type: 'pivotRow'
         },
         {
           label: 'Pakaian dan Alas Kaki',
           patterns: [/pakaian.*alas.*kaki/i],
-          type: 'series'
+          type: 'pivotRow'
         },
         {
           label: 'Perumahan, Air, Listrik, Gas, dan Bahan Bakar Rumah Tangga',
           patterns: [/perumahan|listrik|gas|bahan.*bakar.*rumah/i],
-          type: 'series'
+          type: 'pivotRow'
         },
         {
-          label: 'Perlengkapan, Peralatan, dan Pemeliharaan Rutin Rumah Tangga',
+          label: 'Perlengkapan/Peralatan/Pemeliharaan Rutin',
           patterns: [/perlengkapan|peralatan|pemeliharaan.*rutin/i],
-          type: 'series'
+          type: 'pivotRow'
         },
         {
           label: 'Kesehatan',
           patterns: [/kesehatan/i],
-          type: 'series'
+          type: 'pivotRow'
         },
         {
           label: 'Transportasi',
           patterns: [/transportasi/i],
-          type: 'series'
+          type: 'pivotRow'
         },
       ]
     },
     'INDEKS PEMBANGUNAN MANUSIA': {
       key: 'IPM',
+      scope: {
+        kelompok: /^indeks\s*pembangunan\s*manusia/i
+      },
       options: [{
           label: 'IPM',
-          patterns: [/^ipm$/i, /indeks.*pembangunan.*manusia/i],
-          type: 'series'
+          patterns: [/indeks\s*pembangunan\s*manusia/i],
+          type: 'pivotRow'
         },
         {
           label: 'Umur Harapan Hidup',
-          patterns: [/umur.*harapan.*hidup/i],
-          type: 'series'
+          patterns: [/umur\s*harapan\s*hidup/i],
+          type: 'pivotRow'
         },
         {
           label: 'Harapan Lama Sekolah',
-          patterns: [/harapan.*lama.*sekolah/i],
-          type: 'series'
+          patterns: [/harapan\s*lama\s*sekolah/i],
+          type: 'pivotRow'
         },
         {
-          label: 'RLS',
-          patterns: [/^rls$/i, /rata.*lama.*sekolah/i],
-          type: 'series'
+          label: 'Rata-rata Lama Sekolah (RLS)',
+          patterns: [/rata.*lama.*sekolah|^rls$/i],
+          type: 'pivotRow'
         },
         {
-          label: 'PPP Poverty Power Parity',
-          patterns: [/ppp|parity|purchasing/i],
-          type: 'series'
+          label: 'Pengeluaran per Kapita yang Disesuaikan',
+          patterns: [/pengeluaran.*disesuaikan/i],
+          type: 'pivotRow'
         },
       ]
     },
     'PDRB': {
       key: 'PDRB',
+      scope: {
+        kelompok: /^pdrb\b/i
+      },
       options: [{
-          label: 'Atas Dasar Harga Berlaku',
-          patterns: [/harga.*berlaku|adhb/i],
-          type: 'series'
+          label: 'Atas Dasar Harga Berlaku (ADHB)',
+          patterns: [/harga\s*berlaku|adhb/i],
+          type: 'pivotRow'
         },
         {
-          label: 'Atas Dasar Harga Konstan',
-          patterns: [/harga.*konstan|adhk/i],
-          type: 'series'
+          label: 'Atas Dasar Harga Konstan (ADHK)',
+          patterns: [/harga\s*konstan|adhk/i],
+          type: 'pivotRow'
         },
         {
           label: 'Laju Pertumbuhan Ekonomi',
           patterns: [/laju.*pertumbuhan/i],
-          type: 'series'
+          type: 'pivotRow'
         },
         {
-          label: 'PDRB per Kapita (ADHB)',
-          patterns: [/kapita|adhb.*kapita/i],
-          type: 'series'
+          label: 'PDRB Per Kapita',
+          patterns: [/per\s*kapita/i],
+          type: 'pivotRow'
         },
       ]
     },
     'KETENAGAKERJAAN': {
       key: 'KETENAGAKERJAAN',
+      scope: {
+        kelompok: /^ketenagakerjaan/i
+      },
       options: [{
-          label: 'Tingkat Pengangguran Terbuka',
-          patterns: [/pengangguran.*terbuka/i],
-          type: 'series'
+          label: 'Tingkat Pengangguran Terbuka (TPT)',
+          patterns: [/pengangguran.*terbuka|tpt/i],
+          type: 'pivotRow'
         },
         {
-          label: 'Tingkat Partisipasi Angkatan Kerja',
-          patterns: [/partisipasi.*angkatan.*kerja/i],
-          type: 'series'
+          label: 'Tingkat Partisipasi Angkatan Kerja (TPAK)',
+          patterns: [/partisipasi.*angkatan.*kerja|tpak/i],
+          type: 'pivotRow'
         },
       ]
     },
     'KESEJAHTERAAN': {
       key: 'KESEJAHTERAAN',
+      scope: {
+        kelompok: /^kesejahteraan/i
+      },
       options: [{
           label: 'Gini Ratio',
           patterns: [/gini/i],
-          type: 'series'
+          type: 'pivotRow'
         },
-        // Pie dua tahun (kiri & kanan)
         {
           label: 'Distribusi Pendapatan',
           patterns: [/40.*bawah/i, /40.*tengah/i, /20.*atas/i],
-          type: 'pieDual'
+          type: 'pieDualPivot'
         },
       ]
     }
   };
 
   /** ============== STATE & UTIL ============== */
-  let lineChart, barChart, lastRows = [],
-    lastYearCol = 'Tahun',
+  let lineChart = null,
+    barChart = null,
+    lastRows = [],
+    lastYearCols = [],
     lastCardKey = '';
   const $title = document.getElementById('indicator-title');
   const $subtitle = document.getElementById('indicator-subtitle');
@@ -396,69 +422,34 @@
   const $yearL = document.getElementById('year-left');
   const $yearR = document.getElementById('year-right');
 
+  const zwsRE = /\u00A0|\u200B/g;
+  const sanitizeHeader = (h) => String(h || '').replace(/^\uFEFF/, '').replace(zwsRE, '').trim();
+  const normText = (s) => sanitizeHeader(s).replace(/^-+\s*/, '').trim(); // buang '-' di awal
   const humanize = (s) => s.replace(/_/g, ' ').replace(/\b\w/g, m => m.toUpperCase());
-  const zwsRE = /\u00A0|\u200B/g; // NBSP/zero‑width
+
   const toNumber = (v) => {
-    if (v == null || v === "") return null;
-    if (typeof v === "number") return v;
-
-    let s = String(v).replace(zwsRE, "").trim();
-
-    // 1) 12.345,67 -> 12345.67
-    if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(s)) {
-      s = s.replace(/\./g, "").replace(",", ".");
-      const n = parseFloat(s);
-      return Number.isNaN(n) ? null : n;
-    }
-    // 2) 12,345.67 -> 12345.67
-    if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) {
-      s = s.replace(/,/g, "");
-      const n = parseFloat(s);
-      return Number.isNaN(n) ? null : n;
-    }
-    // 3) 12345,67 -> 12345.67
-    if (/^\d+(,\d+)$/.test(s)) {
-      s = s.replace(",", ".");
-      const n = parseFloat(s);
-      return Number.isNaN(n) ? null : n;
-    }
-    // 4) 12345.67 atau 12345
-    if (/^\d+(\.\d+)?$/.test(s)) {
-      const n = parseFloat(s);
-      return Number.isNaN(n) ? null : n;
-    }
-    return null;
+    if (v == null || v === '') return null;
+    if (typeof v === 'number') return v;
+    let s = String(v).replace(zwsRE, '').trim();
+    if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(s)) s = s.replace(/\./g, '').replace(',', '.');
+    else if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) s = s.replace(/,/g, '');
+    else if (/^\d+(,\d+)$/.test(s)) s = s.replace(',', '.');
+    if (!/^\d+(\.\d+)?$/.test(s)) return null;
+    const n = parseFloat(s);
+    return Number.isNaN(n) ? null : n;
   };
 
-  function sanitizeHeader(h) {
-    return String(h || '')
-      .replace(/^\uFEFF/, '') // BOM
-      .replace(/\u00A0|\u200B/g, '') // NBSP/ZWSP
-      .trim();
+  function resetCharts() {
+    if (lineChart) {
+      lineChart.destroy();
+      lineChart = null;
+    }
+    if (barChart) {
+      barChart.destroy();
+      barChart = null;
+    }
   }
 
-  /** Cari nama kolom sebenarnya berdasarkan regex patterns */
-  function resolveFields(columns, patterns) {
-    const cleanCols = columns.map(sanitizeHeader);
-    const found = [];
-    patterns.forEach(re => {
-      const idx = cleanCols.findIndex(c => re.test(c));
-      if (idx !== -1) found.push(columns[idx]); // return nama kolom asli utk akses nilai
-    });
-    return found;
-  }
-
-  /** Dataset series untuk Chart.js */
-  function makeDatasets(rows, fields) {
-    return fields.map((field) => ({
-      label: field,
-      data: rows.map(r => toNumber(r[field])),
-      tension: .25,
-      borderWidth: 2
-    }));
-  }
-
-  /** Helpers: ctx canvas */
   function ctx(id) {
     const el = document.getElementById(id);
     if (!el) throw new Error(`Canvas #${id} tidak ditemukan`);
@@ -467,76 +458,64 @@
     return c;
   }
 
-  /** Render dari BARIS (tahun ada di kolom-kolom 4 digit) */
-  function renderRowAcrossYears(rows, yearCols, row, label) {
-    const labels = yearCols;
-    const values = yearCols.map(y => toNumber(row[y]));
-
-    if (lineChart) lineChart.destroy();
-    if (barChart) barChart.destroy();
-
-    lineChart = new Chart(ctx('chartLine'), {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label,
-          data: values,
-          tension: .25,
-          borderWidth: 2,
-          fill: true
-        }]
-      },
-      options: {
-        plugins: {
-          legend: {
-            position: 'bottom'
-          }
-        },
-        scales: {
-          x: {
-            grid: {
-              display: false
-            }
-          }
-        }
-      }
+  /** ================== FETCH ================== */
+  async function fetchIndicator(key, force = false) {
+    const url = `<?= base_url('api/indikator') ?>?key=${encodeURIComponent(key)}${force ? '&nocache=1' : ''}`;
+    const res = await fetch(url, {
+      cache: 'no-store'
     });
-
-    barChart = new Chart(ctx('chartBar'), {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [{
-          label,
-          data: values,
-          borderWidth: 1
-        }]
-      },
-      options: {
-        plugins: {
-          legend: {
-            position: 'bottom'
-          }
-        }
-      }
-    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || 'Fetch gagal');
+    return json; // { columns, rows }
   }
 
+  /** Ambil label baris yang informatif (SubIndikator kalau ada, else Kelompok) */
+  function getRowLabel(row) {
+    const s1 = normText(row['SubIndikator'] ?? '');
+    const s2 = normText(row['Kelompok'] ?? '');
+    return s1 || s2 || '(tanpa label)';
+  }
 
-  /** Render LINE + BAR */
-  function renderSeries(rows, yearCol, fields) {
-    const labels = rows.map(r => r[yearCol] ?? r['Tahun'] ?? r['tahun']);
-    const ds = makeDatasets(rows, fields);
+  /** Cari indeks baris yang cocok pola (cek SubIndikator ATAU Kelompok), dengan scoping Kelompok jika ada */
+  function findRowIndexByPattern(rows, yearCols, pattern, scope) {
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
+      // baris harus ada angka pada minimal satu kolom tahun
+      const hasNumber = yearCols.some(y => toNumber(r[y]) != null);
+      if (!hasNumber) continue;
 
-    if (lineChart) lineChart.destroy();
-    if (barChart) barChart.destroy();
+      // jika ada scope.kelompok → wajib match
+      if (scope?.kelompok) {
+        const k = normText(r['Kelompok'] ?? '');
+        if (!scope.kelompok.test(k)) continue;
+      }
 
+      const hay = normText((r['SubIndikator'] ?? '') + ' ' + (r['Kelompok'] ?? ''));
+      if (pattern.test(hay)) return i;
+    }
+    return -1;
+  }
+
+  /** ============= RENDER ============= */
+  function renderPivotSeries(rowIdxs, yearCols, customLabels = null) {
+    const labels = yearCols.slice();
+    const datasets = rowIdxs.map((idx, i) => {
+      const r = lastRows[idx];
+      return {
+        label: customLabels ? customLabels[i] : getRowLabel(r),
+        data: yearCols.map(y => toNumber(r[y])),
+        tension: .25,
+        borderWidth: 2,
+        fill: true
+      };
+    });
+
+    resetCharts();
     lineChart = new Chart(ctx('chartLine'), {
       type: 'line',
       data: {
         labels,
-        datasets: ds
+        datasets
       },
       options: {
         plugins: {
@@ -557,8 +536,9 @@
       type: 'bar',
       data: {
         labels,
-        datasets: ds.map(d => ({
-          ...d
+        datasets: datasets.map(d => ({
+          ...d,
+          fill: false
         }))
       },
       options: {
@@ -571,24 +551,21 @@
     });
   }
 
-  /** Render 2 PIE (Distribusi Pendapatan) */
-  function renderPieDual(rows, yearCol, fields, yearLeft, yearRight) {
-    // labels adalah nama-nama field (40% bawah, 40% tengah, 20% atas)
-    const labels = fields;
-    const rowL = rows.find(r => String(r[yearCol]) === String(yearLeft));
-    const rowR = rows.find(r => String(r[yearCol]) === String(yearRight));
-    const dataL = fields.map(f => toNumber(rowL?.[f] ?? 0));
-    const dataR = fields.map(f => toNumber(rowR?.[f] ?? 0));
+  function renderPieDualPivot(rowIdxs, yearCols, yearLeft, yearRight) {
+    // rowIdxs: 3 baris (40 bawah, 40 tengah, 20 atas)
+    const labels = rowIdxs.map(idx => getRowLabel(lastRows[idx]));
+    const yL = String(yearLeft),
+      yR = String(yearRight);
+    const dataL = rowIdxs.map(idx => toNumber(lastRows[idx][yL] ?? 0));
+    const dataR = rowIdxs.map(idx => toNumber(lastRows[idx][yR] ?? 0));
 
-    if (lineChart) lineChart.destroy();
-    if (barChart) barChart.destroy();
-
+    resetCharts();
     lineChart = new Chart(ctx('chartLine'), {
       type: 'pie',
       data: {
         labels,
         datasets: [{
-          label: `Distribusi ${yearLeft}`,
+          label: `Distribusi ${yL}`,
           data: dataL
         }]
       },
@@ -605,7 +582,7 @@
       data: {
         labels,
         datasets: [{
-          label: `Distribusi ${yearRight}`,
+          label: `Distribusi ${yR}`,
           data: dataR
         }]
       },
@@ -619,174 +596,145 @@
     });
   }
 
-  /** Ambil data CSV via API proxy */
-  async function fetchIndicator(key, force = false) {
-    const url = `<?= base_url('api/indikator') ?>?key=${encodeURIComponent(key)}${force ? '&nocache=1' : ''}`;
-    const res = await fetch(url, {
-      cache: 'no-store'
-    });
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || 'Fetch gagal');
-    return json;
-  }
-
-  /** Bangun dropdown berdasarkan config MENU + kolom aktual */
+  /** ============= DROPDOWN BUILDER (PIVOT-ONLY) ============= */
   function buildDropdown(cardKey, columns) {
     $select.innerHTML = '';
     $yearL.classList.add('d-none');
     $yearR.classList.add('d-none');
 
     const config = MENU[cardKey];
-    const hasYearCol = columns.some(c => /^tahun$/i.test(sanitizeHeader(c)));
-    const yearCols = columns.filter(c => /^\d{4}$/.test(sanitizeHeader(c))); // ["2019",...]
-    const isPivot = !hasYearCol && yearCols.length >= 2;
+    if (!config) return {
+      usableOptions: [],
+      yearCols: []
+    };
 
-    // ===== MODE 1: Struktur lama (ada kolom "Tahun") =====
-    if (!isPivot) {
-      const yearCol = columns.find(c => /^tahun$/i.test(sanitizeHeader(c))) || 'Tahun';
-      const usable = [];
-      for (const opt of config.options) {
-        const fields = resolveFields(columns, opt.patterns);
-        if (fields.length === opt.patterns.length) {
+    const yearCols = columns.filter(c => /^\d{4}$/.test(sanitizeHeader(c)));
+    lastYearCols = yearCols;
+
+    const usable = [];
+    config.options.forEach(opt => {
+      if (opt.type === 'pieDualPivot') {
+        // setiap pattern harus ketemu satu baris
+        const rowIdxs = (opt.patterns || []).map(p => findRowIndexByPattern(lastRows, yearCols, p, config.scope));
+        if (rowIdxs.every(i => i >= 0)) {
           usable.push({
             ...opt,
-            fields
+            rowIdxs,
+            type: 'pieDualPivot'
           });
-          const o = document.createElement('option');
-          o.value = opt.label;
-          o.textContent = opt.label;
-          $select.appendChild(o);
+        }
+      } else if (opt.type === 'pivotMulti') {
+        const rowIdxs = (opt.patterns || []).map(p => findRowIndexByPattern(lastRows, yearCols, p, config.scope));
+        if (rowIdxs.every(i => i >= 0)) {
+          usable.push({
+            ...opt,
+            rowIdxs,
+            type: 'pivotMulti'
+          });
+        }
+      } else { // pivotRow (default)
+        const idx = findRowIndexByPattern(lastRows, yearCols, opt.patterns?.[0] ?? /./, config.scope);
+        if (idx >= 0) {
+          usable.push({
+            ...opt,
+            rowIdxs: [idx],
+            type: 'pivotRow'
+          });
         }
       }
-      if (usable.length) $select.value = usable[0].label;
-      return {
-        yearCol,
-        usableOptions: usable,
-        isPivot: false,
-        yearCols: []
-      };
-    }
-
-    // ===== MODE 2: PIVOT (tahun sebagai kolom) =====
-    // Dropdown diisi dari baris yang punya data numerik minimal di salah satu kolom tahun
-    const options = [];
-    lastRows.forEach((row, idx) => {
-      const hasNumber = yearCols.some(y => toNumber(row[y]) != null);
-      if (!hasNumber) return;
-
-      // ambil label yang paling informatif
-      const lbl = (row['SubIndikator'] && String(row['SubIndikator']).trim()) ||
-        (row['SubIndikator'] && String(row['SubIndikator']).trim()) // jaga-jaga ejaan
-        ||
-        (row['SubIndikator'] ?? '') ||
-        (row['Kelompok'] ?? '') ||
-        `Baris ${idx+1}`;
-
-      const text = String(lbl || '').trim();
-      options.push({
-        label: text,
-        rowIndex: idx,
-        type: 'pivotRow'
-      });
     });
-
-    // Jika MENU spesifik memilih subset, kamu bisa filter di sini berdasarkan cardKey
-    // contoh sederhana (opsional):
-    // if (cardKey === 'LUAS_WILAYAH') options = options.filter(o => /luas/i.test(o.label));
 
     // isi dropdown
-    options.forEach(o => {
-      const opt = document.createElement('option');
-      opt.value = String(o.rowIndex);
-      opt.textContent = o.label;
-      $select.appendChild(opt);
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = '— Pilih Opsi —';
+    $select.appendChild(ph);
+
+    usable.forEach((u, i) => {
+      const o = document.createElement('option');
+      o.value = String(i); // pakai index usable
+      o.textContent = u.label;
+      $select.appendChild(o);
     });
-    if (options.length) $select.value = String(options[0].rowIndex);
+
+    // kalau tak ada opsi -> kosongkan chart
+    if (usable.length === 0) {
+      resetCharts();
+    }
 
     return {
-      yearCol: null,
-      usableOptions: options,
-      isPivot: true,
+      usableOptions: usable,
       yearCols
     };
   }
 
-
-  /** Saat menggambar dari pilihan dropdown */
-  function renderFromSelection(usableOptions, yearCol, meta = {}) {
-    const {
-      isPivot = false, yearCols = []
-    } = meta;
-
-    if (isPivot) {
-      // value dropdown = index baris
-      const idx = Number($select.value);
-      const opt = usableOptions.find(o => Number(o.rowIndex) === idx) || usableOptions[0];
-      if (!opt) return;
-      const row = lastRows[idx];
-      renderRowAcrossYears(lastRows, yearCols, row, opt.label);
+  /** ============= ON-CHANGE ============= */
+  function renderFromSelection(usableOptions, yearCols) {
+    const sel = $select.value;
+    if (!sel) {
+      resetCharts();
+      return;
+    }
+    const idx = Number(sel);
+    const opt = usableOptions[idx];
+    if (!opt) {
+      resetCharts();
       return;
     }
 
-    // mode normal (ada kolom "Tahun")
-    const label = $select.value;
-    const opt = usableOptions.find(o => o.label === label);
-    if (!opt) return;
-
-    if (opt.type === 'pieDual') {
+    if (opt.type === 'pieDualPivot') {
       $yearL.classList.remove('d-none');
       $yearR.classList.remove('d-none');
-      const years = lastRows.map(r => r[yearCol]);
-      $yearL.innerHTML = years.map(y => `<option>${y}</option>`).join('');
-      $yearR.innerHTML = years.map(y => `<option>${y}</option>`).join('');
-      if (years.length >= 2) {
-        $yearL.value = years[years.length - 2];
-        $yearR.value = years[years.length - 1];
+      $yearL.innerHTML = yearCols.map(y => `<option>${y}</option>`).join('');
+      $yearR.innerHTML = yearCols.map(y => `<option>${y}</option>`).join('');
+      if (yearCols.length >= 2) {
+        $yearL.value = yearCols[yearCols.length - 2];
+        $yearR.value = yearCols[yearCols.length - 1];
       }
-      const draw = () => renderPieDual(lastRows, yearCol, opt.fields, $yearL.value, $yearR.value);
+      const draw = () => renderPieDualPivot(opt.rowIdxs, yearCols, $yearL.value, $yearR.value);
       draw();
       $yearL.onchange = draw;
       $yearR.onchange = draw;
-    } else {
-      $yearL.classList.add('d-none');
-      $yearR.classList.add('d-none');
-      renderSeries(lastRows, yearCol, opt.fields);
+      return;
     }
+
+    $yearL.classList.add('d-none');
+    $yearR.classList.add('d-none');
+
+    // pivotRow / pivotMulti
+    renderPivotSeries(opt.rowIdxs, yearCols);
   }
 
-
-  /** Handler klik kartu indikator */
+  /** ============= MAIN HANDLER ============= */
   async function loadIndicatorByCard(cardEl, force = false) {
     const cardKey = (cardEl.getAttribute('data-indicator') || '').toUpperCase();
     const conf = MENU[cardKey];
     if (!conf) return alert('Indikator belum dipetakan: ' + cardKey);
 
     lastCardKey = cardKey;
-
     $title.textContent = humanize(cardKey);
     $subtitle.textContent = '2019-2024';
+    resetCharts(); // penting: bersihkan sisa grafik kartu sebelumnya
 
     const {
       columns,
       rows
     } = await fetchIndicator(conf.key, force);
     lastRows = rows;
+
     const {
-      yearCol,
       usableOptions,
-      isPivot,
       yearCols
     } = buildDropdown(cardKey, columns);
-    renderFromSelection(usableOptions, yearCol, {
-      isPivot,
-      yearCols
-    });
 
-    $select.onchange = () => renderFromSelection(usableOptions, yearCol, {
-      isPivot,
-      yearCols
-    });
-    $refresh.onclick = () => loadIndicatorByCard(cardEl, true); // refetch untuk auto-update
+    // auto pilih opsi pertama kalau ada
+    if (usableOptions.length) {
+      $select.value = '0';
+      renderFromSelection(usableOptions, yearCols);
+    }
+
+    $select.onchange = () => renderFromSelection(usableOptions, yearCols);
+    $refresh.onclick = () => loadIndicatorByCard(cardEl, true);
   }
 
   /** Pasang listener untuk semua .indicator-card */
@@ -804,4 +752,5 @@
     if (first) first.click();
   });
 </script>
+
 <?= $this->endSection(); ?>
