@@ -19,29 +19,32 @@
 
 <body style="background-color: #f8f9fa;">
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary py-3" style="font-size: 0.9rem;">
-    <div class="container">
-      <a class="navbar-brand" href="<?= base_url('/user'); ?>">
-        <img src="<?= base_url('/img/logobpskotategal.png'); ?>" height="40" alt="BPS Logo">
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-        data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false"
-        aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse text-right" id="navbarText">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link active" href="<?= base_url('/user'); ?>">Beranda</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Data Indikator</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Berita</a></li>
-        </ul>
-        <span class="text-white fw-semibold me-2" style="font-size: 0.85rem;">User</span>
-        <img src="https://via.placeholder.com/32x32/cccccc/666666?text=U"
-          class="rounded-circle" width="32" height="32" alt="User Avatar">
-      </div>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary py-3" style="font-size: 0.9rem;">
+  <div class="container">
+    <a class="navbar-brand" href="<?= base_url('/user'); ?>">
+      <img src="<?= base_url('/img/logobpskotategal.png'); ?>" height="40" alt="BPS Logo">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+            data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" 
+            aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse text-right" id="navbarText">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 me-3">
+        <li class="nav-item"><a class="nav-link active" href="<?= base_url('/user'); ?>">Beranda</a></li>
+        <li class="nav-item"><a class="nav-link" href="#data-indikator">Data Indikator</a></li>
+        <li class="nav-item"><a class="nav-link" href="#infografis">Infografis</a></li>
+
+      </ul>
+      <span class="text-white fw-semibold me-2" style="font-size: 0.85rem;">
+          <?= session()->get('username') ?? 'User'; ?>
+      </span>
+      <img src="<?= base_url('/img/default.png'); ?>" 
+           class="rounded-circle" width="32" height="32" alt="User Avatar">
     </div>
-  </nav>
+  </div>
+</nav>
 
   <!-- Konten Dinamis -->
   <?= $this->renderSection('content'); ?>
@@ -64,29 +67,29 @@
           </div>
         </div>
 
-        <!-- Menu & Sosial -->
-        <div class="col-lg-6">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <h6 class="mb-3">Menu Utama</h6>
-              <ul class="list-unstyled">
-                <li><a href="<?= base_url('/user'); ?>" class="text-white-50 text-decoration-none">Beranda</a></li>
-                <li><a href="#" class="text-white-50 text-decoration-none">Data Indikator</a></li>
-                <li><a href="#" class="text-white-50 text-decoration-none">Berita</a></li>
-              </ul>
-            </div>
-            <div class="col-md-6 mb-3">
-              <h6 class="mb-3">Media Sosial</h6>
-              <div class="d-flex gap-3">
-                <a href="https://www.facebook.com/bps.kotategal.3" class="text-white-50"><i class="fab fa-facebook-f fa-lg"></i></a>
-                <a href="https://www.instagram.com/bpskotategal/" class="text-white-50"><i class="fab fa-instagram fa-lg"></i></a>
-                <a href="https://x.com/bps_statistics" class="text-white-50"><i class="fab fa-twitter fa-lg"></i></a>
-                <a href="https://www.youtube.com/channel/UCQ3MpAVvEEtiL7hBoxT_U4A" class="text-white-50"><i class="fab fa-youtube fa-lg"></i></a>
-              </div>
+      <!-- Menu & Sosial -->
+      <div class="col-lg-6">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <h6 class="mb-3">Menu Utama</h6>
+            <ul class="list-unstyled">
+              <li><a href="<?= base_url('/user'); ?>" class="text-white-50 text-decoration-none">Beranda</a></li>
+              <li class="nav-item"><a class="nav-link" href="#data-indikator">Data Indikator</a></li>
+              <li class="nav-item"><a class="nav-link" href="#infografis">Infografis</a></li>
+            </ul>
+          </div>
+          <div class="col-md-6 mb-3">
+            <h6 class="mb-3">Media Sosial</h6>
+            <div class="d-flex gap-3">
+              <a href="https://www.facebook.com/bps.kotategal.3" class="text-white-50"><i class="fab fa-facebook-f fa-lg"></i></a>
+              <a href="https://www.instagram.com/bpskotategal/" class="text-white-50"><i class="fab fa-instagram fa-lg"></i></a>
+              <a href="https://x.com/bps_statistics" class="text-white-50"><i class="fab fa-twitter fa-lg"></i></a>
+              <a href="https://www.youtube.com/channel/UCQ3MpAVvEEtiL7hBoxT_U4A" class="text-white-50"><i class="fab fa-youtube fa-lg"></i></a>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
       <hr class="my-4 opacity-25">
       <div class="text-left">

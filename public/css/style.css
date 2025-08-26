@@ -1,4 +1,5 @@
 .navbar {
+<<<<<<< HEAD
   background: linear-gradient(135deg, #1e40af, #0e57cd) !important;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -10,6 +11,70 @@
   border-left: 4px solid #3b82f6;
   transition: all 0.3s ease;
 }
+=======
+        background: linear-gradient(135deg, #1e40af, #0e57cd) !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+.navbar-nav .nav-link,
+.footer .nav-link,
+.footer .text-white-50 {
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 0.3s ease; /* animasi halus */
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active,
+.footer .nav-link:hover,
+.footer .nav-link.active,
+.footer .text-white-50:hover {
+  color: #fff !important;
+}
+       
+    .indicator-card {
+        background: white;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-left: 4px solid #3b82f6;
+        transition: all 0.3s ease;
+    }
+    
+    .indicator-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .news-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        height: 300px;
+    }
+    
+    .news-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    
+    .news-image {
+        width: 100%;
+        height: 100px;
+        background: linear-gradient(45deg, #e5e7eb, #f3f4f6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280;
+    }
+    
+    .footer {
+        background: linear-gradient(135deg, #1e40af, #0e57cd);
+        color: white;
+        padding: 40px 0 20px 0;
+    }
+>>>>>>> 80694763a43728dd8319fe302e30c56be43d38e0
 
 .indicator-card:hover {
   transform: translateX(5px);
@@ -50,6 +115,7 @@
   color: #d3d3d3; /* abu-abu Bootstrap */
   font-size: 0.95rem; /* opsional biar lebih rapi */
 }
+<<<<<<< HEAD
 
 .section-title {
   font-weight: 700;
@@ -181,3 +247,64 @@
     min-width: 100px;
   }
 }
+=======
+    
+    .section-title {
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 30px;
+        position: relative;
+        padding-bottom: 10px;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: #3b82f6;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #002B6A, #002B6A);
+        border: none;
+        border-radius: 25px;
+        padding: 10px 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+    }
+    
+    .stats-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-top: -80px;
+        position: relative;
+        z-index: 10;
+    }
+    
+    .map-placeholder {
+        background: linear-gradient(45deg, #f8fafc, #e2e8f0);
+        border: 2px dashed #cbd5e1;
+        border-radius: 10px;
+        height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        font-size: 18px;
+    }
+    
+    .carousel-item img {
+        object-fit: cover;
+        height: 580px;
+    }
+
+>>>>>>> 80694763a43728dd8319fe302e30c56be43d38e0
