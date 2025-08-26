@@ -28,6 +28,32 @@ to your `app` folder. The affected files can be copied or merged from
 Copy `env` to `.env` and tailor for your app, specifically the baseURL
 and any database settings.
 
+After deployment API with AppsScript copy this to Code.gs or Kode.gs or create it first then copy this:
+
+// === KONFIGURASI ===
+const SPREADSHEET_ID = '1ohHcbmQnyH5S2SwY1B9SGa_oC64FzloE3L4F8Vk2Ito';     // ganti ID yang ada di link spreadsheet
+const DEFAULT_SHEET  = 'LUAS_KEPENDUDUKAN';          // biarkan
+
+function doGet(e) {
+  const sheetName = e?.parameter?.sheet || DEFAULT_SHEET;
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sh = ss.getSheetByName(sheetName);
+  if (!sh) {
+    return ContentService.createTextOutput(`Sheet "${sheetName}" not found`).setMimeType(ContentService.MimeType.TEXT);
+  }
+  const values = sh.getDataRange().getValues();
+  const csv = values.map(r => r.map(v => {
+    if (v == null) return '';
+    const s = String(v);
+    const needQ = /[",\n\r]/.test(s);
+    return needQ ? `"${s.replace(/"/g,'""')}"` : s;
+  }).join(',')).join('\n');
+
+  return ContentService.createTextOutput(csv).setMimeType(ContentService.MimeType.CSV);
+}
+
+After that, change the URL Deployment in CSV_URL at .env
+
 ## Important Change with index.php
 
 `index.php` is no longer in the root of the project! It has been moved inside the *public* folder,

@@ -37,21 +37,46 @@ class CsvFetcher
         $final = ['columns' => [], 'rows' => []];
 
         foreach ($candidates as $tryUrl) {
-            $resp = $client->get($tryUrl);
+            log_message('debug', 'CsvFetcher mencoba URL: ' . $tryUrl);
+
+            try {
+                $resp = $client->get($tryUrl);
+            } catch (\Throwable $e) {
+                log_message('error', 'Curl error: ' . $e->getMessage());
+                continue;
+            }
+
             $code = $resp->getStatusCode();
+            log_message('debug', "CsvFetcher HTTP $code untuk $tryUrl");
+
             if ($code !== 200) {
                 continue;
             }
+
             $body = $resp->getBody();
 
-            // Jika body tampak seperti HTML (bukan CSV), lewati kandidat ini
-            if (!$body || preg_match('/<\s*html/i', substr($body, 0, 400))) {
+            // deteksi HTML
+            if (!$body) {
+                log_message('debug', "CsvFetcher: body kosong untuk $tryUrl");
+                continue;
+            }
+
+            // deteksi halaman login (Google) yang lolos dari cek HTML
+            if (preg_match('/Sign in - Google Accounts|accounts\.google\.com/i', substr($body, 0, 500))) {
+                log_message('debug', "CsvFetcher: terdeteksi halaman login Google, skip: $tryUrl");
+                continue;
+            }
+
+            if (preg_match('/<\s*html/i', substr($body, 0, 400))) {
+                log_message('debug', "CsvFetcher: body tampak HTML (bukan CSV), skip: $tryUrl");
+                // optional: log cuplikan awal untuk analisis
+                log_message('debug', 'Body preview: ' . substr($body, 0, 200));
                 continue;
             }
 
             [$columns, $rows] = $this->parseCsv($body);
+            log_message('debug', 'CsvFetcher parse: kolom=' . json_encode($columns) . ' | baris=' . count($rows));
 
-            // Anggap sukses hanya jika ada header & minimal 1 baris data numerik/teks
             if (!empty($columns) && !empty($rows)) {
                 $final = ['columns' => $columns, 'rows' => $rows];
                 break;
