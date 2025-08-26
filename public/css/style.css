@@ -2,6 +2,22 @@
         background: linear-gradient(135deg, #1e40af, #0e57cd) !important;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
+
+.navbar-nav .nav-link,
+.footer .nav-link,
+.footer .text-white-50 {
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 0.3s ease; /* animasi halus */
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active,
+.footer .nav-link:hover,
+.footer .nav-link.active,
+.footer .text-white-50:hover {
+  color: #fff !important;
+}
+       
     .indicator-card {
         background: white;
         border-radius: 8px;
@@ -108,3 +124,4 @@
         object-fit: cover;
         height: 580px;
     }
+

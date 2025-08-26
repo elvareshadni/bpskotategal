@@ -7,10 +7,34 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Home::index');
 
-// Route untuk user (dashboard / home user)
+// =======================
+// USER ROUTE
+// =======================
 $routes->get('/user', 'User::index');
 $routes->get('/user/beranda', 'User::beranda');
+$routes->get('/user/list', 'User::list');
+$routes->get('/user/detail/(:num)', 'User::detail/$1');
 
-// Route untuk halaman auth (login, register, dll.)
-$routes->get('/auth/register', 'Home::register');
-$routes->get('/auth/forget', 'Home::forget');
+// =======================
+// AUTH ROUTE (login, register, forget)
+// =======================
+$routes->get('/login', 'Home::login');
+$routes->post('/login', 'Home::doLogin');
+
+$routes->get('/register', 'Home::register');
+$routes->post('/register', 'Home::doRegister');
+
+$routes->get('/forget', 'Home::forget');
+
+// =======================
+// ADMIN ROUTE
+// =======================
+$routes->get('/admin', 'Admin::index');
+$routes->get('/admin/profile', 'Admin::profile');
+$routes->post('/admin/updateUser', 'Admin::updateUser');
+
+$routes->get('/admin/create', 'Admin::create');
+$routes->post('/admin/save', 'Admin::save');
+$routes->get('/admin/edit/(:num)', 'Admin::edit/$1');
+$routes->post('/admin/update/(:num)', 'Admin::update/$1');
+$routes->get('/admin/delete/(:num)', 'Admin::delete/$1');

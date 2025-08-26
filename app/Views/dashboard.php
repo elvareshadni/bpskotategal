@@ -127,7 +127,7 @@
 
     <!-- Card 2 -->
     <div class="col-lg-3 col-md-6 mb-4">
-      <a href="<?= base_url('user/list'); ?>" target="_blank" class="text-decoration-none">
+      <a href="https://example.com/poster1" target="_blank" class="text-decoration-none">
         <div class="card h-100 shadow-sm border-0">
           <div class="p-3 pb-0 bg-white">
             <img src="<?= base_url('/img/cover2.jpg'); ?>" 
@@ -145,7 +145,7 @@
 
     <!-- Card 3 -->
     <div class="col-lg-3 col-md-6 mb-4">
-      <a href="<?= base_url('user/list'); ?>" target="_blank" class="text-decoration-none">
+      <a href="https://example.com/poster1" target="_blank" class="text-decoration-none">
         <div class="card h-100 shadow-sm border-0">
           <div class="p-3 pb-0 bg-white">
             <img src="<?= base_url('/img/cover2.jpg'); ?>" 
@@ -163,7 +163,7 @@
 
     <!-- Card 4 -->
     <div class="col-lg-3 col-md-6 mb-4">
-      <a href="<?= base_url('user/list'); ?>" target="_blank" class="text-decoration-none">
+      <a href="https://example.com/poster1" target="_blank" class="text-decoration-none">
         <div class="card h-100 shadow-sm border-0">
           <div class="p-3 pb-0 bg-white">
             <img src="<?= base_url('/img/cover2.jpg'); ?>" 
@@ -182,6 +182,7 @@
       <a href="<?= base_url('user/list'); ?>" class="text-decoration-none">
           <button class="btn btn-primary">Infografis Lainnya</button>
       </a>
+
     </div>
 </section>
 <?= $this->endSection(); ?>

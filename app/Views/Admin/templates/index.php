@@ -31,16 +31,13 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse text-right" id="navbarText">
-      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 me-3">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
         <li class="nav-item"><a class="nav-link active" href="<?= base_url('/user'); ?>">Beranda</a></li>
-        <li class="nav-item"><a class="nav-link" href="#data-indikator">Data Indikator</a></li>
-        <li class="nav-item"><a class="nav-link" href="#infografis">Infografis</a></li>
-
+        <li class="nav-item"><a class="nav-link" href="#">Data Indikator</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Berita</a></li>
       </ul>
-      <span class="text-white fw-semibold me-2" style="font-size: 0.85rem;">
-          <?= session()->get('username') ?? 'User'; ?>
-      </span>
-      <img src="<?= base_url('/img/default.png'); ?>" 
+      <span class="text-white fw-semibold me-2" style="font-size: 0.85rem;">User</span>
+      <img src="https://via.placeholder.com/32x32/cccccc/666666?text=U" 
            class="rounded-circle" width="32" height="32" alt="User Avatar">
     </div>
   </div>
@@ -74,8 +71,8 @@
             <h6 class="mb-3">Menu Utama</h6>
             <ul class="list-unstyled">
               <li><a href="<?= base_url('/user'); ?>" class="text-white-50 text-decoration-none">Beranda</a></li>
-              <li class="nav-item"><a class="nav-link" href="#data-indikator">Data Indikator</a></li>
-              <li class="nav-item"><a class="nav-link" href="#infografis">Infografis</a></li>
+              <li><a href="#" class="text-white-50 text-decoration-none">Data Indikator</a></li>
+              <li><a href="#" class="text-white-50 text-decoration-none">Berita</a></li>
             </ul>
           </div>
           <div class="col-md-6 mb-3">
