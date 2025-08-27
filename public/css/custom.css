@@ -1,0 +1,6 @@
+/* khusus sidebar yang pakai bg-gradient-primary */
+.sidebar.bg-gradient-panel{
+  background-color: #1e40af !important; /* fallback */
+  background-image: linear-gradient(180deg, #1e40af 10%, #0e57cd 100%) !important;
+  background-size: cover;
+}

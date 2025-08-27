@@ -18,6 +18,7 @@
 
     <!-- Custom styles for this template-->
     <link href="<?= base_url(); ?>/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="<?= base_url(); ?>/css/custom.css" rel="stylesheet">
 
 </head>
 
@@ -27,7 +28,7 @@
     <div id="wrapper">
 
         <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+        <ul class="navbar-nav bg-gradient-panel sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="<?= base_url('home/user'); ?>">
@@ -45,94 +46,44 @@
             </div>
 
             <!-- Nav Item - Laporan Kunjungan -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="<?= base_url('laporan-kunjungan'); ?>" data-toggle="collapse" data-target="#collapseLaporanKunjungan"
-                    aria-expanded="true" aria-controls="collapseLaporanKunjungan">
+            <li class="nav-item <?= uri_string() === 'laporan-kunjungan' ? 'active' : '' ?>">
+                <a class="nav-link collapsed" href="<?= base_url('laporan-kunjungan'); ?>">
                     <i class="fas fa-fw fa-wrench"></i>
                     <span>Laporan Kunjungan</span>
                 </a>
-                <div id="collapseLaporanKunjungan" class="collapse" aria-labelledby="headingLaporan Kunjungan"
-                    data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Laporan Kunjungan:</h6>
-                        <a class="collapse-item" href="<?= base_url('laporan-kunjungan'); ?>">Data Kunjungan Website</a>
-                        <a class="collapse-item" href="Laporan Kunjungan-color.html">Colors</a>
-                        <a class="collapse-item" href="Laporan Kunjungan-border.html">Borders</a>
-                        <a class="collapse-item" href="Laporan Kunjungan-animation.html">Animations</a>
-                        <a class="collapse-item" href="Laporan Kunjungan-other.html">Other</a>
-                    </div>
-                </div>
             </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider">
 
             <!-- Nav Item - Kelola Data Indikator -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="<?= base_url('data-indikator'); ?>" data-toggle="collapse" data-target="#collapseKelolaDataIndikator"
-                    aria-expanded="true" aria-controls="collapseKelolaDataIndikator">
+            <li class="nav-item <?= uri_string() === 'data-indikator' ? 'active' : '' ?>">
+                <a class="nav-link collapsed" href="<?= base_url('data-indikator'); ?>">
                     <i class="fas fa-fw fa-wrench"></i>
                     <span>Kelola Data Indikator</span>
                 </a>
-                <div id="collapseKelolaDataIndikator" class="collapse" aria-labelledby="headingKelola Data Indikator"
-                    data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Kelola Data Indikator:</h6>
-                        <a class="collapse-item" href="<?= base_url('data-indikator'); ?>">Edit Data</a>
-                        <a class="collapse-item" href="Kelola Data Indikator-color.html">Colors</a>
-                        <a class="collapse-item" href="Kelola Data Indikator-border.html">Borders</a>
-                        <a class="collapse-item" href="Kelola Data Indikator-animation.html">Animations</a>
-                        <a class="collapse-item" href="Kelola Data Indikator-other.html">Other</a>
-                    </div>
-                </div>
             </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider">
 
             <!-- Nav Item - Edit Carousell -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="<?= base_url('edit-carousell'); ?>" data-toggle="collapse" data-target="#collapseEditCarousell"
-                    aria-expanded="true" aria-controls="collapseEditCarousell">
+            <li class="nav-item <?= uri_string() === 'edit-carousell' ? 'active' : '' ?>">
+                <a class="nav-link collapsed" href="<?= base_url('edit-carousell'); ?>">
                     <i class="fas fa-fw fa-wrench"></i>
                     <span>Edit Carousell</span>
                 </a>
-                <div id="collapseEditCarousell" class="collapse" aria-labelledby="headingKelola Data Indikator"
-                    data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Carousell:</h6>
-                        <a class="collapse-item" href="<?= base_url('edit-carousell'); ?>">Tambah Carousell</a>
-                        <a class="collapse-item" href="<?= base_url('edit-carousell/list'); ?>">Edit Carousell yang Sudah Ada</a>
-                        <a class="collapse-item" href="Edit Konten-color.html">Colors</a>
-                        <a class="collapse-item" href="Edit Konten-border.html">Borders</a>
-                        <a class="collapse-item" href="Edit Konten-animation.html">Animations</a>
-                        <a class="collapse-item" href="Edit Konten-other.html">Other</a>
-                    </div>
-                </div>
             </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider">
 
             <!-- Nav Item - Edit Konten -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="<?= base_url('edit-infografis'); ?>" data-toggle="collapse" data-target="#collapseEditKonten"
-                    aria-expanded="true" aria-controls="collapseEditKonten">
+            <li class="nav-item <?= uri_string() === 'edit-infografis' ? 'active' : '' ?>">
+                <a class="nav-link collapsed" href="<?= base_url('edit-infografis'); ?>">
                     <i class="fas fa-fw fa-wrench"></i>
                     <span>Edit Konten</span>
                 </a>
-                <div id="collapseEditKonten" class="collapse" aria-labelledby="headingKelola Data Indikator"
-                    data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Infografis:</h6>
-                        <a class="collapse-item" href="<?= base_url('edit-infografis'); ?>">Tambah Infografis</a>
-                        <a class="collapse-item" href="<?= base_url('edit-infografis/list'); ?>">Edit Infografis yang Sudah Ada</a>
-                        <a class="collapse-item" href="Edit Konten-color.html">Colors</a>
-                        <a class="collapse-item" href="Edit Konten-border.html">Borders</a>
-                        <a class="collapse-item" href="Edit Konten-animation.html">Animations</a>
-                        <a class="collapse-item" href="Edit Konten-other.html">Other</a>
-                    </div>
-                </div>
             </li>
 
             <!-- Divider -->
@@ -141,16 +92,12 @@
             <!-- Nav Item - Logout -->
             <li class="nav-item">
                 <a class="nav-link" href="tables.html">
+                    <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span></a>
             </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
-
-            <!-- Sidebar Toggler (Sidebar) -->
-            <div class="text-center d-none d-md-inline">
-                <button class="rounded-circle border-0" id="sidebarToggle"></button>
-            </div>
 
         </ul>
         <!-- End of Sidebar -->
