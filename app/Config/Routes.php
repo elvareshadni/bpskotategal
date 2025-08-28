@@ -41,3 +41,10 @@ $routes->post('/admin/save', 'Admin::save');
 $routes->get('/admin/edit/(:num)', 'Admin::edit/$1');
 $routes->post('/admin/update/(:num)', 'Admin::update/$1');
 $routes->get('/admin/delete/(:num)', 'Admin::delete/$1');
+
+// =======================
+// USER PROFILE
+// =======================
+$routes->get('/user/profile', 'User::profile', ['as' => 'user.profile']);
+$routes->post('/user/profile/update', 'User::updateProfile', ['as' => 'user.profile.update']);
+$routes->post('/user/profile/password', 'User::updatePassword', ['as' => 'user.password.update']);
