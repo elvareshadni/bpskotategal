@@ -1,208 +1,125 @@
 <?php
 
 namespace App\Controllers;
-use App\Models\UserModel;
+
 use App\Models\InfografisModel;
+use App\Models\CarouselModel;
 
 class Admin extends BaseController
 {
-    protected $userModel;
-    protected $infografisModel;
-
-    public function __construct()
-    {
-        // Inisialisasi UserModel
-        $this->userModel = new UserModel();
-        $this->infografisModel = new InfografisModel();
-
-    }
-
     public function index(): string
     {
-        // Mendapatkan ID pengguna yang sedang login
-        $id = user()->id;
+        return view('admin/index');
+    }
 
-        // Mendapatkan data user
-        $data = [
-            'title' => 'Profile',
-            'user' => $this->userModel->where(['id' => $id])->first()  
-        ];
-
-        return view('admin/profile', $data);
+    public function profile(): string
+    {
+        return view('admin/profile');
     }
 
     public function updateUser()
     {
-        // Mendapatkan ID pengguna yang sedang login
-        $id = user()->id;
-
-        // Ambil data lama
-        $userLama = $this->userModel->find($id);
-
-        // Validasi Form Input
-        if (!$this->validate([
-            'fullname' => 'permit_empty|string|max_length[255]',
-            'email' => 'permit_empty|valid_email',
-            'phone_number' => 'permit_empty|numeric|max_length[15]',
-            'user_image' => 'permit_empty|is_image[user_image]|max_size[user_image,3072]|mime_in[user_image,image/jpg,image/jpeg,image/png]',
-            'id_image' => 'permit_empty|is_image[id_image]|max_size[id_image,3072]|mime_in[id_image,image/jpg,image/jpeg,image/png]',
-        ])) {
-            return redirect()->to('/user/profile')->withInput()->with('validation', $this->validator);
-        }
-
-        // Mengelola file gambar user_image
-        $userImage = $this->request->getFile('user_image');
-        $userImageName = $userLama['user_image']; // Gunakan gambar lama secara default
-        if ($userImage && $userImage->isValid()) {
-            $userImage->move('img/user');
-            $userImageName = $userImage->getName();
-        }
-
-        // Mengelola file gambar id_image
-        $idImage = $this->request->getFile('id_image');
-        $idImageName = $userLama['id_image']; // Gunakan gambar lama secara default
-        if ($idImage && $idImage->isValid()) {
-            $idImage->move('img/user');
-            $idImageName = $idImage->getName();
-        }
-
-        // Data yang ingin diupdate
-        $data = [
-            'fullname'     => $this->request->getVar('fullname') ?: $userLama['fullname'],
-            'email'        => $this->request->getVar('email') ?: $userLama['email'],
-            'phone_number' => $this->request->getVar('phone_number') ?: $userLama['phone_number'],
-            'user_image'   => $userImageName,
-            'nik'          => $this->request->getVar('nik') ?: $userLama['nik'],
-            'id_image'     => $idImageName,
-        ];
-
-        // Update data pengguna
-        if ($this->userModel->update($id, $data)) {
-            session()->setFlashdata('pesan', 'Data berhasil diperbarui');
-        } else {
-            session()->setFlashdata('pesan', 'Gagal memperbarui data');
-        }
-
-        return redirect()->to('/admin/profile');
+        // logika update user (sementara kosong)
+        return redirect()->back()->with('success', 'User berhasil diupdate!');
     }
 
-    public function infografis()
+    // --- Kelola Data ---
+    public function dataIndikator(): string
     {
-        $infografis = $this->infografisModel->findAll();
-        // Mendapatkan data user
-        $data = [
-            'title' => 'Manage infografis',
-            'infografis' => $infografis
-        ];
-
-        return view('admin/infografis', $data);
+        return view('admin/kelola_data_indikator');
     }
 
-    public function create()
+    public function laporanKunjungan(): string
     {
-        // Mendapatkan data user
-        $data = [
-            'title' => 'Form Tambah infografis',
-        ];
-
-        return view('admin/create', $data);
+        return view('admin/laporan_kunjungan');
     }
 
-    public function save()
+    // --- carousel ---
+    public function carousel(): string
     {
-        $slug = url_title($this->request->getVar('name'), '-', true);
+        $carouselModel = new CarouselModel();
+        $data['carousels'] = $carouselModel->findAll();
 
-        // Mengelola file foto infografis
-        $photo = $this->request->getFile('image');
-        $photoName = '';
-        if ($photo && $photo->isValid()) {
-            $photo->move('img/infografis', $photo->getName());
-            $photoName = $photo->getName();
-        }
+        return view('admin/carousel', $data);
+    }
 
-        // Menyimpan data infografis baru
-        $this->infografisModel->save([
-            'name' => $this->request->getVar('name'),
-            'address' => $this->request->getVar('address'),
-            'type' => $this->request->getVar('type'),
-            'slug' => $slug,
-            'price' => $this->request->getVar('price'),
-            'capacity' => $this->request->getVar('capacity'),
-            'description' => $this->request->getVar('description'),
-            'image' => $photoName
+
+    public function carouselAdd(): string
+    {
+        return view('admin/carousel_add');
+    }
+
+    public function carouselSave()
+{
+    $carouselModel = new CarouselModel();
+
+    $file  = $this->request->getFile('carouselImage');
+    $judul = $this->request->getPost('judulcarousel');
+
+    if ($file && $file->isValid() && !$file->hasMoved()) {
+        $newName = $file->getRandomName();
+        $file->move(FCPATH . 'img', $newName);
+
+        $carouselModel->insert([
+            'judul'   => $judul,
+            'gambar'  => $newName,
+            'posisi'  => 'center'
+        ]);
+    }
+
+    return redirect()->to(base_url('admin/listcarousel'))
+        ->with('success', 'Carousel berhasil ditambahkan!');
+}
+
+    // --- Infografis ---
+    public function infografis(): string
+    {
+        return view('admin/infografis');
+    }
+
+    public function infografisAdd(): string
+    {
+        return view('admin/infografis_add');
+    }
+
+    public function infografisSave()
+    {
+        $infografisModel = new InfografisModel();
+
+        $file = $this->request->getFile('infografisImage');
+        $newName = $file->getRandomName();
+        $file->move('img', $newName);
+
+        $infografisModel->save([
+            'judul'     => $this->request->getPost('judulInfografis'),
+            'deskripsi' => $this->request->getPost('deskripsiInfografis'),
+            'gambar'    => $newName,
+            'tanggal'   => date('Y-m-d')
         ]);
 
-        // Set flashdata untuk notifikasi
-        session()->setFlashdata('success', 'Data infografis berhasil ditambahkan.');
-        
-        return redirect()->to('/admin/infografis');
+        return redirect()->to(base_url('admin/infografis'))->with('success', 'Infografis berhasil ditambahkan!');
     }
 
-    public function edit($id)
+
+    // --- Edit carousel ---
+    public function editcarousel(): string
     {
-        // Ambil data infografis berdasarkan ID
-        $infografis = $this->infografisModel->find($id);
-
-        // Data untuk form edit
-        $data = [
-            'title' => 'Edit infografis',
-            'infografis' => $infografis
-        ];
-
-        return view('admin/edit', $data); // Menggunakan tampilan terpisah untuk edit
+        return view('admin/edit_carousel');
     }
 
-    public function update($id)
+    public function listcarousel(): string
     {
-        // Mengelola file foto infografis
-        $photo = $this->request->getFile('image');
-        $photoName = $this->request->getVar('existing_image');
-        if ($photo && $photo->isValid()) {
-            $photo->move('img/infografis', $photo->getName());
-            $photoName = $photo->getName();
-        }
-
-        // Memperbarui data infografis
-        $this->infografisModel->update($id, [
-            'name' => $this->request->getVar('name'),
-            'address' => $this->request->getVar('address'),
-            'type' => $this->request->getVar('type'),
-            'price' => $this->request->getVar('price'),
-            'capacity' => $this->request->getVar('capacity'),
-            'description' => $this->request->getVar('description'),
-            'image' => $photoName
-        ]);
-
-        session()->setFlashdata('success', 'Data infografis berhasil diperbarui.');
-
-        return redirect()->to('/admin/infografis');
+        return view('admin/edit_carousel_list');
     }
 
-    public function delete($id)
+    // --- Edit Infografis ---
+    public function editInfografis(): string
     {
-        // Cek apakah data infografis ada
-        $infografis = $this->infografisModel->find($id);
-        if (!$infografis) {
-            session()->setFlashdata('error', 'Data infografis tidak ditemukan.');
-            return redirect()->to('/admin/infografis');
-        }
-
-        // Hapus file foto infografis jika ada
-        if ($infografis['image']) {
-            $filePath = 'img/infografis/' . $infografis['image'];
-            if (file_exists($filePath)) {
-                unlink($filePath); // Hapus foto infografis
-            }
-        }
-
-        // Hapus data infografis dari database
-        if ($this->infografisModel->delete($id)) {
-            session()->setFlashdata('success', 'Data infografis berhasil dihapus.');
-        } else {
-            session()->setFlashdata('error', 'Gagal menghapus data infografis.');
-        }
-
-        return redirect()->to('/admin/infografis');
+        return view('admin/edit_infografis');
     }
 
+    public function listInfografis(): string
+    {
+        return view('admin/edit_infografis_list');
+    }
 }

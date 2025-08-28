@@ -2,12 +2,20 @@
 
 namespace App\Controllers;
 
+use App\Models\InfografisModel;
+use App\Models\CarouselModel; // 👈 tambahkan model carousel
+
 class User extends BaseController 
 {
     public function index() 
     {
+        $infografisModel = new InfografisModel();
+        $carouselModel   = new CarouselModel(); // 👈 panggil model carousel
+
         $data = [
-            'title' => 'Home | BPS Kota Tegal'
+            'title'      => 'Home | BPS Kota Tegal',
+            'infografis' => $infografisModel->orderBy('tanggal', 'DESC')->findAll(6), // tampilkan 6 terbaru
+            'carousel'   => $carouselModel->findAll() // 👈 ambil semua slide carousel
         ];
         return view('user/dashboard', $data);
     }
@@ -20,25 +28,30 @@ class User extends BaseController
         return view('user/home', $data);
     }
 
-    public function listInfografis()
+    public function list() 
     {
-        return view('user/list');
-    }
-
-    public function list()
-    {
+        $model = new InfografisModel();
         $data = [
-            'title' => 'Daftar Berita Resmi Statistik'
+            'title'      => 'Daftar Infografis',
+            'infografis' => $model->orderBy('tanggal', 'DESC')->findAll()
         ];
         return view('user/list', $data);
     }
 
-    public function detail($id = null)
+    public function detail($id) 
     {
-        // nanti bisa pakai $id untuk ambil detail dari database
+        $model = new InfografisModel();
+        $item = $model->find($id);
+
+        if (!$item) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Data dengan ID $id tidak ditemukan");
+        }
+
         $data = [
-            'title' => 'Detail Berita Resmi Statistik'
+            'title' => $item['judul'],
+            'item'  => $item
         ];
+
         return view('user/detail', $data);
     }
 }

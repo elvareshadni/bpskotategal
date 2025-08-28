@@ -1,28 +1,28 @@
 <?= $this->extend('template/index'); ?>
 <?= $this->section('content'); ?>
 
-<body>
 <div class="container py-4">
   <!-- Breadcrumb -->
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="list.html">Beranda</a></li>
-      <li class="breadcrumb-item"><a href="list.html">Produk - Berita Resmi Statistik</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Perkembangan Statistik Pariwisata Kota Tegal Juni 2025</li>
+      <li class="breadcrumb-item"><a href="<?= base_url('user/beranda'); ?>">Beranda</a></li>
+      <li class="breadcrumb-item"><a href="<?= base_url('user/list'); ?>">Infografis</a></li>
+      <li class="breadcrumb-item active" aria-current="page"><?= esc($item['judul']); ?></li>
     </ol>
   </nav>
 
-  <h2 class="mb-3">Perkembangan Statistik Pariwisata Kota Tegal Juni 2025</h2>
-  <p><strong>Tanggal Rilis:</strong> 1 Agustus 2025</p>
-  <p><strong>Ukuran File:</strong> 1.213387 MB</p>
+  <h2 class="mb-3"><?= esc($item['judul']); ?></h2>
+  <p><strong>Tanggal Rilis:</strong> <?= date('d M Y', strtotime($item['tanggal'])); ?></p>
+  <p><strong>Ukuran File:</strong> <?= esc($item['ukuran_file'] ?? '-'); ?> MB</p>
 
   <h5>Abstraksi</h5>
-  <p>Tingkat penghunian kamar (TPK) Hotel bintang di Kota Tegal pada bulan Juni 2025 sebesar 30,77 persen.</p>
+  <p><?= esc($item['abstraksi'] ?? 'Belum ada deskripsi.'); ?></p>
 
   <div class="text-center">
-    <img src="<?= base_url('/img/cover2.jpg'); ?>" class="img-fluid shadow-sm" alt="Infografis">
+    <img src="<?= base_url('img/' . $item['gambar']); ?>" 
+         class="img-fluid shadow-sm" 
+         alt="<?= esc($item['judul']); ?>">
   </div>
-
 </div>
 
 <?= $this->endSection(); ?>
