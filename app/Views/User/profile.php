@@ -31,8 +31,13 @@
         <div class="d-flex justify-content-center mb-4">
             <div class="border rounded-3 d-flex align-items-center justify-content-center"
                 style="width: 180px; height: 220px;">
+<<<<<<< HEAD
                 <?php if (!empty(session()->get('photo'))): ?>
                     <img id="avatarPreview" src="<?= base_url(session()->get('photo')); ?>" alt="Foto Profil"
+=======
+                <?php if (!empty($user['photo'])): ?>
+                    <img id="avatarPreview" src="<?= base_url($user['photo']); ?>" alt="Foto Profil"
+>>>>>>> ac3bfa8de96bd057f22d001c5e926d0f1b4e1485
                         class="img-fluid h-100">
                 <?php else: ?>
                     <svg id="avatarPreview" xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor"

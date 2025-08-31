@@ -9,6 +9,22 @@ class Home extends BaseController
     // Halaman Utama
     public function index(): string
     {
+<<<<<<< HEAD
+=======
+        
+        // Peta URL CSV; kunci ini dipakai di front‑end (config INDICATOR_SOURCES)
+        /*$csvMap = [
+            'LUAS_KEPENDUDUKAN' => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJyBrk8tL1KUffFoTdcpM_xEd5GpiBQSYA1chCqd631ABxGTSahHBtXHkNzTLKCKa67a8eqJ0IEWwp/pub?gid=1557804739&single=true&output=csv',
+            'ANGKA_KEMISKINAN'  => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJyBrk8tL1KUffFoTdcpM_xEd5GpiBQSYA1chCqd631ABxGTSahHBtXHkNzTLKCKa67a8eqJ0IEWwp/pub?gid=901949954&single=true&output=csv',
+            'INFLASI_UMUM'      => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJyBrk8tL1KUffFoTdcpM_xEd5GpiBQSYA1chCqd631ABxGTSahHBtXHkNzTLKCKa67a8eqJ0IEWwp/pub?gid=882681484&single=true&output=csv',
+            'IPM'               => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJyBrk8tL1KUffFoTdcpM_xEd5GpiBQSYA1chCqd631ABxGTSahHBtXHkNzTLKCKa67a8eqJ0IEWwp/pub?gid=896003102&single=true&output=csv',
+            'PDRB'              => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJyBrk8tL1KUffFoTdcpM_xEd5GpiBQSYA1chCqd631ABxGTSahHBtXHkNzTLKCKa67a8eqJ0IEWwp/pub?gid=1018033332&single=true&output=csv',
+            'KETENAGAKERJAAN'   => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJyBrk8tL1KUffFoTdcpM_xEd5GpiBQSYA1chCqd631ABxGTSahHBtXHkNzTLKCKa67a8eqJ0IEWwp/pub?gid=1275628956&single=true&output=csv',
+            'KESEJAHTERAAN'     => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJyBrk8tL1KUffFoTdcpM_xEd5GpiBQSYA1chCqd631ABxGTSahHBtXHkNzTLKCKa67a8eqJ0IEWwp/pub?gid=2060752569&single=true&output=csv',
+        ];*/
+
+        // Peta URL CSV; kunci ini dipakai di front-end (config INDICATOR_SOURCES)
+>>>>>>> ac3bfa8de96bd057f22d001c5e926d0f1b4e1485
         $exec = getenv('CSV_URL'); // ambil dari .env
         if (!$exec) {
             log_message('error', 'ENV CSV_URL kosong!');
@@ -30,8 +46,13 @@ class Home extends BaseController
             'title'     => 'Daftar Data Indikator',
             'csvMap'    => $csvMap,
         ];
+<<<<<<< HEAD
         
         return view('dashboard', $data);
+=======
+
+        return view('user/dashboard', $data);
+>>>>>>> ac3bfa8de96bd057f22d001c5e926d0f1b4e1485
     }
 
     // ==========================

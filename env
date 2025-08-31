@@ -14,7 +14,7 @@
 # ENVIRONMENT
 #--------------------------------------------------------------------
 
-# CI_ENVIRONMENT = production
+CI_ENVIRONMENT = production
 
 #--------------------------------------------------------------------
 # APP
@@ -66,4 +66,6 @@
 # LOGGER
 #--------------------------------------------------------------------
 
-# logger.threshold = 4
+logger.threshold = 4
+
+CSV_URL="https://script.google.com/macros/s/AKfycbwFOA47Yv5oZKHY7Lnv4kLEaXq1nQhmvSkAg0rh7s2pgCIcQQ_ntU4XWmvdh1kLQ5o7/exec" #Nanti diganti sesuai API yang dibuild

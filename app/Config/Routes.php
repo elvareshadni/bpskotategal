@@ -8,11 +8,22 @@ use CodeIgniter\Router\RouteCollection;
 
 $routes->get('/', 'User::index'); // langsung ke dashboard user
 
+<<<<<<< HEAD
 $routes->group('user', function($routes) {
     $routes->get('/', 'User::index');          
     $routes->get('beranda', 'User::beranda');  
     $routes->get('list', 'User::list');       
     $routes->get('detail/(:num)', 'User::detail/$1'); 
+=======
+// API (proxy CSV -> JSON)
+$routes->get('api/indikator', 'Indicators::index'); // dipakai oleh fetch() di JS
+
+// =======================
+// AUTH ROUTE (login, register, forget)
+// =======================
+$routes->get('/login', 'Home::login');
+$routes->post('/login', 'Home::doLogin');
+>>>>>>> ac3bfa8de96bd057f22d001c5e926d0f1b4e1485
 
     // Profile
     $routes->get('profile', 'User::profile', ['as' => 'user.profile']); 
@@ -27,6 +38,7 @@ $routes->group('', function($routes) {
     $routes->get('login', 'Home::login');
     $routes->post('login', 'Home::doLogin');
 
+<<<<<<< HEAD
     $routes->get('register', 'Home::register');
     $routes->post('register', 'Home::doRegister');
 
@@ -61,3 +73,17 @@ $routes->group('admin', function($routes) {
     $routes->get('edit-infografis', 'Admin::editInfografis');       
     $routes->get('edit-infografis/list', 'Admin::listInfografis');   
 });
+=======
+$routes->get('/admin/create', 'Admin::create');
+$routes->post('/admin/save', 'Admin::save');
+$routes->get('/admin/edit/(:num)', 'Admin::edit/$1');
+$routes->post('/admin/update/(:num)', 'Admin::update/$1');
+$routes->get('/admin/delete/(:num)', 'Admin::delete/$1');
+
+// =======================
+// USER PROFILE
+// =======================
+$routes->get('/user/profile', 'User::profile', ['as' => 'user.profile']);
+$routes->post('/user/profile/update', 'User::updateProfile', ['as' => 'user.profile.update']);
+$routes->post('/user/profile/password', 'User::updatePassword', ['as' => 'user.password.update']);
+>>>>>>> ac3bfa8de96bd057f22d001c5e926d0f1b4e1485

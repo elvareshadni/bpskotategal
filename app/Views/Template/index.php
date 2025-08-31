@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +11,16 @@
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
-  
+
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<<<<<<< HEAD
   
+=======
+>>>>>>> ac3bfa8de96bd057f22d001c5e926d0f1b4e1485
 
 </head>
+
 <body style="background-color: #f8f9fa;">
 
 <!-- Navbar -->
@@ -47,26 +52,26 @@
   </div>
 </nav>
 
-<!-- Konten Dinamis -->
-<?= $this->renderSection('content'); ?>
+  <!-- Konten Dinamis -->
+  <?= $this->renderSection('content'); ?>
 
-<!-- Footer -->
-<footer class="footer bg-dark text-white mt-5 pt-4 pb-3">
-  <div class="container">
-    <div class="row">
-      <!-- Info -->
-      <div class="col-lg-6 mb-4">
-        <a class="navbar-brand d-inline-block mb-3" href="<?= base_url('/user'); ?>">
-          <img src="<?= base_url('/img/logobpskotategal.png'); ?>" height="40" alt="BPS Logo">
-        </a>
-        <div class="text-start text-footer text-white-50">
-          <div>Badan Pusat Statistik (BPS-Statistics of Tegal Municipality)</div>
-          <div>Jl. Nakula Nomor 36A Tegal</div>
-          <div>52124 Provinsi Jawa Tengah</div>
-          <div>Telp/Faks (62-283) 351593</div>
-          <div>E-mail : bps3376@bps.go.id</div>
+  <!-- Footer -->
+  <footer class="footer bg-dark text-white mt-5 pt-4 pb-3">
+    <div class="container">
+      <div class="row">
+        <!-- Info -->
+        <div class="col-lg-6 mb-4">
+          <a class="navbar-brand d-inline-block mb-3" href="<?= base_url('/user'); ?>">
+            <img src="<?= base_url('/img/logobpskotategal.png'); ?>" height="40" alt="BPS Logo">
+          </a>
+          <div class="text-start text-footer text-white-50">
+            <div>Badan Pusat Statistik (BPS-Statistics of Tegal Municipality)</div>
+            <div>Jl. Nakula Nomor 36A Tegal</div>
+            <div>52124 Provinsi Jawa Tengah</div>
+            <div>Telp/Faks (62-283) 351593</div>
+            <div>E-mail : bps3376@bps.go.id</div>
+          </div>
         </div>
-      </div>
 
       <!-- Menu & Sosial -->
       <div class="col-lg-6">
@@ -92,16 +97,17 @@
       </div>
     </div>
 
-    <hr class="my-4 opacity-25">
-    <div class="text-left">
-      <small>Hak Cipta © <?= date('Y'); ?> Badan Pusat Statistik</small>
+      <hr class="my-4 opacity-25">
+      <div class="text-left">
+        <small>Hak Cipta © <?= date('Y'); ?> Badan Pusat Statistik</small>
+      </div>
     </div>
-  </div>
-</footer>
+  </footer>
 
-<!-- JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+<<<<<<< HEAD
 <script>
   // Custom indikator
   document.addEventListener("DOMContentLoaded", function () {
@@ -110,54 +116,78 @@
 
     const cards = document.querySelectorAll(".indicator-card");
     const placeholder = document.getElementById("indicator-placeholder");
+=======
+  <script>
+    // Custom indikator
+    document.addEventListener("DOMContentLoaded", function() {
+      // >>> ADD GUARD: kalau ada #indicator-container (mode chart), skip script ini
+      if (document.getElementById('indicator-container')) return;
+>>>>>>> ac3bfa8de96bd057f22d001c5e926d0f1b4e1485
 
-    if (!placeholder) return;
+      const cards = document.querySelectorAll(".indicator-card");
+      const placeholder = document.getElementById("indicator-placeholder");
 
-    const apiBase = "https://script.googleusercontent.com/macros/echo?user_content_key=XXXX&lib=YYYY";  
+      if (!placeholder) return;
 
-    cards.forEach(card => {
-      card.style.cursor = "pointer";
-      card.addEventListener("click", () => {
-        const indicator = card.getAttribute("data-indicator");
-        placeholder.innerHTML = `<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>`;
-        fetch(`${apiBase}?indicator=${indicator}`)
-          .then(response => response.json())
-          .then(data => {
-            placeholder.innerHTML = `
+      const apiBase = "https://script.googleusercontent.com/macros/echo?user_content_key=XXXX&lib=YYYY";
+
+      cards.forEach(card => {
+        card.style.cursor = "pointer";
+        card.addEventListener("click", () => {
+          const indicator = card.getAttribute("data-indicator");
+          placeholder.innerHTML = `<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>`;
+          fetch(`${apiBase}?indicator=${indicator}`)
+            .then(response => response.json())
+            .then(data => {
+              placeholder.innerHTML = `
               <h4 class="fw-bold text-primary">${card.innerText}</h4>
               <p class="mt-3">${data.value ?? "Data tidak tersedia"}</p>
             `;
-          })
-          .catch(error => {
-            placeholder.innerHTML = `<div class="text-danger">Gagal memuat data!</div>`;
-            console.error(error);
-          });
+            })
+            .catch(error => {
+              placeholder.innerHTML = `<div class="text-danger">Gagal memuat data!</div>`;
+              console.error(error);
+            });
+        });
       });
     });
-  });
 
-  // Smooth scrolling
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+    // Smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
     });
-  });
 
-  // Animasi saat scroll
-  const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
-      }
+    // Animasi saat scroll
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.news-card').forEach(card => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(card);
     });
-  }, observerOptions);
 
+<<<<<<< HEAD
   document.querySelectorAll('.news-card').forEach(card => {
     card.style.opacity = '0';
     card.style.transform = 'translateY(20px)';
@@ -173,5 +203,16 @@
   });
 </script>
  <?= $this->renderSection('scripts') ?>
+=======
+    document.querySelectorAll('.indicator-card').forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateX(-20px)';
+      card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+      observer.observe(card);
+    });
+  </script>
+  <?= $this->renderSection('scripts') ?>
+>>>>>>> ac3bfa8de96bd057f22d001c5e926d0f1b4e1485
 </body>
+
 </html>
