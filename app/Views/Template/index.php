@@ -14,8 +14,7 @@
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 <body style="background-color: #f8f9fa;">
 
@@ -37,11 +36,13 @@
         <li class="nav-item"><a class="nav-link" href="#infografis">Infografis</a></li>
 
       </ul>
-      <span class="text-white fw-semibold me-2" style="font-size: 0.85rem;">
+      <a href="<?= route_to('user.profile'); ?>" class="d-flex align-items-center text-white text-decoration-none">
+        <span class="fw-semibold me-2" style="font-size: 0.85rem;">
           <?= session()->get('username') ?? 'User'; ?>
-      </span>
-      <img src="<?= base_url('/img/default.png'); ?>" 
-           class="rounded-circle" width="32" height="32" alt="User Avatar">
+        </span>
+        <img src="<?= base_url(session()->get('photo') ?? 'img/default.png'); ?>" 
+     class="rounded-circle" width="28" height="28" alt="User Avatar">
+      </a>
     </div>
   </div>
 </nav>
@@ -104,6 +105,9 @@
 <script>
   // Custom indikator
   document.addEventListener("DOMContentLoaded", function () {
+    // >>> ADD GUARD: kalau ada #indicator-container (mode chart), skip script ini
+    if (document.getElementById('indicator-container')) return;
+
     const cards = document.querySelectorAll(".indicator-card");
     const placeholder = document.getElementById("indicator-placeholder");
 
@@ -168,5 +172,6 @@
     observer.observe(card);
   });
 </script>
+ <?= $this->renderSection('scripts') ?>
 </body>
 </html>

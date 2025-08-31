@@ -9,9 +9,29 @@ class Home extends BaseController
     // Halaman Utama
     public function index(): string
     {
-        return view('dashboard', [
-            'title' => 'Daftar Data Indikator'
-        ]);
+        $exec = getenv('CSV_URL'); // ambil dari .env
+        if (!$exec) {
+            log_message('error', 'ENV CSV_URL kosong!');
+        }
+
+
+        $csvMap = [
+            'LUAS_KEPENDUDUKAN' => $exec . '?sheet=LUAS_KEPENDUDUKAN',
+            'ANGKA_KEMISKINAN'  => $exec . '?sheet=ANGKA_KEMISKINAN',
+            'INFLASI_UMUM'      => $exec . '?sheet=INFLASI_UMUM',
+            'IPM'               => $exec . '?sheet=IPM',
+            'PDRB'              => $exec . '?sheet=PDRB',
+            'KETENAGAKERJAAN'   => $exec . '?sheet=KETENAGAKERJAAN',
+            'KESEJAHTERAAN'     => $exec . '?sheet=KESEJAHTERAAN',
+        ];
+
+        // Kirim data ke view
+        $data = [
+            'title'     => 'Daftar Data Indikator',
+            'csvMap'    => $csvMap,
+        ];
+        
+        return view('dashboard', $data);
     }
 
     // ==========================

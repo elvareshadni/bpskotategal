@@ -13,7 +13,15 @@ $routes->group('user', function($routes) {
     $routes->get('beranda', 'User::beranda');  
     $routes->get('list', 'User::list');       
     $routes->get('detail/(:num)', 'User::detail/$1'); 
+
+    // Profile
+    $routes->get('profile', 'User::profile', ['as' => 'user.profile']); 
+    $routes->post('profile/update', 'User::updateProfile', ['as' => 'user.profile.update']);
+    $routes->post('profile/password', 'User::updatePassword', ['as' => 'user.password.update']);
 });
+
+// API (proxy CSV -> JSON)
+$routes->get('api/indikator', 'Indicators::index'); // dipakai oleh fetch() di JS
 
 $routes->group('', function($routes) {
     $routes->get('login', 'Home::login');
