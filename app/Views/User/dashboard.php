@@ -2,7 +2,7 @@
 <?= $this->section('content'); ?>
 
 <!-- Fixed Carousel (Single Image) -->
-<div class="carousel" style="height:490px;">
+<div class="carousel" style="height:450px; width: 1300px;">
   <img src="<?= base_url('img/slide1.jpg'); ?>"
     class="d-block w-100"
     style="height:490px; object-fit:cover;"
@@ -11,48 +11,7 @@
     style="color:white; height:100%;">
     <h5 class="display-6 fw-bold">Judul Carousel</h5>
   </div>
-
-  <!-- Slides -->
-  <!-- <div class="carousel-inner"> -->
-  <!-- Slide 1 -->
-  <!-- <div class="carousel-item active" style="height: 490px;">
-      <img src="<?= base_url('/img/slide1.jpg'); ?>" class="d-block w-100" alt="Slide 1">
-      <div class="carousel-caption d-flex flex-column justify-content-center align-items-center text-center"
-        style="color:white; height: 100%;">
-        <h2 class="display-5 fw-bold">Jumlah Usaha/Perusahaan</h2>
-      </div>
-    </div> -->
-
-  <!-- Slide 2 -->
-  <!-- <div class="carousel-item" style="height: 490px;">
-      <img src="<?= base_url('/img/slide1.jpg'); ?>" class="d-block w-100" alt="Slide 2">
-      <div class="carousel-caption d-flex flex-column justify-content-center align-items-end text-end" 
-           style="color:white; height: 100%;">
-        <h5 class="display-6 fw-bold">Data Indikator</h5>
-        <p class="fw-bold">Di Wilayah Kota Tegal</p>
-      </div>
-    </div> -->
-
-  <!-- Slide 3 -->
-  <!-- <div class="carousel-item" style="height: 490px;">
-      <img src="<?= base_url('/img/slide1.jpg'); ?>" class="d-block w-100" alt="Slide 3">
-      <div class="carousel-caption d-none d-md-block" style="color: white;">
-        <h5 class="display-6 fw-bold">Data Indikator</h5>
-        <p>Di Wilayah Kota Tegal</p>
-      </div>
-    </div> -->
 </div>
-
-<!-- Controls -->
-<!-- <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev"> -->
-<!-- <span class="carousel-control-prev-icon" aria-hidden="true"></span> -->
-<!-- <span class="visually-hidden">Previous</span> -->
-<!-- </button> -->
-<!-- <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next"> -->
-<!-- <span class="carousel-control-next-icon" aria-hidden="true"></span> -->
-<!-- <span class="visually-hidden">Next</span> -->
-<!-- </button> -->
-<!-- </div> -->
 
 <!-- Main Content -->
 <div class="container mt-5" id="data-indikator">
@@ -149,15 +108,17 @@
               <div class="card h-100 shadow-sm border-0">
                 <div class="p-3 pb-0 bg-white">
                   <img src="<?= base_url('img/' . $item['gambar']); ?>"
-                    class="img-fluid rounded border border-white p-1"
+                    class="img-fluid rounded border border-white"
                     alt="<?= esc($item['judul']); ?>"
-                    style="max-width: 100%; height: 200px; object-fit: cover;">
+                    style="max-width: auto; height: 100%; object-fit: cover;">
                 </div>
-                <div class="card-body">
-                  <small class="text-muted"><?= date('d M Y', strtotime($item['tanggal'])); ?></small>
-                  <h6 class="card-title mt-2 text-dark"><?= esc($item['judul']); ?></h6>
-                </div>
+                <div class="card-body pt-0">
+                  <small class="text-muted d-block mt-2 mb-0">
+                    <?= date('d M Y', strtotime($item['tanggal'])); ?>
+                  </small>
+                  <h6 class="card-title text-dark"><?= esc($item['judul']); ?></h6>
               </div>
+        </div>
             </a>
           </div>
         <?php endforeach; ?>

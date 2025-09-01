@@ -35,7 +35,6 @@
           <li class="nav-item"><a class="nav-link active" href="<?= base_url('/user'); ?>">Beranda</a></li>
           <li class="nav-item"><a class="nav-link" href="#data-indikator">Data Indikator</a></li>
           <li class="nav-item"><a class="nav-link" href="#infografis">Infografis</a></li>
-
         </ul>
         <a href="<?= route_to('user.profile'); ?>" class="d-flex align-items-center text-white text-decoration-none">
           <span class="fw-semibold me-2" style="font-size: 0.85rem;">

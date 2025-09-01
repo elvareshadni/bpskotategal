@@ -5,7 +5,7 @@
   <!-- Breadcrumb -->
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="<?= base_url('user/beranda'); ?>">Beranda</a></li>
+      <li class="breadcrumb-item"><a href="<?= base_url('/user'); ?>">Beranda</a></li>
       <li class="breadcrumb-item"><a href="<?= base_url('user/list'); ?>">Infografis</a></li>
       <li class="breadcrumb-item active" aria-current="page"><?= esc($item['judul']); ?></li>
     </ol>
@@ -13,15 +13,17 @@
 
   <h2 class="mb-3"><?= esc($item['judul']); ?></h2>
   <p><strong>Tanggal Rilis:</strong> <?= date('d M Y', strtotime($item['tanggal'])); ?></p>
-  <p><strong>Ukuran File:</strong> <?= esc($item['ukuran_file'] ?? '-'); ?> MB</p>
+  <div class="row mt-3">
+    <div class="col-md-3 text-left">
+      <img src="<?= base_url('img/' . $item['gambar']); ?>"
+        class="img-fluid shadow-sm rounded"
+        alt="<?= esc($item['judul']); ?>"
+        style="max-height: 300px; width: auto; object-fit: cover;">
+    </div>
 
-  <h5>Abstraksi</h5>
-  <p><?= esc($item['abstraksi'] ?? 'Belum ada deskripsi.'); ?></p>
-
-  <div class="text-center">
-    <img src="<?= base_url('img/' . $item['gambar']); ?>"
-      class="img-fluid shadow-sm"
-      alt="<?= esc($item['judul']); ?>">
+    <div class="col-md-7 d-flex px-3">
+    <p><?= esc($item['deskripsi'] ?? 'Belum ada deskripsi.'); ?></p>
+  </div>
   </div>
 </div>
 
