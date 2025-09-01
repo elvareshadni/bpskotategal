@@ -3,19 +3,19 @@
 
 <!-- Fixed Carousel (Single Image) -->
 <div class="carousel" style="height:490px;">
-  <img src="<?= base_url('img/slide1.jpg'); ?>" 
-       class="d-block w-100" 
-       style="height:490px; object-fit:cover;" 
-       alt="Banner">
-  <div class="carousel-caption d-flex flex-column justify-content-center align-items-center text-center" 
-       style="color:white; height:100%;">
+  <img src="<?= base_url('img/slide1.jpg'); ?>"
+    class="d-block w-100"
+    style="height:490px; object-fit:cover;"
+    alt="Banner">
+  <div class="carousel-caption d-flex flex-column justify-content-center align-items-center text-center"
+    style="color:white; height:100%;">
     <h5 class="display-6 fw-bold">Judul Carousel</h5>
   </div>
 
   <!-- Slides -->
   <!-- <div class="carousel-inner"> -->
-    <!-- Slide 1 -->
-    <!-- <div class="carousel-item active" style="height: 490px;">
+  <!-- Slide 1 -->
+  <!-- <div class="carousel-item active" style="height: 490px;">
       <img src="<?= base_url('/img/slide1.jpg'); ?>" class="d-block w-100" alt="Slide 1">
       <div class="carousel-caption d-flex flex-column justify-content-center align-items-center text-center"
         style="color:white; height: 100%;">
@@ -23,8 +23,8 @@
       </div>
     </div> -->
 
-    <!-- Slide 2 -->
-    <!-- <div class="carousel-item" style="height: 490px;">
+  <!-- Slide 2 -->
+  <!-- <div class="carousel-item" style="height: 490px;">
       <img src="<?= base_url('/img/slide1.jpg'); ?>" class="d-block w-100" alt="Slide 2">
       <div class="carousel-caption d-flex flex-column justify-content-center align-items-end text-end" 
            style="color:white; height: 100%;">
@@ -33,25 +33,25 @@
       </div>
     </div> -->
 
-    <!-- Slide 3 -->
-    <!-- <div class="carousel-item" style="height: 490px;">
+  <!-- Slide 3 -->
+  <!-- <div class="carousel-item" style="height: 490px;">
       <img src="<?= base_url('/img/slide1.jpg'); ?>" class="d-block w-100" alt="Slide 3">
       <div class="carousel-caption d-none d-md-block" style="color: white;">
         <h5 class="display-6 fw-bold">Data Indikator</h5>
         <p>Di Wilayah Kota Tegal</p>
       </div>
-    </div>
-  </div> -->
+    </div> -->
+</div>
 
-  <!-- Controls -->
-  <!-- <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev"> -->
-    <!-- <span class="carousel-control-prev-icon" aria-hidden="true"></span> -->
-    <!-- <span class="visually-hidden">Previous</span> -->
-  <!-- </button> -->
-  <!-- <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next"> -->
-    <!-- <span class="carousel-control-next-icon" aria-hidden="true"></span> -->
-    <!-- <span class="visually-hidden">Next</span> -->
-  <!-- </button> -->
+<!-- Controls -->
+<!-- <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev"> -->
+<!-- <span class="carousel-control-prev-icon" aria-hidden="true"></span> -->
+<!-- <span class="visually-hidden">Previous</span> -->
+<!-- </button> -->
+<!-- <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next"> -->
+<!-- <span class="carousel-control-next-icon" aria-hidden="true"></span> -->
+<!-- <span class="visually-hidden">Next</span> -->
+<!-- </button> -->
 <!-- </div> -->
 
 <!-- Main Content -->
@@ -109,29 +109,29 @@
         </div>
         <div class="border border-top-0 p-3 rounded-bottom bg-light">
           <div class="indicator-card mb-2" data-indicator="luas_wilayah">
-          <i class="fas fa-home me-2 text-primary"></i>Luas Wilayah
-        </div>
-        <div class="indicator-card mb-2" data-indicator="kependudukan">
-          <i class="fas fa-users me-2 text-primary"></i>Kependudukan
-        </div>
-        <div class="indicator-card mb-2" data-indicator="kemiskinan">
-          <i class="fas fa-chart-line me-2 text-primary"></i>Angka Kemiskinan
-        </div>
-        <div class="indicator-card mb-2" data-indicator="inflasi umum">
-          <i class="fas fa-money-bill-wave me-2 text-primary"></i>Inflasi Umum
-        </div>
-        <div class="indicator-card mb-2" data-indicator="indeks pembangunan manusia">
-          <i class="fas fa-building me-2 text-primary"></i>Indeks Pembangunan Manusia
-        </div>
-        <div class="indicator-card mb-2" data-indicator="PDRB">
-          <i class="fas fa-chart-pie me-2 text-primary"></i>PDRB
-        </div>
-        <div class="indicator-card mb-2" data-indicator="ketenagakerjaan">
-          <i class="fas fa-hammer me-2 text-primary"></i>Ketenagakerjaan
-        </div>
-        <div class="indicator-card mb-2" data-indicator="kesejahteraan">
-          <i class="fas fa-heart me-2 text-primary"></i>Kesejahteraan
-        </div>
+            <i class="fas fa-home me-2 text-primary"></i>Luas Wilayah
+          </div>
+          <div class="indicator-card mb-2" data-indicator="kependudukan">
+            <i class="fas fa-users me-2 text-primary"></i>Kependudukan
+          </div>
+          <div class="indicator-card mb-2" data-indicator="kemiskinan">
+            <i class="fas fa-chart-line me-2 text-primary"></i>Angka Kemiskinan
+          </div>
+          <div class="indicator-card mb-2" data-indicator="inflasi umum">
+            <i class="fas fa-money-bill-wave me-2 text-primary"></i>Inflasi Umum
+          </div>
+          <div class="indicator-card mb-2" data-indicator="indeks pembangunan manusia">
+            <i class="fas fa-building me-2 text-primary"></i>Indeks Pembangunan Manusia
+          </div>
+          <div class="indicator-card mb-2" data-indicator="PDRB">
+            <i class="fas fa-chart-pie me-2 text-primary"></i>PDRB
+          </div>
+          <div class="indicator-card mb-2" data-indicator="ketenagakerjaan">
+            <i class="fas fa-hammer me-2 text-primary"></i>Ketenagakerjaan
+          </div>
+          <div class="indicator-card mb-2" data-indicator="kesejahteraan">
+            <i class="fas fa-heart me-2 text-primary"></i>Kesejahteraan
+          </div>
         </div>
       </div>
     </div>
@@ -143,15 +143,15 @@
     <h2 class="section-title mb-4">INFOGRAFIS</h2>
     <div class="row g-3 mb-3">
       <?php if (!empty($infografis)): ?>
-        <?php foreach($infografis as $item): ?>
+        <?php foreach ($infografis as $item): ?>
           <div class="col-lg-3 col-md-6 mb-4">
             <a href="<?= base_url('user/detail/' . $item['id']); ?>" class="text-decoration-none">
               <div class="card h-100 shadow-sm border-0">
                 <div class="p-3 pb-0 bg-white">
-                  <img src="<?= base_url('img/' . $item['gambar']); ?>" 
-                       class="img-fluid rounded border border-white p-1" 
-                       alt="<?= esc($item['judul']); ?>" 
-                       style="max-width: 100%; height: 200px; object-fit: cover;">
+                  <img src="<?= base_url('img/' . $item['gambar']); ?>"
+                    class="img-fluid rounded border border-white p-1"
+                    alt="<?= esc($item['judul']); ?>"
+                    style="max-width: 100%; height: 200px; object-fit: cover;">
                 </div>
                 <div class="card-body">
                   <small class="text-muted"><?= date('d M Y', strtotime($item['tanggal'])); ?></small>
