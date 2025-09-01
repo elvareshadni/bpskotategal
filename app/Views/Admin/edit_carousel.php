@@ -1,7 +1,7 @@
 <?= $this->extend('admin/templates/index'); ?>
 <?= $this->section('content'); ?>
 
-<h1 class="h3 text-gray-800 mb-2">carousell</h1>
+<h1 class="h3 text-gray-800 mb-2">Carousell</h1>
 <h2 class="h5 text-gray-600 mb-4">Tambah carousell</h2>
 
 <div class="card shadow mb-4">
@@ -24,7 +24,7 @@
 
     <hr class="my-4">
 
-    <a href="<?= base_url('edit-carousell/list'); ?>" class="btn btn-outline-secondary">
+    <a href="<?= base_url('admin/edit-carousel/list'); ?>" class="btn btn-outline-secondary">
       Edit carousell yang Sudah Ada
     </a>
   </div>

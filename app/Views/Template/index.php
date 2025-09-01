@@ -14,43 +14,39 @@
 
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-<<<<<<< HEAD
-  
-=======
->>>>>>> ac3bfa8de96bd057f22d001c5e926d0f1b4e1485
 
 </head>
 
 <body style="background-color: #f8f9fa;">
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary py-3" style="font-size: 0.9rem;">
-  <div class="container">
-    <a class="navbar-brand" href="<?= base_url('/user'); ?>">
-      <img src="<?= base_url('/img/logobpskotategal.png'); ?>" height="40" alt="BPS Logo">
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
-            data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" 
-            aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse text-right" id="navbarText">
-      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 me-3">
-        <li class="nav-item"><a class="nav-link active" href="<?= base_url('/user'); ?>">Beranda</a></li>
-        <li class="nav-item"><a class="nav-link" href="#data-indikator">Data Indikator</a></li>
-        <li class="nav-item"><a class="nav-link" href="#infografis">Infografis</a></li>
-
-      </ul>
-      <a href="<?= route_to('user.profile'); ?>" class="d-flex align-items-center text-white text-decoration-none">
-        <span class="fw-semibold me-2" style="font-size: 0.85rem;">
-          <?= session()->get('username') ?? 'User'; ?>
-        </span>
-        <img src="<?= base_url(session()->get('photo') ?? 'img/default.png'); ?>" 
-     class="rounded-circle" width="28" height="28" alt="User Avatar">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary py-3" style="font-size: 0.9rem;">
+    <div class="container">
+      <a class="navbar-brand" href="<?= base_url('/user'); ?>">
+        <img src="<?= base_url('/img/logobpskotategal.png'); ?>" height="40" alt="BPS Logo">
       </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+        data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false"
+        aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse text-right" id="navbarText">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 me-3">
+          <li class="nav-item"><a class="nav-link active" href="<?= base_url('/user'); ?>">Beranda</a></li>
+          <li class="nav-item"><a class="nav-link" href="#data-indikator">Data Indikator</a></li>
+          <li class="nav-item"><a class="nav-link" href="#infografis">Infografis</a></li>
+
+        </ul>
+        <a href="<?= route_to('user.profile'); ?>" class="d-flex align-items-center text-white text-decoration-none">
+          <span class="fw-semibold me-2" style="font-size: 0.85rem;">
+            <?= session()->get('username') ?? 'User'; ?>
+          </span>
+          <img src="<?= base_url(session()->get('photo') ?? 'img/default.png'); ?>"
+            class="rounded-circle" width="28" height="28" alt="User Avatar">
+        </a>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
   <!-- Konten Dinamis -->
   <?= $this->renderSection('content'); ?>
@@ -73,29 +69,29 @@
           </div>
         </div>
 
-      <!-- Menu & Sosial -->
-      <div class="col-lg-6">
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <h6 class="mb-3">Menu Utama</h6>
-            <ul class="list-unstyled">
-              <li><a href="<?= base_url('/user'); ?>" class="text-white-50 text-decoration-none">Beranda</a></li>
-              <li class="nav-item"><a class="nav-link" href="#data-indikator">Data Indikator</a></li>
-              <li class="nav-item"><a class="nav-link" href="#infografis">Infografis</a></li>
-            </ul>
-          </div>
-          <div class="col-md-6 mb-3">
-            <h6 class="mb-3">Media Sosial</h6>
-            <div class="d-flex gap-3">
-              <a href="https://www.facebook.com/bps.kotategal.3" class="text-white-50"><i class="fab fa-facebook-f fa-lg"></i></a>
-              <a href="https://www.instagram.com/bpskotategal/" class="text-white-50"><i class="fab fa-instagram fa-lg"></i></a>
-              <a href="https://x.com/bps_statistics" class="text-white-50"><i class="fab fa-twitter fa-lg"></i></a>
-              <a href="https://www.youtube.com/channel/UCQ3MpAVvEEtiL7hBoxT_U4A" class="text-white-50"><i class="fab fa-youtube fa-lg"></i></a>
+        <!-- Menu & Sosial -->
+        <div class="col-lg-6">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <h6 class="mb-3">Menu Utama</h6>
+              <ul class="list-unstyled">
+                <li><a href="<?= base_url('/user'); ?>" class="text-white-50 text-decoration-none">Beranda</a></li>
+                <li class="nav-item"><a class="nav-link" href="#data-indikator">Data Indikator</a></li>
+                <li class="nav-item"><a class="nav-link" href="#infografis">Infografis</a></li>
+              </ul>
+            </div>
+            <div class="col-md-6 mb-3">
+              <h6 class="mb-3">Media Sosial</h6>
+              <div class="d-flex gap-3">
+                <a href="https://www.facebook.com/bps.kotategal.3" class="text-white-50"><i class="fab fa-facebook-f fa-lg"></i></a>
+                <a href="https://www.instagram.com/bpskotategal/" class="text-white-50"><i class="fab fa-instagram fa-lg"></i></a>
+                <a href="https://x.com/bps_statistics" class="text-white-50"><i class="fab fa-twitter fa-lg"></i></a>
+                <a href="https://www.youtube.com/channel/UCQ3MpAVvEEtiL7hBoxT_U4A" class="text-white-50"><i class="fab fa-youtube fa-lg"></i></a>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
       <hr class="my-4 opacity-25">
       <div class="text-left">
@@ -107,22 +103,11 @@
   <!-- JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<<<<<<< HEAD
-<script>
-  // Custom indikator
-  document.addEventListener("DOMContentLoaded", function () {
-    // >>> ADD GUARD: kalau ada #indicator-container (mode chart), skip script ini
-    if (document.getElementById('indicator-container')) return;
-
-    const cards = document.querySelectorAll(".indicator-card");
-    const placeholder = document.getElementById("indicator-placeholder");
-=======
   <script>
     // Custom indikator
     document.addEventListener("DOMContentLoaded", function() {
       // >>> ADD GUARD: kalau ada #indicator-container (mode chart), skip script ini
       if (document.getElementById('indicator-container')) return;
->>>>>>> ac3bfa8de96bd057f22d001c5e926d0f1b4e1485
 
       const cards = document.querySelectorAll(".indicator-card");
       const placeholder = document.getElementById("indicator-placeholder");
@@ -187,23 +172,13 @@
       observer.observe(card);
     });
 
-<<<<<<< HEAD
-  document.querySelectorAll('.news-card').forEach(card => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px)';
-    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    observer.observe(card);
-  });
+    document.querySelectorAll('.news-card').forEach(card => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(card);
+    });
 
-  document.querySelectorAll('.indicator-card').forEach((card, index) => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateX(-20px)';
-    card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
-    observer.observe(card);
-  });
-</script>
- <?= $this->renderSection('scripts') ?>
-=======
     document.querySelectorAll('.indicator-card').forEach((card, index) => {
       card.style.opacity = '0';
       card.style.transform = 'translateX(-20px)';
@@ -212,7 +187,6 @@
     });
   </script>
   <?= $this->renderSection('scripts') ?>
->>>>>>> ac3bfa8de96bd057f22d001c5e926d0f1b4e1485
 </body>
 
 </html>

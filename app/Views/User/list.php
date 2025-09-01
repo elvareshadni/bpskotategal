@@ -1,4 +1,4 @@
-<?= $this->extend('template/index'); ?>
+<?= $this->extend('Template/index'); ?>
 <?= $this->section('content'); ?>
 
 <div class="container py-4">
@@ -20,10 +20,10 @@
             <div class="card shadow-sm h-100">
               <div class="row g-0 h-100">
                 <div class="col-md-4">
-                  <img src="<?= base_url('img/' . $item['gambar']); ?>" 
-                       class="img-fluid rounded-start border border-2 border-white h-100" 
-                       alt="<?= esc($item['judul']); ?>" 
-                       style="object-fit: cover; width: 100%;">
+                  <img src="<?= base_url('img/' . $item['gambar']); ?>"
+                    class="img-fluid rounded-start border border-2 border-white h-100"
+                    alt="<?= esc($item['judul']); ?>"
+                    style="object-fit: cover; width: 100%;">
                 </div>
                 <div class="col-md-8 d-flex">
                   <div class="card-body d-flex flex-column justify-content-between">

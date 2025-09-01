@@ -29,7 +29,7 @@
 
         <hr class="my-4">
 
-        <a href="<?= base_url('edit-infografis/list'); ?>" class="btn btn-outline-secondary">
+        <a href="<?= base_url('admin/edit-infografis/list'); ?>" class="btn btn-outline-secondary">
             Edit Infografis yang Sudah Ada
         </a>
     </div>

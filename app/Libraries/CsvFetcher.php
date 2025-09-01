@@ -185,8 +185,4 @@ class CsvFetcher
 
         return [$columns, $outRows];
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> ac3bfa8de96bd057f22d001c5e926d0f1b4e1485

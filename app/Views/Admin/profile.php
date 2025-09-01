@@ -1,4 +1,4 @@
-<?= $this->extend('Template/index'); ?>
+<?= $this->extend('templates/index'); ?>
 <?= $this->section('content'); ?>
 
 <div class="container py-4">

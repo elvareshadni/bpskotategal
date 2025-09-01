@@ -1,4 +1,4 @@
-<?= $this->extend('template/index'); ?>
+<?= $this->extend('Template/index'); ?>
 <?= $this->section('content'); ?>
 
 <div class="container py-4">
@@ -19,9 +19,9 @@
   <p><?= esc($item['abstraksi'] ?? 'Belum ada deskripsi.'); ?></p>
 
   <div class="text-center">
-    <img src="<?= base_url('img/' . $item['gambar']); ?>" 
-         class="img-fluid shadow-sm" 
-         alt="<?= esc($item['judul']); ?>">
+    <img src="<?= base_url('img/' . $item['gambar']); ?>"
+      class="img-fluid shadow-sm"
+      alt="<?= esc($item['judul']); ?>">
   </div>
 </div>
 

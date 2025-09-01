@@ -2,14 +2,10 @@
 
 namespace App\Controllers;
 
-<<<<<<< HEAD
 use App\Models\InfografisModel;
 use App\Models\CarouselModel; // 👈 tambahkan model carousel
 
 class User extends BaseController 
-=======
-class User extends BaseController
->>>>>>> ac3bfa8de96bd057f22d001c5e926d0f1b4e1485
 {
     public function index()
     {
@@ -60,65 +56,6 @@ class User extends BaseController
     }
 
     public function profile()
-<<<<<<< HEAD
-{
-    $userModel = new \App\Models\UserModel();
-    $user = $userModel->find(session()->get('user_id'));
-
-    $data = [
-        'title' => 'My Profile',
-        'user'  => $user
-    ];
-
-    return view('user/profile', $data);
-}
-
-public function updateProfile()
-{
-    $userModel = new \App\Models\UserModel();
-    $id = session()->get('user_id');
-
-    $data = [
-        'username' => $this->request->getPost('username'),
-        'email'    => $this->request->getPost('email'),
-        'phone'    => $this->request->getPost('phone'),
-    ];
-
-    // upload foto
-    $photo = $this->request->getFile('photo');
-    if ($photo && $photo->isValid() && !$photo->hasMoved()) {
-        $newName = $photo->getRandomName();
-        $photo->move('uploads/profile', $newName);
-        $data['photo'] = 'uploads/profile/' . $newName;
-    }
-
-    $userModel->update($id, $data);
-    return redirect()->back()->with('msg', 'Profil berhasil diperbarui');
-}
-
-public function updatePassword()
-    {
-        $userModel = new \App\Models\UserModel();
-        $id = session()->get('user_id');
-
-        $current = $this->request->getPost('current_password');
-        $new     = $this->request->getPost('new_password');
-        $confirm = $this->request->getPost('confirm_password');
-
-        $user = $userModel->find($id);
-
-        if (!password_verify($current, $user['password'])) {
-            return redirect()->back()->with('errors', ['Password sekarang salah']);
-        }
-        if ($new !== $confirm) {
-            return redirect()->back()->with('errors', ['Konfirmasi password tidak cocok']);
-        }
-
-        $userModel->update($id, ['password' => password_hash($new, PASSWORD_DEFAULT)]);
-        return redirect()->back()->with('msg', 'Password berhasil diperbarui');
-    }
-
-=======
     {
         // contoh data user aktif; ganti dengan session/auth milikmu
         $user = [
@@ -179,5 +116,4 @@ public function updatePassword()
 
         return redirect()->route('user.profile')->with('msg', 'Password berhasil diubah.');
     }
->>>>>>> ac3bfa8de96bd057f22d001c5e926d0f1b4e1485
 }
