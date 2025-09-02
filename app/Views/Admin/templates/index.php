@@ -12,12 +12,17 @@
     <title>Dashboard Admin</title>
 
     <!-- Custom fonts for this template-->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
-    <!-- Custom styles for this template-->
-    <link href="<?= base_url(); ?>/css/style.css" rel="stylesheet">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
 </head>
 
@@ -116,12 +121,11 @@
                         <!-- Nav Item - User Information -->
                         <li class="nav-item no-arrow">
                             <a class="nav-link" href="<?= route_to('admin.profile'); ?>">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                                <span class="mr-2 d-none d-lg-inline text-white small">
                                     <?= session()->get('username') ?? 'Admin'; ?>
                                 </span>
-                                <img class="img-profile rounded-circle"
-                                    src="<?= base_url(session()->get('photo') ?? 'img/default.png'); ?>"
-                                    width="30" height="30" alt="User Avatar">
+                                <img src="<?= base_url(session()->get('photo') ?? 'img/default.png'); ?>"
+                                class="img-profile rounded-circle" width="30" height="30" alt="User Avatar">
                             </a>
                         </li>
                     </ul>
