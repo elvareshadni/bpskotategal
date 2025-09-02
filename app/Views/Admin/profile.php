@@ -53,6 +53,13 @@
             </div>
 
             <div class="row g-3 align-items-center mb-2">
+                <div class="col-4 text-end"><label class="col-form-label">Fullname:</label></div>
+                <div class="col-8"><input type="text" name="fullname" class="form-control"
+                        value="<?= old('fullname', $user['fullname'] ?? ''); ?>"></div>
+            </div>
+
+
+            <div class="row g-3 align-items-center mb-2">
                 <div class="col-4 text-end"><label class="col-form-label">Email:</label></div>
                 <div class="col-8"><input type="email" name="email" class="form-control"
                         value="<?= old('email', $user['email'] ?? ''); ?>"></div>

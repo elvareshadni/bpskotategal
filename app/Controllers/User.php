@@ -3,33 +3,31 @@
 namespace App\Controllers;
 
 use App\Models\InfografisModel;
-use App\Models\CarouselModel; 
+use App\Models\CarouselModel;
 use App\Models\UserModel;
+use CodeIgniter\HTTP\ResponseInterface;
 
-class User extends BaseController 
+class User extends BaseController
 {
     public function index()
     {
         $infografisModel = new InfografisModel();
-        $carouselModel   = new CarouselModel(); // 👈 panggil model carousel
+        $carouselModel   = new CarouselModel();
 
         $data = [
             'title'      => 'Home | BPS Kota Tegal',
-            'infografis' => $infografisModel->orderBy('tanggal', 'DESC')->findAll(6), // tampilkan 6 terbaru
-            'carousel'   => $carouselModel->findAll() // 👈 ambil semua slide carousel
+            'infografis' => $infografisModel->orderBy('tanggal', 'DESC')->findAll(6),
+            'carousel'   => $carouselModel->findAll()
         ];
         return view('user/dashboard', $data);
     }
 
     public function beranda()
     {
-        $data = [
-            'title' => 'Beranda'
-        ];
-        return view('user/home', $data);
+        return view('user/home', ['title' => 'Beranda']);
     }
 
-    public function list() 
+    public function list()
     {
         $model = new InfografisModel();
         $data = [
@@ -39,7 +37,7 @@ class User extends BaseController
         return view('user/list', $data);
     }
 
-    public function detail($id) 
+    public function detail($id)
     {
         $model = new InfografisModel();
         $item = $model->find($id);
@@ -48,18 +46,16 @@ class User extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Data dengan ID $id tidak ditemukan");
         }
 
-        $data = [
+        return view('user/detail', [
             'title' => $item['judul'],
             'item'  => $item
-        ];
-
-        return view('user/detail', $data);
+        ]);
     }
 
-    public function profile()
+    public function profile(): ResponseInterface|string
     {
         $userModel = new UserModel();
-        $userId    = session()->get('user_id'); // ambil id dari session login
+        $userId    = session()->get('user_id');
 
         if (!$userId) {
             return redirect()->to('/login');
@@ -68,80 +64,226 @@ class User extends BaseController
         $user = $userModel->find($userId);
 
         if (!$user) {
-            return redirect()->to('/login')->with('errors', ['User tidak ditemukan']);
+            return redirect()->to('/login')->with('errors', ['User tidak ditemukan'])->with('error', 'User tidak ditemukan');
         }
 
         return view('user/profile', [
             'title'      => 'My Profile',
             'user'       => $user,
-            'validation' => \Config\Services::validation(),
         ]);
     }
 
+    /**
+     * Update data profil (validasi manual, tanpa Validation Service)
+     */
     public function updateProfile()
     {
-        $userModel  = new UserModel();
-        $validation = \Config\Services::validation();
-        $userId     = session()->get('user_id');
+        $userModel = new UserModel();
+        $userId    = session()->get('user_id');
 
-        $rules = [
-            'username' => 'required|min_length[3]|max_length[50]',
-            'email'    => 'required|valid_email',
-            'phone'    => 'permit_empty|min_length[6]|max_length[20]',
-            'photo'    => 'if_exist|max_size[photo,1024]|is_image[photo]|mime_in[photo,image/jpg,image/jpeg,image/png]',
-        ];
-
-        if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+        if (!$userId) {
+            return redirect()->to('/login');
         }
 
+        $username = trim((string) $this->request->getPost('username'));
+        $fullname = trim((string) $this->request->getPost('fullname'));
+        $email    = strtolower(trim((string) $this->request->getPost('email')));
+        $phone    = trim((string) $this->request->getPost('phone'));
+        $file     = $this->request->getFile('photo');
+
+        $errors = [];
+
+        // --- Validasi username ---
+        if ($username === '') {
+            $errors['username'] = 'Username wajib diisi.';
+        } elseif (mb_strlen($username) < 3) {
+            $errors['username'] = 'Username minimal 3 karakter.';
+        } elseif (mb_strlen($username) > 50) {
+            $errors['username'] = 'Username maksimal 50 karakter.';
+        } else {
+            // Unik kecuali milik sendiri
+            $exists = $userModel->where('username', $username)
+                ->where('id !=', $userId)
+                ->first();
+            if ($exists) {
+                $errors['username'] = 'Username sudah digunakan.';
+            }
+        }
+
+        // --- Validasi fullname ---
+        if ($fullname === '') {
+            $errors['fullname'] = 'Nama lengkap wajib diisi.';
+        } elseif (mb_strlen($fullname) < 3) {
+            $errors['fullname'] = 'Nama lengkap minimal 3 karakter.';
+        }
+
+        // --- Validasi email ---
+        if ($email === '') {
+            $errors['email'] = 'Email wajib diisi.';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Format email tidak valid.';
+        } else {
+            $exists = $userModel->where('email', $email)
+                ->where('id !=', $userId)
+                ->first();
+            if ($exists) {
+                $errors['email'] = 'Email sudah digunakan.';
+            }
+        }
+
+        // --- Validasi phone (opsional) ---
+        if ($phone !== '') {
+            if (mb_strlen($phone) < 6 || mb_strlen($phone) > 20) {
+                $errors['phone'] = 'No. HP minimal 6 dan maksimal 20 karakter.';
+            }
+            // Jika ingin hanya angka + plus, aktifkan baris di bawah:
+            // elseif (!preg_match('/^\+?[0-9\s\-]+$/', $phone)) {
+            //     $errors['phone'] = 'No. HP hanya boleh berisi angka, spasi, tanda minus, dan awalan +.';
+            // }
+        }
+
+        // --- Validasi foto (jika diupload) ---
+        $photoPath = null;
+        if ($file && $file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
+            // cek ukuran ≤ 1MB
+            if ($file->getSize() > 1024 * 1024) { // bytes
+                $errors['photo'] = 'Ukuran foto maksimal 1MB.';
+            }
+            // cek tipe
+            $mimeOk = ['image/jpg', 'image/jpeg', 'image/png'];
+            $mime   = $file->getMimeType();
+            if (!in_array($mime, $mimeOk, true)) {
+                $errors['photo'] = 'Format foto harus jpg, jpeg, atau png.';
+            }
+        }
+
+        if ($errors) {
+            return redirect()->back()->withInput()
+                ->with('errors', $errors)
+                ->with('error', reset($errors));
+        }
+
+        // Siapkan data update
         $data = [
-            'username' => $this->request->getPost('username'),
-            'email'    => $this->request->getPost('email'),
-            'phone'    => $this->request->getPost('phone'),
+            'username' => $username,
+            'fullname' => $fullname,
+            'email'    => $email,
+            'phone'    => $phone,
         ];
 
-        // handle foto
-        $file = $this->request->getFile('photo');
-        if ($file && $file->isValid() && !$file->hasMoved()) {
+        // Pindah file jika ada
+        if ($file && $file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
+            $dir = FCPATH . 'uploads/profile';
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0775, true);
+            }
             $newName = $file->getRandomName();
-            $file->move('uploads/profile', $newName);
-            $data['photo'] = 'uploads/profile/' . $newName;
+            if (!$file->move($dir, $newName)) {
+                return redirect()->back()->withInput()
+                    ->with('errors', ['photo' => 'Gagal menyimpan foto.'])
+                    ->with('error', 'Gagal menyimpan foto.');
+            }
+            $photoPath = 'uploads/profile/' . $newName;
+            $data['photo'] = $photoPath;
+
+            // (Opsional) hapus foto lama
+            $current = $userModel->find($userId);
+            if ($current && !empty($current['photo'])) {
+                $old = FCPATH . ltrim($current['photo'], '/');
+                if (is_file($old)) {
+                    @unlink($old);
+                }
+            }
         }
 
-        $userModel->update($userId, $data);
+        // Update
+        try {
+            $userModel->update($userId, $data);
+        } catch (\Throwable $e) {
+            log_message('error', 'Update profile error: {0}', [$e->getMessage()]);
+            return redirect()->back()->withInput()
+                ->with('errors', ['global' => 'Gagal memperbarui profil. Coba lagi.'])
+                ->with('error', 'Gagal memperbarui profil. Coba lagi.');
+        }
 
         return redirect()->route('user.profile')->with('msg', 'Profil berhasil diperbarui.');
     }
 
+    /**
+     * Ubah password (validasi manual, tanpa Validation Service)
+     */
     public function updatePassword()
     {
-        $userModel  = new UserModel();
-        $validation = \Config\Services::validation();
-        $userId     = session()->get('user_id');
+        $userModel = new UserModel();
+        $userId    = session()->get('user_id');
 
-        $rules = [
-            'current_password' => 'required',
-            'new_password'     => 'required|min_length[6]',
-            'confirm_password' => 'required|matches[new_password]',
-        ];
-
-        if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+        if (!$userId) {
+            return redirect()->to('/login');
         }
 
+        $currentPassword = (string) $this->request->getPost('current_password');
+        $newPassword     = (string) $this->request->getPost('new_password');
+        $confirmPassword = (string) $this->request->getPost('confirm_password');
+
+        $errors = [];
+
+        // --- Validasi input ---
+        if ($currentPassword === '') {
+            $errors['current_password'] = 'Password sekarang wajib diisi.';
+        }
+        if ($newPassword === '') {
+            $errors['new_password'] = 'Password baru wajib diisi.';
+        } elseif (mb_strlen($newPassword) < 6) {
+            $errors['new_password'] = 'Password baru minimal 6 karakter.';
+        }
+        // Kalau ingin password kuat, aktifkan ini:
+        // elseif (!$this->isStrongPassword($newPassword)) {
+        //     $errors['new_password'] = 'Password baru harus mengandung huruf kecil, huruf besar, dan angka.';
+        // }
+
+        if ($confirmPassword === '') {
+            $errors['confirm_password'] = 'Konfirmasi password wajib diisi.';
+        } elseif ($confirmPassword !== $newPassword) {
+            $errors['confirm_password'] = 'Konfirmasi password tidak sama dengan Password baru.';
+        }
+
+        if ($errors) {
+            return redirect()->back()->withInput()
+                ->with('errors', $errors)
+                ->with('error', reset($errors));
+        }
+
+        // --- Cek password lama cocok ---
         $user = $userModel->find($userId);
-
-        // cek password lama
-        if (! password_verify($this->request->getPost('current_password'), $user['password'])) {
-            return redirect()->back()->with('errors', ['Password lama salah']);
+        if (!$user || !password_verify($currentPassword, $user['password'])) {
+            return redirect()->back()->withInput()
+                ->with('errors', ['current_password' => 'Password sekarang salah.'])
+                ->with('error', 'Password sekarang salah.');
         }
 
-        // update password baru
-        $userModel->update($userId, [
-            'password' => password_hash($this->request->getPost('new_password'), PASSWORD_DEFAULT)
-        ]);
+        // --- Update password baru ---
+        try {
+            $userModel->update($userId, [
+                'password' => password_hash($newPassword, PASSWORD_DEFAULT),
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'Update password error: {0}', [$e->getMessage()]);
+            return redirect()->back()->withInput()
+                ->with('errors', ['global' => 'Gagal mengubah password. Coba lagi.'])
+                ->with('error', 'Gagal mengubah password. Coba lagi.');
+        }
 
         return redirect()->route('user.profile')->with('msg', 'Password berhasil diubah.');
     }
+
+    // ==========================
+    // Utilitas Validasi Lokal
+    // ==========================
+    /*private function isStrongPassword(string $pwd): bool
+    {
+        $hasLower = preg_match('/[a-z]/', $pwd);
+        $hasUpper = preg_match('/[A-Z]/', $pwd);
+        $hasDigit = preg_match('/\d/',    $pwd);
+        return (bool) ($hasLower && $hasUpper && $hasDigit);
+    }*/
 }
