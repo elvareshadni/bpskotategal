@@ -9,10 +9,10 @@
                     <div>
                         <h1 class="auth-title">Selamat Datang Kembali!</h1>
                         <p class="auth-subtitle">
-                            Untuk tetap terhubung dengan kami, silakan login dengan info pribadi Anda
+                            Sudah memiliki akun? Silahkan login di sini
                         </p>
                         <!-- Link ke halaman login -->
-                        <a href="<?= base_url('login') ?>" class="btn-outline">Masuk</a>
+                        <a href="<?= base_url('login') ?>" class="btn-outline">Login</a>
                     </div>
                 </div>
             </div>

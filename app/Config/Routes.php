@@ -64,7 +64,11 @@ $routes->post('/login', 'Home::doLogin');
 $routes->get('register', 'Home::register');
 $routes->post('register', 'Home::doRegister');
 
-$routes->get('forget', 'Home::forget');
+$routes->get('forget', 'Home::forget');          // form lupa
+$routes->post('forget', 'Home::sendReset');      // kirim email
+
+$routes->get('reset-password', 'Home::reset');   // GET: email+token
+$routes->post('reset-password', 'Home::doReset');// POST: simpan password
 
 $routes->get('/logout', 'Home::logout', ['as' => 'logout']);
 

@@ -68,4 +68,18 @@ database.default.port = 3306
 
 logger.threshold = 4
 
+# API UNTUK SPREADSHEET
 CSV_URL="https://script.google.com/macros/s/AKfycbwFOA47Yv5oZKHY7Lnv4kLEaXq1nQhmvSkAg0rh7s2pgCIcQQ_ntU4XWmvdh1kLQ5o7/exec" #Nanti diganti sesuai API yang dibuild
+
+# EMAIL
+email.fromEmail = "jordandwifebri@gmail.com" #Diubah mengikuti akun BPS
+email.fromName  = "BPS Kota Tegal System"
+email.protocol  = "smtp"
+email.SMTPHost  = "smtp.gmail.com"
+email.SMTPUser  = "jordandwifebri@gmail.com" #Diubah mengikuti akun BPS
+email.SMTPPass  = "ptgv eevc zghf vdsf" #Diubah mengikuti akun BPS
+email.SMTPPort  = 587
+email.SMTPCrypto = "tls"
+email.mailType  = "html"
+email.charset   = "utf-8"
+email.wordWrap  = true
