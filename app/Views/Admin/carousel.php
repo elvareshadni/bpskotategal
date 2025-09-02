@@ -1,4 +1,4 @@
-<?= $this->extend('admin/templates/index'); ?>
+<!-- <?= $this->extend('admin/templates/index'); ?>
 <?= $this->section('content'); ?>
 
 <div class="container mt-5">
@@ -45,4 +45,4 @@
   </table>
 </div>
 
-<?= $this->endSection(); ?>
+<?= $this->endSection(); ?> -->

@@ -2,14 +2,14 @@
 <?= $this->section('content'); ?>
 
 <!-- Fixed Carousel (Single Image) -->
-<div class="carousel" style="height:450px; width: 1300px;">
+<div class="carousel" style="height:450px;">
   <img src="<?= base_url('img/slide1.jpg'); ?>"
     class="d-block w-100"
     style="height:490px; object-fit:cover;"
     alt="Banner">
   <div class="carousel-caption d-flex flex-column justify-content-center align-items-center text-center"
     style="color:white; height:100%;">
-    <h5 class="display-6 fw-bold">Judul Carousel</h5>
+    <h5 class="display-6 fw-bold">Pusat Data Statistik Kota Tegal</h5>
   </div>
 </div>
 

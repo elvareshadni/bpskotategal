@@ -58,31 +58,43 @@ class Home extends BaseController
 
     // Proses Login
     public function doLogin()
-    {
-        $session   = session();
-        $userModel = new UserModel();
+{
+    // Ambil input "login" (boleh username ATAU email) + password
+    $login    = trim($this->request->getPost('login') 
+                ?? $this->request->getPost('username') 
+                ?? $this->request->getPost('email') 
+                ?? '');
+    $password = (string) $this->request->getPost('password');
 
-        $email    = $this->request->getPost('email');
-        $password = $this->request->getPost('password');
-
-        $user = $userModel->where('email', $email)->first();
-
-        if ($user) {
-            if (password_verify($password, $user['password'])) {
-                $session->set([
-                    'user_id'   => $user['id'],
-                    'username'  => $user['username'],
-                    'email'     => $user['email'],
-                    'logged_in' => true,
-                ]);
-                return redirect()->to('/user'); // redirect ke dashboard user
-            } else {
-                return redirect()->back()->with('error', 'Password salah!');
-            }
-        } else {
-            return redirect()->back()->with('error', 'Email tidak ditemukan!');
-        }
+    if ($login === '' || $password === '') {
+        return redirect()->back()->with('error', 'Isi username/email dan password.')->withInput();
     }
+
+    $userModel = new \App\Models\UserModel();
+
+    // Cari berdasarkan username ATAU email
+    $user = $userModel->where('username', $login)
+                      ->orWhere('email', $login)
+                      ->first();
+
+    if (!$user || !password_verify($password, $user['password'])) {
+        return redirect()->back()->with('error', 'Kredensial tidak valid.')->withInput();
+    }
+
+    // Simpan session
+    session()->set([
+        'user_id'   => $user['id'],
+        'username'  => $user['username'],
+        'role'      => $user['role'] ?? 'user',
+        'logged_in' => true,
+    ]);
+
+    // Arahkan sesuai role
+    if (($user['role'] ?? 'user') === 'admin') {
+        return redirect()->to('/admin');      // dashboard admin
+    }
+    return redirect()->to('/user');           // dashboard user
+}
 
     // Form Register
     public function register()

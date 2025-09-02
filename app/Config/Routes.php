@@ -6,8 +6,10 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
-$routes->get('/', 'User::index'); // langsung ke dashboard user
+// Halaman awal → login, bukan dashboard
+$routes->get('/', 'Home::login');
 
+// USER
 $routes->group('user', function ($routes) {
     $routes->get('/', 'User::index');
     $routes->get('beranda', 'User::beranda');
@@ -64,9 +66,20 @@ $routes->post('register', 'Home::doRegister');
 
 $routes->get('forget', 'Home::forget');
 
+$routes->get('/logout', 'Home::logout', ['as' => 'logout']);
+
+
 // =======================
 // USER PROFILE
 // =======================
-$routes->get('profile', 'User::profile', ['as' => 'user.profile']);
-$routes->post('/profile/update', 'User::updateProfile', ['as' => 'user.profile.update']);
-$routes->post('/profile/password', 'User::updatePassword', ['as' => 'user.password.update']);
+$routes->get('user/profile', 'User::profile', ['as' => 'user.profile']);
+$routes->post('user/profile/update', 'User::updateProfile', ['as' => 'user.profile.update']);
+$routes->post('user/profile/password', 'User::updatePassword', ['as' => 'user.password.update']);
+
+// =======================
+// ADMIN PROFILE
+// =======================
+$routes->get('admin/profile', 'Admin::profile', ['as' => 'admin.profile']);
+$routes->post('admin/profile/update', 'Admin::updateProfile', ['as' => 'admin.profile.update']);
+$routes->post('admin/profile/password', 'Admin::updatePassword', ['as' => 'admin.password.update']);
+

@@ -109,6 +109,12 @@
                 <button class="btn btn-primary px-4">Ubah Password</button>
             </div>
         </form>
+        <div class="text-center mt-4">
+            <a href="<?= route_to('logout'); ?>" class="btn btn-outline-danger px-4">
+                Logout
+            </a>
+        </div>
+
     </div>
 </div>
 

@@ -8,12 +8,20 @@
                 <div class="auth-right">
                     <h2 class="form-title">Masuk</h2>
                     <!-- Action diarahkan ke dashboard -->
-                    <form action="<?= base_url('login') ?>" method="post">
-                        <input type="email" class="form-control" name="email" placeholder="E-mail" required>
-                        <input type="password" class="form-control" name="password" placeholder="Password" required>
-                        <a href="<?= base_url('forget') ?>" class="forgot-password">Lupa password?</a>
-                        <button type="submit" class="btn btn-primary">Masuk</button>
-                    </form>
+                    <form action="<?= base_url('/login'); ?>" method="post">
+                        <?= csrf_field(); ?>
+
+                        <div class="mb-3">
+                            <input type="text" name="login" id="login" class="form-control"
+                                placeholder="username atau email" value="<?= old('login'); ?>" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <input type="password" name="password" id="password" class="form-control" placeholder="password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Masuk</button>
+                        </form>
                 </div>
             </div>
             <div class="col-lg-6">

@@ -12,15 +12,72 @@ class Admin extends BaseController
         return view('admin/index');
     }
 
-    public function profile(): string
+    public function __construct()
     {
-        return view('admin/profile');
+        if (session()->get('role') !== 'admin') {
+            redirect()->to('/login')->send();
+            exit;
+        }
     }
 
-    public function updateUser()
+    public function profile(): string
     {
-        // logika update user (sementara kosong)
-        return redirect()->back()->with('success', 'User berhasil diupdate!');
+        $userModel = new \App\Models\UserModel();
+        $userId = session()->get('user_id'); // ambil dari session login
+
+        $data['user'] = $userModel->find($userId);
+
+        return view('admin/profile', $data);
+    }   
+
+    public function updateProfile()
+    {
+        $userModel = new \App\Models\UserModel();
+        $userId = session()->get('user_id');
+
+        $data = [
+            'username' => $this->request->getPost('username'),
+            'email'    => $this->request->getPost('email'),
+            'phone'    => $this->request->getPost('phone'),
+        ];
+
+        // handle upload foto
+        $file = $this->request->getFile('photo');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = $file->getRandomName();
+            $file->move(FCPATH . 'uploads', $newName);
+            $data['photo'] = 'uploads/' . $newName;
+        }
+
+        $userModel->update($userId, $data);
+
+        return redirect()->back()->with('msg', 'Profil berhasil diperbarui!');
+    }
+
+    public function updatePassword()
+    {
+        $userModel = new \App\Models\UserModel();
+        $userId = session()->get('user_id');
+
+        $currentPassword = $this->request->getPost('current_password');
+        $newPassword     = $this->request->getPost('new_password');
+        $confirmPassword = $this->request->getPost('confirm_password');
+
+        $user = $userModel->find($userId);
+
+        if (!password_verify($currentPassword, $user['password'])) {
+            return redirect()->back()->with('errors', ['Password sekarang salah!']);
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            return redirect()->back()->with('errors', ['Konfirmasi password tidak cocok!']);
+        }
+
+        $userModel->update($userId, [
+            'password' => password_hash($newPassword, PASSWORD_DEFAULT)
+        ]);
+
+        return redirect()->back()->with('msg', 'Password berhasil diperbarui!');
     }
 
     // --- Kelola Data ---
@@ -29,47 +86,52 @@ class Admin extends BaseController
         return view('admin/kelola_data_indikator');
     }
 
-    public function laporanKunjungan(): string
+    public function laporanKunjungan()
     {
-        return view('admin/laporan_kunjungan');
-    }
+        $kunjunganModel = new \App\Models\KunjunganModel();
+        $data['kunjungan'] = $kunjunganModel->findAll();
 
-    // --- carousel ---
-    public function carousel(): string
-    {
-        $carouselModel = new CarouselModel();
-        $data['carousels'] = $carouselModel->findAll();
-
-        return view('admin/carousel', $data);
+        return view('admin/laporan_kunjungan', $data);
     }
 
 
-    public function carouselAdd(): string
-    {
-        return view('admin/carousel_add');
-    }
 
-    public function carouselSave()
-{
-    $carouselModel = new CarouselModel();
+    // // --- carousel ---
+    // public function carousel(): string
+    // {
+    //     $carouselModel = new CarouselModel();
+    //     $data['carousels'] = $carouselModel->findAll();
 
-    $file  = $this->request->getFile('carouselImage');
-    $judul = $this->request->getPost('judulcarousel');
+    //     return view('admin/carousel', $data);
+    // }
 
-    if ($file && $file->isValid() && !$file->hasMoved()) {
-        $newName = $file->getRandomName();
-        $file->move(FCPATH . 'img', $newName);
 
-        $carouselModel->insert([
-            'judul'   => $judul,
-            'gambar'  => $newName,
-            'posisi'  => 'center'
-        ]);
-    }
+    // public function carouselAdd(): string
+    // {
+    //     return view('admin/carousel_add');
+    // }
 
-    return redirect()->to(base_url('admin/listcarousel'))
-        ->with('success', 'Carousel berhasil ditambahkan!');
-}
+//     public function carouselSave()
+// {
+//     $carouselModel = new CarouselModel();
+
+//     $file  = $this->request->getFile('carouselImage');
+//     $judul = $this->request->getPost('judulcarousel');
+
+//     if ($file && $file->isValid() && !$file->hasMoved()) {
+//         $newName = $file->getRandomName();
+//         $file->move(FCPATH . 'img', $newName);
+
+//         $carouselModel->insert([
+//             'judul'   => $judul,
+//             'gambar'  => $newName,
+//             'posisi'  => 'center'
+//         ]);
+//     }
+
+//     return redirect()->to(base_url('admin/listcarousel'))
+//         ->with('success', 'Carousel berhasil ditambahkan!');
+// }
 
     // --- Infografis ---
     public function infografis(): string
@@ -101,16 +163,16 @@ class Admin extends BaseController
     }
 
 
-    // --- Edit carousel ---
-    public function editcarousel(): string
-    {
-        return view('admin/edit_carousel');
-    }
+    // // --- Edit carousel ---
+    // public function editcarousel(): string
+    // {
+    //     return view('admin/edit_carousel');
+    // }
 
-    public function listcarousel(): string
-    {
-        return view('admin/edit_carousel_list');
-    }
+    // public function listcarousel(): string
+    // {
+    //     return view('admin/edit_carousel_list');
+    // }
 
     // --- Edit Infografis ---
     public function editInfografis(): string

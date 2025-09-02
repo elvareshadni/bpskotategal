@@ -1,4 +1,4 @@
-<?= $this->extend('templates/index'); ?>
+<?= $this->extend('admin/templates/index'); ?>
 <?= $this->section('content'); ?>
 
 <div class="container py-4">
@@ -44,7 +44,7 @@
         </div>
 
         <!-- Form Data Profil -->
-        <form action="<?= route_to('user.profile.update'); ?>" method="post" enctype="multipart/form-data" class="mx-auto" style="max-width: 520px;">
+        <form action="<?= base_url('admin/updateProfile'); ?>" method="post" enctype="multipart/form-data" class="mx-auto" style="max-width: 520px;">
             <?= csrf_field(); ?>
 
             <div class="row g-3 align-items-center mb-2">
@@ -87,7 +87,7 @@
         <hr class="my-5">
 
         <!-- Form Ubah Password -->
-        <form action="<?= route_to('user.password.update'); ?>" method="post" class="mx-auto" style="max-width: 520px;">
+        <form action="<?= base_url('admin/updatePassword'); ?>" method="post" class="mx-auto" style="max-width: 520px;">
             <?= csrf_field(); ?>
 
             <div class="row g-3 align-items-center mb-2">

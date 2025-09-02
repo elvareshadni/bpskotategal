@@ -64,15 +64,12 @@
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
-            <!-- Nav Item - Edit carousel -->
+            <!-- Nav Item - Edit carousel
             <li class="nav-item <?= uri_string() === 'admin/edit-carousel' ? 'active' : '' ?>">
                 <a class="nav-link collapsed" href="<?= base_url('admin/edit-carousel'); ?>">
                     <span>Edit carousel</span>
                 </a>
-            </li>
-
-            <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
+            </li> -->
 
             <!-- Nav Item - Edit Konten -->
             <li class="nav-item <?= uri_string() === 'admin/edit-infografis' ? 'active' : '' ?>">
@@ -86,7 +83,7 @@
 
             <!-- Nav Item - Logout -->
             <li class="nav-item">
-                <a class="nav-link" href="tables.html">
+                <a class="nav-link" href="/logout">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Logout</span></a>
             </li>
@@ -117,29 +114,17 @@
                         <div class="topbar-divider d-none d-sm-block"></div>
 
                         <!-- Nav Item - User Information -->
-                        <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Profile</span>
-                                <img class="img-profile rounded-circle" src="<?= base_url(); ?>img/undraw_profile.svg">
+                        <li class="nav-item no-arrow">
+                            <a class="nav-link" href="<?= route_to('admin.profile'); ?>">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                                    <?= session()->get('username') ?? 'Admin'; ?>
+                                </span>
+                                <img class="img-profile rounded-circle"
+                                    src="<?= base_url(session()->get('photo') ?? 'img/default.png'); ?>"
+                                    width="30" height="30" alt="User Avatar">
                             </a>
-                            <!-- Dropdown - User Information -->
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Profile
-
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                        Logout
-                                    </a>
-                            </div>
                         </li>
-
                     </ul>
-
                 </nav>
                 <!-- End of Topbar -->
 
