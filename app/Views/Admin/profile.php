@@ -5,7 +5,7 @@
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?= base_url('/user'); ?>">Beranda</a></li>
+            <li class="breadcrumb-item"><a href="<?= base_url('/admin'); ?>">Beranda</a></li>
             <li class="breadcrumb-item active" aria-current="page">My Profile</li>
         </ol>
     </nav>
@@ -32,8 +32,7 @@
             <div class="border rounded-3 d-flex align-items-center justify-content-center"
                 style="width: 180px; height: 220px;">
                 <?php if (!empty($user['photo'])): ?>
-                    <img id="avatarPreview" src="<?= base_url($user['photo']); ?>" alt="Foto Profil"
-                        class="img-fluid h-100">
+                    <img id="avatarPreview" src="<?= base_url($user['photo']); ?>" alt="Foto Profil" class="img-fluid h-100">
                 <?php else: ?>
                     <svg id="avatarPreview" xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor"
                         class="bi bi-person" viewBox="0 0 16 16" style="color:#9ca3af;">
@@ -44,7 +43,7 @@
         </div>
 
         <!-- Form Data Profil -->
-        <form action="<?= base_url('admin/updateProfile'); ?>" method="post" enctype="multipart/form-data" class="mx-auto" style="max-width: 520px;">
+        <form action="<?= route_to('admin.profile.update'); ?>" method="post" enctype="multipart/form-data" class="mx-auto" style="max-width: 520px;">
             <?= csrf_field(); ?>
 
             <div class="row g-3 align-items-center mb-2">
@@ -87,7 +86,7 @@
         <hr class="my-5">
 
         <!-- Form Ubah Password -->
-        <form action="<?= base_url('admin/updatePassword'); ?>" method="post" class="mx-auto" style="max-width: 520px;">
+        <form action="<?= route_to('admin.password.update'); ?>" method="post" class="mx-auto" style="max-width: 520px;">
             <?= csrf_field(); ?>
 
             <div class="row g-3 align-items-center mb-2">
