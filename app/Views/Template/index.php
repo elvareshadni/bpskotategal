@@ -33,8 +33,8 @@
         <div class="collapse navbar-collapse text-right" id="navbarText">
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0 me-3">
             <li class="nav-item"><a class="nav-link active" href="<?= base_url('/user'); ?>">Beranda</a></li>
-            <li class="nav-item"><a class="nav-link" href="#data-indikator">Data Indikator</a></li>
-            <li class="nav-item"><a class="nav-link" href="#infografis">Infografis</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= base_url('/user'); ?>#data-indikator">Data Indikator</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?= base_url('/user'); ?>#infografis">Infografis</a></li>
           </ul>
           <a href="<?= route_to('user.profile'); ?>" class="d-flex align-items-center text-white text-decoration-none">
             <span class="fw-semibold me-2" style="font-size: 0.85rem;">
@@ -75,8 +75,8 @@
               <h6 class="mb-3">Menu Utama</h6>
               <ul class="list-unstyled">
                 <li><a href="<?= base_url('/user'); ?>" class="text-white-50 text-decoration-none">Beranda</a></li>
-                <li><a href="#data-indikator" class="text-white-50 text-decoration-none">Data Indikator</a></li>
-                <li><a href="#infografis" class="text-white-50 text-decoration-none">Infografis</a></li>
+                <li><a href="<?= base_url('/user'); ?>#data-indikator" class="text-white-50 text-decoration-none">Data Indikator</a></li>
+                <li><a href="<?= base_url('/user'); ?>#infografis" class="text-white-50 text-decoration-none">Infografis</a></li>
               </ul>
             </div>
             <div class="col-md-6 mb-3">

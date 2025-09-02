@@ -206,6 +206,14 @@ class User extends BaseController
                 ->with('error', 'Gagal memperbarui profil. Coba lagi.');
         }
 
+        // >>> SINKRONKAN SESSION <<<
+        if (isset($data['username'])) {
+            session()->set('username', $data['username']);
+        }
+        if (isset($data['photo'])) {
+            session()->set('photo', $data['photo']);
+        }
+
         return redirect()->route('user.profile')->with('msg', 'Profil berhasil diperbarui.');
     }
 

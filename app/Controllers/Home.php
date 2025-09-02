@@ -74,6 +74,8 @@ class Home extends BaseController
             'user_id'   => $user['id'],
             'username'  => $user['username'],
             'role'      => $user['role'] ?? 'user',
+            'photo'     => $user['photo'] ?? 'img/default.png',
+            'fullname'  => $user['fullname'],
             'logged_in' => true,
         ]);
 
