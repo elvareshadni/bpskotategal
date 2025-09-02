@@ -25,18 +25,35 @@ class Home extends BaseController
         return view('auth/login');
     }
 
-    // Proses Login
+    // Proses Login (validasi manual)
     public function doLogin()
     {
-        // Ambil input "login" (boleh username ATAU email) + password
         $login    = trim($this->request->getPost('login')
             ?? $this->request->getPost('username')
             ?? $this->request->getPost('email')
             ?? '');
         $password = (string) $this->request->getPost('password');
 
-        if ($login === '' || $password === '') {
-            return redirect()->back()->with('error', 'Isi username/email dan password.')->withInput();
+        $errors = [];
+
+        // Required
+        if ($login === '') {
+            $errors['login']   = 'Username atau email wajib diisi.';
+        }
+        if ($password === '') {
+            $errors['password'] = 'Password wajib diisi.';
+        }
+
+        // Panjang wajar, cegah input aneh
+        if ($login !== '' && mb_strlen($login) > 100) {
+            $errors['login'] = 'Username/Email terlalu panjang.';
+        }
+        if ($password !== '' && mb_strlen($password) < 6) {
+            $errors['password'] = 'Password minimal 6 karakter.';
+        }
+
+        if ($errors) {
+            return redirect()->to('/login')->with('errors', $errors)->withInput();
         }
 
         $userModel = new UserModel();
@@ -47,7 +64,9 @@ class Home extends BaseController
             ->first();
 
         if (!$user || !password_verify($password, $user['password'])) {
-            return redirect()->back()->with('error', 'Username atau E-Mail atau password salah!')->withInput();
+            return redirect()->back()
+                ->with('errors', ['login' => 'Username/Email atau password salah.'])
+                ->withInput();
         }
 
         // Simpan session
@@ -60,9 +79,9 @@ class Home extends BaseController
 
         // Arahkan sesuai role
         if (($user['role'] ?? 'user') === 'admin') {
-            return redirect()->to('/admin')->with('msg', 'Login admin berhasil.');      // dashboard admin
+            return redirect()->to('/admin')->with('success', 'Anda berhasil login sebagai Admin, selamat datang ' . $user['username'] . '!');
         }
-        return redirect()->to('/user')->with('msg', 'Login berhasil.');           // dashboard user
+        return redirect()->to('/user')->with('success', 'Anda berhasil login sebagai User, selamat datang ' . $user['username'] . '!');
     }
 
     // Form Register
@@ -71,29 +90,83 @@ class Home extends BaseController
         return view('auth/register');
     }
 
-    // Proses Register
+    // Proses Register (validasi manual lengkap)
     public function doRegister()
     {
-        $userModel = new UserModel();
+        $username         = trim((string) $this->request->getPost('username'));
+        $email            = strtolower(trim((string) $this->request->getPost('email')));
+        $password         = (string) $this->request->getPost('password');
+        $confirmPassword  = (string) $this->request->getPost('confirm_password');
+        $fullname         = trim((string) $this->request->getPost('fullname'));
 
-        $data = [
-            'username' => $this->request->getPost('username'),
-            'email'    => $this->request->getPost('email'),
-            'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
-            'fullname' => $this->request->getPost('fullname'),
-            'role'     => 'user',
-        ];
+        $errors = [];
 
-        // Validasi sederhana (boleh kamu ganti ke Validation Service)
-        if (! filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            return redirect()->back()->withInput()->with('error', 'Format email tidak valid.');
+        // Username
+        if ($username === '') {
+            $errors['username'] = 'Username wajib diisi.';
+        } elseif (mb_strlen($username) < 3) {
+            $errors['username'] = 'Username minimal 3 karakter.';
+        } elseif (mb_strlen($username) > 50) {
+            $errors['username'] = 'Username maksimal 50 karakter.';
+        } else {
+            // Unik di DB
+            $userModel = new UserModel();
+            if ($userModel->where('username', $username)->first()) {
+                $errors['username'] = 'Username sudah digunakan.';
+            }
         }
 
+        // Email
+        if ($email === '') {
+            $errors['email'] = 'Email wajib diisi.';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Format email tidak valid.';
+        } else {
+            // Unik di DB
+            $userModel = new UserModel();
+            if ($userModel->where('email', $email)->first()) {
+                $errors['email'] = 'Email sudah digunakan.';
+            }
+        }
+
+        // Password
+        if ($password === '') {
+            $errors['password'] = 'Password wajib diisi.';
+        } elseif (mb_strlen($password) < 6) {
+            $errors['password'] = 'Password minimal 6 karakter.';
+        } /*elseif (!$this->isStrongPassword($password)) {
+            $errors['password'] = 'Password harus mengandung huruf kecil, huruf besar, dan angka.';
+        }*/
+
+        // Konfirmasi password
+        if ($confirmPassword === '') {
+            $errors['confirm_password'] = 'Konfirmasi password wajib diisi.';
+        } elseif ($confirmPassword !== $password) {
+            $errors['confirm_password'] = 'Konfirmasi password tidak sama dengan Password.';
+        }
+
+        // Fullname (opsional, batasi panjang saja)
+        if ($fullname !== '' && mb_strlen($fullname) > 100) {
+            $errors['fullname'] = 'Nama lengkap terlalu panjang.';
+        }
+
+        if ($errors) {
+            return redirect()->to('/register')->with('errors', $errors)->withInput();
+        }
+
+        // Simpan
+        $userModel = new UserModel();
         try {
-            $userModel->save($data);
+            $userModel->save([
+                'username' => $username,
+                'email'    => $email,
+                'password' => password_hash($password, PASSWORD_DEFAULT),
+                'fullname' => $fullname,
+                'role'     => 'user',
+            ]);
         } catch (\Throwable $e) {
             log_message('error', 'Register error: {0}', [$e->getMessage()]);
-            return redirect()->back()->withInput()->with('error', 'Gagal mendaftar. Coba lagi.');
+            return redirect()->back()->withInput()->with('errors', ['global' => 'Gagal mendaftar. Coba lagi.']);
         }
 
         return redirect()->to('/login')->with('success', 'Pendaftaran berhasil, silakan login!');
@@ -105,34 +178,42 @@ class Home extends BaseController
         return view('auth/forget');
     }
 
-    // POST: Kirim email reset password (token 30 menit)
+    // POST: Kirim email reset password (token 30 menit) — validasi manual
     public function sendReset(): RedirectResponse
     {
-        $validation = Services::validation();
-        $rules = ['email' => 'required|valid_email'];
-
-        if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
-        }
-
         $emailAddr = strtolower(trim((string) $this->request->getPost('email')));
+        $errors    = [];
 
-        // Cek user ada/tidak — tapi balasannya tetap generik (anti enumeration)
-        $userModel = new UserModel();
-        $user = $userModel->where('email', $emailAddr)->first();
-
-        $genericMsg = 'Jika email terdaftar, tautan reset sudah dikirim. Periksa inbox/spam.';
-
-        if (!$user) {
-            return redirect()->to(base_url('forget'))->with('msg', $genericMsg);
+        if ($emailAddr === '') {
+            $errors['email'] = 'Email wajib diisi.';
+        } elseif (!filter_var($emailAddr, FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Format email tidak valid.';
         }
 
-        // Buat token + simpan hash
+        if ($errors) {
+            return redirect()->back()->with('errors', $errors)->withInput();
+        }
+
+        $user = (new UserModel())->where('email', $emailAddr)->first();
+
+        // Jika email TIDAK ditemukan
+        if (!$user) {
+            return redirect()->to(base_url('forget'))
+                ->with('error', 'Email tersebut tidak pernah terdaftar, silakan Register/Daftar terlebih dahulu.')
+                ->withInput();
+        }
+
+        // Jika email ditemukan maka Buat token + simpan hash
         $resetModel = new PasswordResetModel();
         $resetModel->purgeExpired();
 
-        $tokenPlain = bin2hex(random_bytes(16)); // 32 hex char
-        $resetModel->where('email', $emailAddr)->where('used_at', null)->set(['used_at' => date('Y-m-d H:i:s')])->update(); // matikan token lama
+        $tokenPlain = bin2hex(random_bytes(16)); // 32 hex
+        // matikan token lama aktif
+        $resetModel->where('email', $emailAddr)
+            ->where('used_at', null)
+            ->set(['used_at' => date('Y-m-d H:i:s')])
+            ->update();
+
         $resetModel->createToken($emailAddr, $tokenPlain, 30);
 
         $resetLink = base_url('reset-password') . '?' . http_build_query([
@@ -140,7 +221,7 @@ class Home extends BaseController
             'token' => $tokenPlain,
         ]);
 
-        // Kirim email (pakai config .env Gmail)
+        // Kirim email
         $email = Services::email();
         $email->setFrom('bpstegalsystem@gmail.com', 'BPS Kota Tegal System');
         $email->setTo($emailAddr);
@@ -156,10 +237,10 @@ class Home extends BaseController
                 $emailAddr,
                 print_r($email->printDebugger(['headers', 'subject', 'body']), true)
             ]);
-            return redirect()->back()->with('error', 'Gagal mengirim email reset. Coba lagi nanti.');
+            return redirect()->back()->with('errors', ['global' => 'Gagal mengirim email reset. Coba lagi nanti.']);
         }
 
-        return redirect()->to(base_url('forget'))->with('msg', $genericMsg);
+        return redirect()->to(base_url('forget'))->with('success', 'Tautan reset sudah dikirim ke email tersebut. Periksa inbox/spam.');
     }
 
     // GET: Halaman reset (via link email)
@@ -169,7 +250,7 @@ class Home extends BaseController
         $token = $this->request->getGet('token');
 
         if (!$email || !$token) {
-            return redirect()->to(base_url('login'))->with('error', 'Tautan reset tidak valid.');
+            return redirect()->to(base_url('login'))->with('errors', ['global' => 'Tautan reset tidak valid.']);
         }
 
         return view('auth/reset_password', [
@@ -179,43 +260,69 @@ class Home extends BaseController
         ]);
     }
 
-    // POST: Simpan password baru
+    // POST: Simpan password baru (validasi manual)
     public function doReset(): RedirectResponse
     {
-        $validation = Services::validation();
-        $rules = [
-            'email'            => 'required|valid_email',
-            'token'            => 'required',
-            'new_password'     => 'required|min_length[6]',
-            'confirm_password' => 'required|matches[new_password]',
-        ];
+        $emailAddr       = strtolower(trim((string) $this->request->getPost('email')));
+        $token           = trim((string) $this->request->getPost('token'));
+        $newPassword     = (string) $this->request->getPost('new_password');
+        $confirmPassword = (string) $this->request->getPost('confirm_password');
 
-        if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+        $errors = [];
+
+        // Email
+        if ($emailAddr === '') {
+            $errors['email'] = 'Email wajib diisi.';
+        } elseif (!filter_var($emailAddr, FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Format email tidak valid.';
         }
 
-        $emailAddr = strtolower(trim((string) $this->request->getPost('email')));
-        $token     = trim((string) $this->request->getPost('token'));
+        // Token
+        if ($token === '') {
+            $errors['token'] = 'Token wajib diisi.';
+        } elseif (!ctype_xdigit($token) || strlen($token) !== 32) {
+            $errors['token'] = 'Token tidak valid.';
+        }
 
+        // Password baru
+        if ($newPassword === '') {
+            $errors['new_password'] = 'Password baru wajib diisi.';
+        } elseif (mb_strlen($newPassword) < 6) {
+            $errors['new_password'] = 'Password baru minimal 6 karakter.';
+        } /*elseif (!$this->isStrongPassword($newPassword)) {
+            $errors['new_password'] = 'Password baru harus mengandung huruf kecil, huruf besar, dan angka.';
+        }*/
+
+        if ($confirmPassword === '') {
+            $errors['confirm_password'] = 'Konfirmasi password wajib diisi.';
+        } elseif ($confirmPassword !== $newPassword) {
+            $errors['confirm_password'] = 'Konfirmasi password tidak sama dengan Password baru.';
+        }
+
+        if ($errors) {
+            return redirect()->back()->with('errors', $errors)->withInput();
+        }
+
+        // Validasi token ke DB
         $resetModel = new PasswordResetModel();
         $row = $resetModel->validateToken($emailAddr, $token);
         if (!$row) {
-            return redirect()->to(base_url('forget'))->with('error', 'Token tidak valid atau sudah kedaluwarsa.');
+            return redirect()->to(base_url('forget'))->with('errors', ['global' => 'Token tidak valid atau sudah kedaluwarsa.']);
         }
 
         // Update password user
         $userModel = new UserModel();
         $user = $userModel->where('email', $emailAddr)->first();
         if (!$user) {
-            return redirect()->to(base_url('forget'))->with('error', 'Akun tidak ditemukan.');
+            return redirect()->to(base_url('forget'))->with('errors', ['global' => 'Akun tidak ditemukan.']);
         }
 
         $ok = $userModel->update($user['id'], [
-            'password' => password_hash((string) $this->request->getPost('new_password'), PASSWORD_DEFAULT),
+            'password' => password_hash($newPassword, PASSWORD_DEFAULT),
         ]);
 
         if (! $ok) {
-            return redirect()->back()->with('error', 'Gagal memperbarui password. Coba lagi.');
+            return redirect()->back()->with('errors', ['global' => 'Gagal memperbarui password. Coba lagi.']);
         }
 
         // Tandai token used
@@ -227,7 +334,6 @@ class Home extends BaseController
     // GET: Lupa Password (legacy)
     public function change_password()
     {
-        // Kalau masih ingin pakai halaman ini, arahkan ke forget atau tampilkan instruksi
         return redirect()->to(base_url('forget'));
     }
 
@@ -236,4 +342,19 @@ class Home extends BaseController
         session()->destroy();
         return redirect()->to('/login')->with('success', 'Anda berhasil logout.');
     }
+
+    // ==========================
+    // Utilitas Validasi Lokal
+    // ==========================
+    /**
+     * Password kuat: minimal ada huruf kecil, huruf besar, dan angka.
+     * (Silakan tambah regex/syarat lain bila perlu)
+     */
+    /*private function isStrongPassword(string $pwd): bool
+    {
+        $hasLower = preg_match('/[a-z]/', $pwd);
+        $hasUpper = preg_match('/[A-Z]/', $pwd);
+        $hasDigit = preg_match('/\d/',    $pwd);
+        return (bool) ($hasLower && $hasUpper && $hasDigit);
+    }*/
 }

@@ -2,6 +2,7 @@
 $errors = session()->getFlashdata('errors') ?? [];
 $msg    = session()->getFlashdata('msg');
 $error  = session()->getFlashdata('error');
+$success  = session()->getFlashdata('success')
 ?>
 <?php if ($msg): ?><div class="alert alert-success"><?= esc($msg) ?></div><?php endif; ?>
 <?php if ($error): ?><div class="alert alert-danger"><?= esc($error) ?></div><?php endif; ?>
@@ -12,3 +13,4 @@ $error  = session()->getFlashdata('error');
     </ul>
   </div>
 <?php endif; ?>
+<?php if ($success): ?><div class="alert alert-success"><?= esc($success) ?></div><?php endif; ?>

@@ -7,6 +7,9 @@
             <div class="col-lg-6">
                 <div class="auth-right">
                     <h2 class="form-title">Masuk</h2>
+
+                    <?= $this->include('partials/flash'); ?>
+
                     <!-- Action diarahkan ke dashboard -->
                     <form action="<?= base_url('/login'); ?>" method="post">
                         <?= csrf_field(); ?>

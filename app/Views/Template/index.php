@@ -186,6 +186,8 @@
     });
   </script>
   <?= $this->renderSection('scripts') ?>
+
+  <?= $this->include('partials/flash_popup'); ?>
 </body>
 
 </html>

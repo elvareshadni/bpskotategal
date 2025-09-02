@@ -19,11 +19,16 @@
             <div class="col-lg-6">
                 <div class="auth-right">
                     <h2 class="form-title">Daftar</h2>
+
+                    <?= $this->include('partials/flash'); ?>
+
                     <form action="<?= base_url('register') ?>" method="post">
-                        <input type="text" class="form-control" name="username" placeholder="Username" required>
-                        <input type="text" class="form-control" name="fullname" placeholder="Nama Lengkap" required>
-                        <input type="email" class="form-control" name="email" placeholder="E-mail" required>
+                        <?= csrf_field(); ?>
+                        <input type="text" class="form-control" name="username" placeholder="Username" value="<?= old('username'); ?>" required>
+                        <input type="text" class="form-control" name="fullname" placeholder="Nama Lengkap" value="<?= old('fullname'); ?>" required>
+                        <input type="email" class="form-control" name="email" placeholder="E-mail" value="<?= old('email'); ?>" required>
                         <input type="password" class="form-control" name="password" placeholder="Password" required>
+                        <input type="password" class="form-control" name="confirm_password" placeholder="Konfirmasi Password" required>
                         <button type="submit" class="btn btn-primary">Daftar</button>
                     </form>
 
