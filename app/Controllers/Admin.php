@@ -275,18 +275,12 @@ class Admin extends BaseController
     }
 
     // --- Infografis ---
-
-    public function infografis()
+    public function addInfografis()
     {
-        return view('admin/infografis');
+        return view('admin/tambah_infografis');
     }
 
-    public function infografisAdd()
-    {
-        return view('admin/infografis_add');
-    }
-
-    public function infografisSave()
+    public function saveInfografis()
     {
         $infografisModel = new InfografisModel();
 
@@ -304,17 +298,87 @@ class Admin extends BaseController
             'tanggal'   => date('Y-m-d')
         ]);
 
-        return redirect()->to(base_url('admin/infografis'))->with('success', 'Infografis berhasil ditambahkan!');
+        return redirect()->to(base_url('admin/edit-infografis/list'))->with('success', 'Infografis berhasil ditambahkan!');
     }
 
-    public function editInfografis()
-    {
-        return view('admin/edit_infografis');
-    }
-
+    // === LIST (untuk halaman edit daftar) ===
     public function listInfografis()
     {
-        return view('admin/edit_infografis_list');
+        $m = new InfografisModel();
+        $data['rows'] = $m->orderBy('id', 'DESC')->findAll();
+        return view('admin/edit_infografis_list', $data);
+    }
+
+    // === EDIT (form) ===
+    public function editInfografis($id)
+    {
+        $m = new InfografisModel();
+        $row = $m->find($id);
+        if (!$row) {
+            return redirect()->to(base_url('admin/edit-infografis/list'))
+                ->with('error', 'Data tidak ditemukan');
+        }
+        return view('admin/edit_infografis', ['row' => $row]);
+    }
+
+    // === UPDATE (submit edit) ===
+    public function updateInfografis($id)
+    {
+        $m = new InfografisModel();
+        $row = $m->find($id);
+        if (!$row) {
+            return redirect()->to(base_url('admin/edit-infografis/list'))
+                ->with('error', 'Data tidak ditemukan');
+        }
+
+        $judul     = trim((string)$this->request->getPost('judulInfografis'));
+        $deskripsi = trim((string)$this->request->getPost('deskripsiInfografis'));
+        $tanggal   = $this->request->getPost('tanggal') ?: $row['tanggal'];
+
+        // Upload gambar (opsional)
+        $file = $this->request->getFile('infografisImage');
+        $data = [
+            'judul'     => $judul,
+            'deskripsi' => $deskripsi,
+            'tanggal'   => $tanggal,
+        ];
+
+        if ($file && $file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
+            if ($file->getSize() > 2 * 1024 * 1024) {
+                return redirect()->back()->withInput()->with('error', 'Ukuran maks 2MB');
+            }
+            if (!in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/jpg'])) {
+                return redirect()->back()->withInput()->with('error', 'Format harus JPG/PNG');
+            }
+            $newName = $file->getRandomName();
+            $file->move(FCPATH . 'img', $newName);
+            $data['gambar'] = $newName;
+
+            // hapus file lama jika ada
+            if (!empty($row['gambar'])) {
+                @unlink(FCPATH . 'img/' . $row['gambar']);
+            }
+        }
+
+        if (!$m->update($id, $data)) {
+            return redirect()->back()->withInput()->with('error', 'Gagal mengubah data.');
+        }
+
+        return redirect()->to(base_url('admin/edit-infografis/list'))
+            ->with('success', 'Infografis berhasil diperbarui.');
+    }
+
+    // === DELETE ===
+    public function deleteInfografis($id)
+    {
+        $m = new InfografisModel();
+        $row = $m->find($id);
+        if ($row && !empty($row['gambar'])) {
+            @unlink(FCPATH . 'img/' . $row['gambar']);
+        }
+        $m->delete($id);
+        return redirect()->to(base_url('admin/edit-infografis/list'))
+            ->with('success', 'Infografis berhasil dihapus.');
     }
 
     // ==========================

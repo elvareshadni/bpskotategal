@@ -24,6 +24,9 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 
 <body id="page-top">
@@ -70,15 +73,15 @@
             <hr class="sidebar-divider d-none d-md-block">
 
             <!-- Nav Item - Edit carousel
-            <li class="nav-item <?= uri_string() === 'admin/edit-carousel' ? 'active' : '' ?>">
-                <a class="nav-link collapsed" href="<?= base_url('admin/edit-carousel'); ?>">
+            <li class="nav-item <?= uri_string() === 'admin/tambah-carousel' ? 'active' : '' ?>">
+                <a class="nav-link collapsed" href="<?= base_url('admin/tambah-carousel'); ?>">
                     <span>Edit carousel</span>
                 </a>
             </li> -->
 
             <!-- Nav Item - Edit Konten -->
-            <li class="nav-item <?= uri_string() === 'admin/edit-infografis' ? 'active' : '' ?>">
-                <a class="nav-link collapsed" href="<?= base_url('admin/edit-infografis'); ?>">
+            <li class="nav-item <?= uri_string() === 'admin/tambah-infografis' ? 'active' : '' ?>">
+                <a class="nav-link collapsed" href="<?= base_url('admin/tambah-infografis'); ?>">
                     <span>Edit Konten</span>
                 </a>
             </li>

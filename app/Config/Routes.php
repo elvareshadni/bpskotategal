@@ -23,10 +23,6 @@ $routes->get('api/indikator', 'Indicators::index'); // dipakai oleh fetch() di J
 // ADMIN
 $routes->group('admin', function ($routes) {
     $routes->get('/', 'Admin::index');
-    $routes->get('laporan-kunjungan', 'Admin::laporanKunjungan');
-    $routes->get('data-indikator', 'Admin::dataIndikator');
-    $routes->get('edit-carousel', 'Admin::editcarousel');
-    $routes->get('edit-infografis', 'Admin::editInfografis');
 
     // Kelola Data
     $routes->get('data-indikator', 'Admin::dataIndikator');
@@ -36,17 +32,17 @@ $routes->group('admin', function ($routes) {
     $routes->get('carousel', 'Admin::carousel');
     $routes->get('carousel/add', 'Admin::carouselAdd');
     $routes->post('carousel/save', 'Admin::carouselSave');
+    $routes->get('tambah-carousel', 'Admin::addcarousel');
+    $routes->get('edit-carousel/list', 'Admin::listcarousel');
 
     // Infografis
-    $routes->get('infografis', 'Admin::infografis');
-    $routes->get('infografis/add', 'Admin::infografisAdd');
-    $routes->post('infografis/save', 'Admin::infografisSave');
+    $routes->get('tambah-infografis', 'Admin::addInfografis');       // form tambah
+    $routes->post('infografis/save',  'Admin::saveInfografis');      // simpan tambah
 
-    // Edit carousel & Infografis
-    $routes->get('edit-carousel', 'Admin::editcarousel');
-    $routes->get('edit-carousel/list', 'Admin::listcarousel');
-    $routes->get('edit-infografis', 'Admin::editInfografis');
-    $routes->get('edit-infografis/list', 'Admin::listInfografis');
+    $routes->get('edit-infografis/list',     'Admin::listInfografis');      // list dari DB
+    $routes->get('edit-infografis/(:num)',   'Admin::editInfografis/$1');   // form edit
+    $routes->post('edit-infografis/update/(:num)', 'Admin::updateInfografis/$1'); // simpan edit
+    $routes->get('edit-infografis/delete/(:num)',  'Admin::deleteInfografis/$1'); // hapus
 
     $routes->get('/create', 'Admin::create');
     $routes->post('/save', 'Admin::save');
@@ -68,7 +64,7 @@ $routes->get('forget', 'Home::forget');          // form lupa
 $routes->post('forget', 'Home::sendReset');      // kirim email
 
 $routes->get('reset-password', 'Home::reset');   // GET: email+token
-$routes->post('reset-password', 'Home::doReset');// POST: simpan password
+$routes->post('reset-password', 'Home::doReset'); // POST: simpan password
 
 $routes->get('/logout', 'Home::logout', ['as' => 'logout']);
 
@@ -86,4 +82,3 @@ $routes->post('user/profile/password', 'User::updatePassword', ['as' => 'user.pa
 $routes->get('admin/profile', 'Admin::profile', ['as' => 'admin.profile']);
 $routes->post('admin/profile/update', 'Admin::updateProfile', ['as' => 'admin.profile.update']);
 $routes->post('admin/profile/password', 'Admin::updatePassword', ['as' => 'admin.password.update']);
-
