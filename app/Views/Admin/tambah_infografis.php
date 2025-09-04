@@ -1,4 +1,4 @@
-<?= $this->extend('admin/templates/index'); ?>
+<?= $this->extend('Admin/templates/index'); ?>
 <?= $this->section('content'); ?>
 
 <h1 class="h3 text-gray-800 mb-2">Infografis</h1>

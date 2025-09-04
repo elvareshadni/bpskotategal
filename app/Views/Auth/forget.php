@@ -1,4 +1,4 @@
-<?= $this->extend('auth/templates/index'); ?>
+<?= $this->extend('Auth/Templates/index'); ?>
 <?= $this->section('content'); ?>
 
 <div class="container d-flex justify-content-center align-items-center min-vh-100">

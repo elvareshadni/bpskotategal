@@ -14,7 +14,7 @@ class Home extends BaseController
     // Halaman Utama
     public function index(): string
     {
-        return view('user/dashboard');
+        return view('User/dashboard');
     }
 
     // ==========================
@@ -24,7 +24,7 @@ class Home extends BaseController
     // Form Login
     public function login()
     {
-        return view('auth/login');
+        return view('Auth/login');
     }
 
     // Proses Login (validasi manual)
@@ -119,7 +119,7 @@ class Home extends BaseController
     // Form Register
     public function register()
     {
-        return view('auth/register');
+        return view('Auth/register');
     }
 
     // Proses Register (validasi manual lengkap)
@@ -207,7 +207,7 @@ class Home extends BaseController
     // Lupa Password
     public function forget()
     {
-        return view('auth/forget');
+        return view('Auth/forget');
     }
 
     // POST: Kirim email reset password (token 30 menit) — validasi manual
@@ -285,7 +285,7 @@ class Home extends BaseController
             return redirect()->to(base_url('login'))->with('errors', ['global' => 'Tautan reset tidak valid.']);
         }
 
-        return view('auth/reset_password', [
+        return view('Auth/reset_password', [
             'title' => 'Reset Password',
             'email' => $email,
             'token' => $token,

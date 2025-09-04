@@ -19,12 +19,12 @@ class User extends BaseController
             'infografis' => $infografisModel->orderBy('tanggal', 'DESC')->findAll(6),
             'carousel'   => $carouselModel->findAll()
         ];
-        return view('user/dashboard', $data);
+        return view('User/dashboard', $data);
     }
 
     public function beranda()
     {
-        return view('user/home', ['title' => 'Beranda']);
+        return view('User/home', ['title' => 'Beranda']);
     }
 
     public function list()
@@ -34,7 +34,7 @@ class User extends BaseController
             'title'      => 'Daftar Infografis',
             'infografis' => $model->orderBy('tanggal', 'DESC')->findAll()
         ];
-        return view('user/list', $data);
+        return view('User/list', $data);
     }
 
     public function detail($id)
@@ -46,7 +46,7 @@ class User extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Data dengan ID $id tidak ditemukan");
         }
 
-        return view('user/detail', [
+        return view('User/detail', [
             'title' => $item['judul'],
             'item'  => $item
         ]);
@@ -67,7 +67,7 @@ class User extends BaseController
             return redirect()->to('/login')->with('errors', ['User tidak ditemukan'])->with('error', 'User tidak ditemukan');
         }
 
-        return view('user/profile', [
+        return view('User/profile', [
             'title'      => 'My Profile',
             'user'       => $user,
         ]);
