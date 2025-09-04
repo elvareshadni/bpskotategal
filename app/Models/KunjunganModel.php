@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class KunjunganModel extends Model
 {
-    protected $table      = 'kunjungan';   // nama tabel di database
+    protected $table      = 'laporan_kunjungan';   // nama tabel di database
     protected $primaryKey = 'id';          // kolom primary key
-    protected $allowedFields = ['username', 'tanggal', 'durasi'];
+    protected $allowedFields = ['user_id', 'username', 'login_time', 'logout_time', 'durasi_waktu', ];
 }

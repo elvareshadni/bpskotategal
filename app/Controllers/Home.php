@@ -6,6 +6,8 @@ use App\Models\PasswordResetModel;
 use CodeIgniter\HTTP\RedirectResponse;
 use Config\Services;
 use App\Models\UserModel;
+use App\Models\KunjunganModel;
+
 
 class Home extends BaseController
 {
@@ -78,6 +80,34 @@ class Home extends BaseController
             'fullname'  => $user['fullname'],
             'logged_in' => true,
         ]);
+
+        // === Catat kunjungan (login) ===
+        try {
+            $role = $user['role'] ?? 'user'; 
+            if ($role === 'user') {         //Validasi hanya User yang ditangkap
+                $kunjungan = new KunjunganModel();
+                $now = date('Y-m-d H:i:s');
+
+                $kunjungan->insert([
+                    'user_id'      => session()->get('user_id'),
+                    'username'     => session()->get('username'),
+                    'login_time'   => $now,
+                    'logout_time'  => null,
+                    'durasi_waktu' => null,
+                ]);
+
+                // simpan id baris kunjungan ke session → dipakai saat logout
+                session()->set('visit_row_id', $kunjungan->getInsertID());
+                
+                // opsional: untuk idle timeout via filter nantinya
+                session()->set('last_activity', time());
+            } else {
+                // pastikan admin tidak punya visit_row_id agar tidak ter-update saat logout
+                session()->remove('visit_row_id');
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Gagal mencatat kunjungan login: {0}', [$e->getMessage()]);
+        }
 
         // Arahkan sesuai role
         if (($user['role'] ?? 'user') === 'admin') {
@@ -341,6 +371,32 @@ class Home extends BaseController
 
     public function logout()
     {
+        try {
+            $visitId = session()->get('visit_row_id');
+            if ($visitId) {
+                $kunjungan = new KunjunganModel();
+                $row = $kunjungan->find($visitId);
+
+                // hanya update jika barisnya ada & belum terisi logout_time
+                if ($row && empty($row['logout_time'])) {
+                    $logout = date('Y-m-d H:i:s');
+
+                    // hitung durasi HH:MM:SS
+                    $dtIn  = new \DateTime($row['login_time']);
+                    $dtOut = new \DateTime($logout);
+                    $durasi = $dtIn->diff($dtOut)->format('%H:%I:%S');
+
+                    $kunjungan->update($visitId, [
+                        'logout_time'  => $logout,
+                        'durasi_waktu' => $durasi,
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Gagal mengunci kunjungan saat logout: {0}', [$e->getMessage()]);
+            // kita lanjutkan logout meski gagal mencatat durasi
+        }
+
         session()->destroy();
         return redirect()->to('/login')->with('success', 'Anda berhasil logout.');
     }

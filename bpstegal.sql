@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Sep 02, 2025 at 11:34 PM
+-- Generation Time: Sep 04, 2025 at 02:45 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.4.1
 
@@ -29,9 +29,9 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `carousel` (
   `id` int NOT NULL,
-  `judul` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `gambar` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `posisi` enum('start','center','end') COLLATE utf8mb4_general_ci DEFAULT 'center',
+  `judul` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `gambar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `posisi` enum('start','center','end') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'center',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -43,9 +43,9 @@ CREATE TABLE `carousel` (
 
 CREATE TABLE `infografis` (
   `id` int NOT NULL,
-  `judul` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `deskripsi` text COLLATE utf8mb4_general_ci,
-  `gambar` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `judul` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `deskripsi` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `gambar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `tanggal` date NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -55,8 +55,39 @@ CREATE TABLE `infografis` (
 --
 
 INSERT INTO `infografis` (`id`, `judul`, `deskripsi`, `gambar`, `tanggal`, `created_at`) VALUES
-(1, 'Sensus Penduduk 2020', 'Jumlah Penduduk Jawa Barat Hasil SP 2020', '1756432767_b0a25241c5e9c02724ff.jpg', '2025-08-29', '2025-08-29 01:59:27'),
-(2, 'Sensus Penduduk 2020', 'Jumlah Penduduk Jawa Barat Hasil SP 2020', '1756433187_2f031ca640e36ad98c53.jpg', '2025-08-29', '2025-08-29 02:06:27');
+(1, 'Sensus Penduduk 2020', 'Jumlah Penduduk Jawa Barat Hasil SP 2020', '1756948685_53c178b7ce77ca7d000e.png', '2025-08-29', '2025-08-29 01:59:27'),
+(2, 'Sensus Penduduk 2020', 'Jumlah Penduduk Jawa Barat Hasil SP 2020', '1756948676_2a2809584b6bddb417e7.png', '2025-08-29', '2025-08-29 02:06:27');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `laporan_kunjungan`
+--
+
+CREATE TABLE `laporan_kunjungan` (
+  `id` int NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `username` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `login_time` datetime NOT NULL,
+  `logout_time` datetime DEFAULT NULL,
+  `durasi_waktu` time DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `migrations`
+--
+
+CREATE TABLE `migrations` (
+  `id` bigint UNSIGNED NOT NULL,
+  `version` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `class` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `group` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `namespace` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `time` int NOT NULL,
+  `batch` int UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -66,22 +97,12 @@ INSERT INTO `infografis` (`id`, `judul`, `deskripsi`, `gambar`, `tanggal`, `crea
 
 CREATE TABLE `password_resets` (
   `id` int NOT NULL,
-  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `token_hash` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `token_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `expires_at` datetime NOT NULL,
   `used_at` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `password_resets`
---
-
-INSERT INTO `password_resets` (`id`, `email`, `token_hash`, `expires_at`, `used_at`, `created_at`) VALUES
-(13, 'jordandwifebri@gmail.com', '$2y$12$PRm3aVLZjVG59NRY.16dUuYscTrr/QXd39lzBT.ZuRizyJzz8UVFO', '2025-09-02 19:33:02', '2025-09-02 19:04:23', '2025-09-02 19:03:02'),
-(14, 'jordandwifebri@gmail.com', '$2y$12$NiHHApJ8wDNTerpEBl4IoeLsc8y3TmhQmqNAoaiMCnjwlo0vMXxFG', '2025-09-02 19:36:08', '2025-09-02 19:06:26', '2025-09-02 19:06:08'),
-(15, 'jordandwifebri@gmail.com', '$2y$12$mrmR7dgVXOHMUJ.N0nFS2ONaXMkCHwYKDyQrnYO4O3XzoM6sqf7Ly', '2025-09-02 19:37:36', '2025-09-02 19:15:48', '2025-09-02 19:07:36'),
-(16, 'jordandwifebri@gmail.com', '$2y$12$EAQVecrmUOkNPxPigq9RnecYeJb8ZUCFsD59SsdFgRtM89tWUf0sy', '2025-09-02 19:45:48', NULL, '2025-09-02 19:15:48');
 
 -- --------------------------------------------------------
 
@@ -91,13 +112,13 @@ INSERT INTO `password_resets` (`id`, `email`, `token_hash`, `expires_at`, `used_
 
 CREATE TABLE `users` (
   `id` int NOT NULL,
-  `username` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `fullname` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `phone` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `photo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `role` enum('admin','user') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'user',
+  `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `fullname` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `photo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `role` enum('admin','user') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'user',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -106,9 +127,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `fullname`, `email`, `phone`, `photo`, `password`, `role`, `created_at`) VALUES
-(1, 'elvares', 'elva', 'elvareshadni@gmail.com', NULL, NULL, '$2y$12$MpQURkUvsl7Rirmdm7L8AuUsc2WM9Yo82VyKcT72JLxxNLC38SJAm', 'user', '2025-08-24 19:14:18'),
-(2, 'jordan', 'jada', 'jojo@gmail.com', '125125125', NULL, '$2y$12$Y/WvmwC5Wm56PFpUl1drnuZ2xgQmNfyCvJbJnVZkcT5SevpWO1HDm', 'admin', '2025-08-31 16:15:59'),
-(6, 'coolman23', 'Coolman023', 'coolman023.pro@gmail.com', '12152125', NULL, '$2y$12$9RaRLWLYNRtwvf5SqUCkru/WWFNsxFCVdfuzcuPvGSrBJM4aHElFu', 'user', '2025-09-02 18:51:43');
+(1, 'admin', 'Admin', 'admin@gmail.com', NULL, NULL, '$2y$12$65Jq96G1u48gFA.ddGy6P.dFtNzTEDi/aRkPCcvyqmR.QQO/f1IhS', 'admin', '2025-09-04 02:34:07'),
+(2, 'elvares', 'elva', 'elvareshadni@gmail.com', NULL, NULL, '$2y$12$PrRWJB3ffzfHC/H5cxAil..nCdLl89e82q2KRL.c/JYamI9ziXpPO', 'user', '2025-09-04 02:43:22');
 
 --
 -- Indexes for dumped tables
@@ -124,6 +144,18 @@ ALTER TABLE `carousel`
 -- Indexes for table `infografis`
 --
 ALTER TABLE `infografis`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `laporan_kunjungan`
+--
+ALTER TABLE `laporan_kunjungan`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `migrations`
+--
+ALTER TABLE `migrations`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -158,6 +190,18 @@ ALTER TABLE `infografis`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `laporan_kunjungan`
+--
+ALTER TABLE `laporan_kunjungan`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `migrations`
+--
+ALTER TABLE `migrations`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `password_resets`
 --
 ALTER TABLE `password_resets`
@@ -167,7 +211,7 @@ ALTER TABLE `password_resets`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

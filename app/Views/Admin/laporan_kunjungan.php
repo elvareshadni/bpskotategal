@@ -13,6 +13,8 @@
                         <th>ID</th>
                         <th>Username</th>
                         <th>Tanggal</th>
+                        <th>Login Time</th>
+                        <th>Logout Time</th>
                         <th>Durasi Waktu</th>
                     </tr>
                 </thead>
@@ -21,10 +23,12 @@
                     <?php foreach ($kunjungan as $row): ?>
                         <tr>
                             <td><?= $no++; ?></td>
-                            <td><?= $row['id']; ?></td>
+                            <td><?= $row['user_id']; ?></td>
                             <td><?= $row['username']; ?></td>
-                            <td><?= $row['tanggal']; ?></td>
-                            <td><?= $row['durasi']; ?></td>
+                            <td><?= date('Y-m-d', strtotime($row['login_time'])); ?></td>
+                            <td><?= $row['login_time']; ?></td>
+                            <td><?= $row['logout_time']; ?></td>
+                            <td><?= $row['durasi_waktu']; ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
