@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Sep 04, 2025 at 02:45 AM
+-- Generation Time: Sep 04, 2025 at 02:53 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.4.1
 
@@ -55,8 +55,8 @@ CREATE TABLE `infografis` (
 --
 
 INSERT INTO `infografis` (`id`, `judul`, `deskripsi`, `gambar`, `tanggal`, `created_at`) VALUES
-(1, 'Sensus Penduduk 2020', 'Jumlah Penduduk Jawa Barat Hasil SP 2020', '1756948685_53c178b7ce77ca7d000e.png', '2025-08-29', '2025-08-29 01:59:27'),
-(2, 'Sensus Penduduk 2020', 'Jumlah Penduduk Jawa Barat Hasil SP 2020', '1756948676_2a2809584b6bddb417e7.png', '2025-08-29', '2025-08-29 02:06:27');
+(1, 'IPM 2020', 'Indeks Pembangunan Manusia 2020', 'cover.jpg', '2025-08-29', '2025-08-29 01:59:27'),
+(2, 'Sensus Penduduk 2020', 'Jumlah Penduduk Jawa Barat Hasil SP 2020', 'cover2.jpg', '2025-08-29', '2025-08-29 02:49:27');
 
 -- --------------------------------------------------------
 
