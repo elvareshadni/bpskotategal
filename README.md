@@ -1,45 +1,125 @@
-# CodeIgniter 4 Application Starter
+# 📊 Dashboard Data Indikator Strategis  
+**Badan Pusat Statistik Kota Tegal**
 
-## What is CodeIgniter?
+Website aplikasi untuk menampilkan **Data Indikator Strategis Kota Tegal** dalam bentuk dashboard interaktif.  
+Dibangun dengan **CodeIgniter 4**, **Bootstrap 5**, dan **Chart.js**.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+---
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+## ✨ Fitur Utama
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+### 🔑 Autentikasi
+- **Login / Register Akun**
+- **Lupa Password** (reset via email)
+- **Manajemen Profil Akun**: ubah email, username, fullname, no. HP, foto profil, dan password
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+### 👤 User
+- Dashboard menampilkan **visualisasi data indikator strategis** Kota Tegal (diagram interaktif dengan Chart.js)
+- Menampilkan **infografis** yang tersimpan di database
 
-## Installation & updates
+### 🛠️ Admin
+- **Laporan kunjungan user** (login/logout + durasi waktu aktif)
+- **Kelola Data Indikator** melalui spreadsheet link yang disediakan
+- **Kelola Infografis** untuk ditampilkan ke dashboard
+- **Kelola carousel banner**
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+---
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+## 🏗️ Arsitektur Sistem
 
-## Setup
+- **Framework**: [CodeIgniter 4](https://codeigniter.com/)  
+- **UI Framework**: Bootstrap 5  
+- **Chart**: Chart.js  
+- **Database**: MySQL 8+  
+- **Environment**: XAMPP / Laragon / Apache + MySQL  
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+Struktur database utama:
+- `users` → data akun (role: admin/user)
+- `laporan_kunjungan` → log kunjungan user
+- `infografis` → data infografis
+- `carousel` → data carousel/banner
+- `password_resets` → token reset password:contentReference[oaicite:0]{index=0}
 
-After deployment API with AppsScript copy this to Code.gs or Kode.gs or create it first then copy this:
+---
 
+## ⚙️ Setup Program (Localhost)
+
+### 1. Clone repository
+```bash
+git clone https://github.com/username/repo-bpstegal.git
+cd repo-bpstegal
+composer install
+```
+
+### 2. Konfigurasi .env
+
+- Salin file `env` → ubah nama jadi `.env`
+- Sesuaikan konfigurasi database, CSV_URL, dan email system.
+
+Contoh isi `.env`:
+
+```dotenv
+app.baseURL = 'http://localhost:8080/'
+
+database.default.hostname = localhost
+database.default.database = bpstegal
+database.default.username = root
+database.default.password = ''
+database.default.DBDriver = MySQLi
+
+CSV_URL = 'https://script.google.com/macros/s/AKfycbwxxxxxxx/exec'
+
+SMTP_HOST = smtp.gmail.com
+SMTP_USER = your_email@gmail.com
+SMTP_PASS = your_app_password
+SMTP_PORT = 587
+SMTP_CRYPTO = tls
+```
+
+---
+
+## 🗄️ Setup Database
+
+### 1. Buat database MySQL:
+```SQL
+CREATE DATABASE bpstegal;
+```
+(atau gunakan nama lain, sesuaikan di `.env`)
+
+### 2. Jalankan migrasi jika data di database masih kosong:
+```bash
+php spark migrate -n App
+```
+### 3. Jalankan seeder (opsional untuk data dummy):
+php spark db:seed DatabaseSeeder
+
+### Opsional:
+Import struktur tabel dari file `bpstegal.sql` (tersedia di repo) jika migrasi dan/atau seeder bermasalah
+
+## 📑 Integrasi Google Spreadsheet
+Aplikasi mengambil data indikator strategis dari **Google Spreadsheet**.
+
+1. Upload Excel indikator strategis ke **Google Spreadsheet**
+
+2. Atur agar **siapa saja dengan link bisa edit**
+
+3. Buka menu **Extensions → Apps Script**
+
+4. Ganti isi `Code.gs` atau `Kode.gs` dengan script berikut:
+
+
+```javascript
 // === KONFIGURASI ===
-const SPREADSHEET_ID = '1ohHcbmQnyH5S2SwY1B9SGa_oC64FzloE3L4F8Vk2Ito';     // ganti ID yang ada di link spreadsheet
-const DEFAULT_SHEET  = 'LUAS_KEPENDUDUKAN';          // biarkan
+const SPREADSHEET_ID = '1ohHcbmQnyH5S2SwY1B9SGa_oC64FzloE3L4F8Vk2Ito'; // ganti
+const DEFAULT_SHEET  = 'LUAS_KEPENDUDUKAN';
 
 function doGet(e) {
   const sheetName = e?.parameter?.sheet || DEFAULT_SHEET;
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sh = ss.getSheetByName(sheetName);
   if (!sh) {
-    return ContentService.createTextOutput(`Sheet "${sheetName}" not found`).setMimeType(ContentService.MimeType.TEXT);
+    return ContentService.createTextOutput(`Sheet "${sheetName}" not found`)
+      .setMimeType(ContentService.MimeType.TEXT);
   }
   const values = sh.getDataRange().getValues();
   const csv = values.map(r => r.map(v => {
@@ -52,43 +132,78 @@ function doGet(e) {
   return ContentService.createTextOutput(csv).setMimeType(ContentService.MimeType.CSV);
 }
 
-After that, change the URL Deployment in CSV_URL at .env
+```
 
-## Important Change with index.php
+5. Deploy sebagai Web App:
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+- Description: `API CSV Dashboard`
+- Execute as: *Me*
+- Access: *Anyone*
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+6. Copy URL → paste ke `.env` pada `CSV_URL`
 
-**Please** read the user guide for a better explanation of how CI4 works!
+## 📬 Setup Email Reset Password
+1. Gunakan akun Gmail nyata yang anda miliki
+2. Aktifkan **App Passwords** (di akun dengan 2FA)
+3. Masukkan `SMTP_USER` dan `SMTP_PASS` ke `.env`
 
-## Repository Management
+## 🚀 Jalankan Server Lokal
+```bash
+php spark serve
+```
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+Buka di browser: ***http://localhost:8080***
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+---
 
-## Server Requirements
+### 🛠️ Perintah Tambahan Untuk Developer
+- #### Buat migration baru:
 
-PHP version 8.1 or higher is required, with the following extensions installed:
+```bash
+php spark make:migration NamaMigration
+```
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+- #### Buat seeder baru:
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - If you are still using PHP 7.4 or 8.0, you should upgrade immediately.
-> - The end of life date for PHP 8.1 will be December 31, 2025.
+```bash
+php spark make:seeder NamaSeeder
+```
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+---
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+### 📊 Laporan Kunjungan
+Setiap **user** (role = `user`) yang login & logout akan dicatat ke tabel `laporan_kunjungan`.
+Fitur **auto-logout** setelah 30 menit idle memastikan data `logout_time` dan `durasi_waktu` tidak pernah kosong.
+Admin dapat melihat laporan kunjungan di dashboard.
+
+---
+
+### 📌 Catatan Penting
+- Default database name: `bpstegal` (ubah sesuai kebutuhan di `.env`)
+
+- File `.env` WAJIB di-setup (database, CSV_URL, email)
+
+- Data indikator strategis **harus berasal dari Google Spreadsheet** dengan Apps Script di atas
+
+- Website masih dalam tahap **pengembangan & evaluasi** untuk peningkatan performa dan pengalaman pengguna
+
+---
+
+### 🖼️ Tampilan (Screenshots)
+- Dashboard User dengan Chart.js
+
+- Halaman Infografis
+
+- Dashboard Admin (Laporan Kunjungan)
+
+- Form Login & Register
+
+***(tambahkan screenshot sesuai kebutuhan di folder /public/screenshots)***
+
+---
+
+## 📄 Lisensi
+© 2025 Badan Pusat Statistik Kota Tegal
+
+Aplikasi ini dikembangkan untuk mendukung transparansi data indikator strategis.
+Gunakan sesuai kebutuhan internal & edukasi.
