@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filters;
 
 use CodeIgniter\HTTP\RequestInterface;
@@ -19,6 +20,7 @@ class TrackVisit implements FilterInterface
 
             // jika idle terlalu lama dan ada visit_row_id yang belum terkunci, kunci sekarang
             if ($last && ($now - $last) > $this->idleTimeout) {
+                // Tutup baris kunjungan yang masih terbuka
                 $visitId = session()->get('visit_row_id');
                 if ($visitId) {
                     $kunjungan = new \App\Models\KunjunganModel();
@@ -34,8 +36,10 @@ class TrackVisit implements FilterInterface
                             'durasi_waktu' => $durasi,
                         ]);
                     }
-                    // kita biarkan session tetap ada; hanya menutup visit lama
-                    session()->remove('visit_row_id');
+                    // Hancurkan sesi agar dianggap “auto-logout”
+                    session()->destroy();
+                    // Biarkan request lanjut; controller akan melihat tidak ada session -> tampil login
+                    return;
                 }
             }
 

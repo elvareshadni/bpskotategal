@@ -24,6 +24,10 @@ class Home extends BaseController
     // Form Login
     public function login()
     {
+        // jika masih login dan belum idle-logout, arahkan ke dashboard
+        if (session()->get('logged_in')) {
+            return redirect()->to((session()->get('role') === 'admin') ? '/admin' : '/user');
+        }
         return view('Auth/login');
     }
 
@@ -81,9 +85,31 @@ class Home extends BaseController
             'logged_in' => true,
         ]);
 
+        // --- Kunci kunjungan lama bila masih terbuka (logout_time NULL) ---
+        try {
+            $role = $user['role'] ?? 'user';
+            if ($role === 'user') {
+                $km = new KunjunganModel();
+                $open = $km->where('user_id', $user['id'])
+                    ->where('logout_time', null)
+                    ->orderBy('id', 'DESC')->first();
+                if ($open) {
+                    $logout = date('Y-m-d H:i:s');
+                    $durasi = (new \DateTime($open['login_time']))
+                        ->diff(new \DateTime($logout))->format('%H:%I:%S');
+                    $km->update($open['id'], [
+                        'logout_time'  => $logout,
+                        'durasi_waktu' => $durasi,
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Auto-close kunjungan lama gagal: {0}', [$e->getMessage()]);
+        }
+
         // === Catat kunjungan (login) ===
         try {
-            $role = $user['role'] ?? 'user'; 
+            $role = $user['role'] ?? 'user';
             if ($role === 'user') {         //Validasi hanya User yang ditangkap
                 $kunjungan = new KunjunganModel();
                 $now = date('Y-m-d H:i:s');
@@ -98,7 +124,7 @@ class Home extends BaseController
 
                 // simpan id baris kunjungan ke session → dipakai saat logout
                 session()->set('visit_row_id', $kunjungan->getInsertID());
-                
+
                 // opsional: untuk idle timeout via filter nantinya
                 session()->set('last_activity', time());
             } else {
@@ -397,6 +423,7 @@ class Home extends BaseController
             // kita lanjutkan logout meski gagal mencatat durasi
         }
 
+        session()->remove('visit_row_id');
         session()->destroy();
         return redirect()->to('/login')->with('success', 'Anda berhasil logout.');
     }
