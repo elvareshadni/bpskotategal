@@ -315,7 +315,7 @@ class Admin extends BaseController
         $m = new InfografisModel();
         $row = $m->find($id);
         if (!$row) {
-            return redirect()->to(base_url('Admin/edit-infografis/list'))
+            return redirect()->to(base_url('admin/edit-infografis/list'))
                 ->with('error', 'Data tidak ditemukan');
         }
         return view('Admin/edit_infografis', ['row' => $row]);
@@ -327,7 +327,7 @@ class Admin extends BaseController
         $m = new InfografisModel();
         $row = $m->find($id);
         if (!$row) {
-            return redirect()->to(base_url('Admin/edit-infografis/list'))
+            return redirect()->to(base_url('admin/edit-infografis/list'))
                 ->with('error', 'Data tidak ditemukan');
         }
 
@@ -364,7 +364,7 @@ class Admin extends BaseController
             return redirect()->back()->withInput()->with('error', 'Gagal mengubah data.');
         }
 
-        return redirect()->to(base_url('Admin/edit-infografis/list'))
+        return redirect()->to(base_url('admin/edit-infografis/list'))
             ->with('success', 'Infografis berhasil diperbarui.');
     }
 
@@ -377,7 +377,7 @@ class Admin extends BaseController
             @unlink(FCPATH . 'img/' . $row['gambar']);
         }
         $m->delete($id);
-        return redirect()->to(base_url('Admin/edit-infografis/list'))
+        return redirect()->to(base_url('admin/edit-infografis/list'))
             ->with('success', 'Infografis berhasil dihapus.');
     }
 
