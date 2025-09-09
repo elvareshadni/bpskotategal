@@ -46,8 +46,8 @@ Struktur database utama:
 
 ### 1. Clone repository
 ```bash
-git clone https://github.com/username/repo-bpstegal.git
-cd repo-bpstegal
+git clone https://github.com/elvareshadni/bpskotategal.git
+cd bpskotategal
 composer install
 ```
 
