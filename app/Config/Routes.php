@@ -17,15 +17,14 @@ $routes->group('user', function ($routes) {
     $routes->get('detail/(:num)', 'User::detail/$1');
 });
 
-// API (proxy CSV -> JSON)
-$routes->get('api/indikator', 'Indicators::index'); // dipakai oleh fetch() di JS
+// API untuk data indikator (JSON)
+$routes->get('api/indikator', 'Indicators::index');
 
 // ADMIN
 $routes->group('admin', function ($routes) {
     $routes->get('/', 'Admin::index');
 
-    // Kelola Data
-    $routes->get('data-indikator', 'Admin::dataIndikator');
+    // Kelola Kunjungan
     $routes->get('laporan-kunjungan', 'Admin::laporanKunjungan');
 
     // Carousel
@@ -34,6 +33,37 @@ $routes->group('admin', function ($routes) {
     $routes->post('carousel/save', 'Admin::carouselSave');
     $routes->get('tambah-carousel', 'Admin::addcarousel');
     $routes->get('edit-carousel/list', 'Admin::listcarousel');
+
+    //Kelola Data Indikator
+    $routes->get('data-indikator', 'Admin::dataIndikator');
+    // === REGION ===
+    $routes->get('regions', 'Admin::regions');                 // halaman
+    $routes->post('regions/create', 'Admin::regionCreate');
+    $routes->post('regions/update/(:num)', 'Admin::regionUpdate/$1');
+    $routes->post('regions/delete/(:num)', 'Admin::regionDelete/$1');
+
+    // === INDIKATOR ===
+    $routes->get('indicators', 'Admin::indicators');           // halaman daftar indikator (pilih region)
+    $routes->get('indicators/list', 'Admin::indicatorsList');  // ?region_id=ID (json)
+    $routes->get('indicator/form', 'Admin::indicatorForm');    // create/edit ?id= (opsi)
+    $routes->post('indicator/save', 'Admin::indicatorSave');   // create/update
+    $routes->post('indicator/delete/(:num)', 'Admin::indicatorDelete/$1');
+
+    // === SUBINDIKATOR ===
+    $routes->get('subindicator/form', 'Admin::subindikatorForm');      // ?id= (edit) atau ?indicator_id=
+    $routes->post('subindicator/save', 'Admin::subindikatorSave');     // create/update basic fields
+    $routes->post('subindicator/delete/(:num)', 'Admin::subindikatorDelete/$1');
+
+    // === VARIABEL (untuk data proporsi) ===
+    $routes->post('subindicator/var/create', 'Admin::varCreate');      // {row_id, name}
+    $routes->post('subindicator/var/delete/(:num)', 'Admin::varDelete/$1');
+
+    // === AJAX untuk landing grid kamu ===
+    $routes->get('data-indikator/ajax/indicators/(:num)', 'Admin::ajaxIndicatorsByRegion/$1');
+    $routes->get('data-indikator/ajax/rows/(:num)/(:num)', 'Admin::ajaxRowsByRegionIndicator/$1/$2');
+    $routes->get('data-indikator/grid/fetch', 'Admin::gridFetch');   // GET: region_id,row_id,year_from,year_to
+    $routes->post('data-indikator/grid/save', 'Admin::gridSave');    // POST: entries batch
+
 
     // Infografis
     $routes->get('tambah-infografis', 'Admin::addInfografis');       // form tambah

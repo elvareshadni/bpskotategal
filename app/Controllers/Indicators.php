@@ -1,66 +1,103 @@
 <?php
-
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use App\Libraries\CsvFetcher;
+use App\Models\IndicatorModel;
+use App\Models\IndicatorRowModel;
+use App\Models\IndicatorValueModel;
+use App\Models\RegionModel;
 
 class Indicators extends BaseController
 {
     public function index()
     {
         $key = strtoupper($this->request->getGet('key') ?? '');
-        if (!$key) return $this->fail('Missing ?key', 400);
+        if ($key === '') {
+            return $this->respondOk([], [], 'Missing ?key'); // tetap ok=true agar frontend tidak error
+        }
 
-        // Samakan dengan peta di Dashboard::index (atau pindahkan ke Config jika mau)
-        /*$map = [
-            'LUAS_KEPENDUDUKAN' => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJyBrk8tL1KUffFoTdcpM_xEd5GpiBQSYA1chCqd631ABxGTSahHBtXHkNzTLKCKa67a8eqJ0IEWwp/pub?gid=1557804739&single=true&output=csv',
-            'ANGKA_KEMISKINAN'  => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJyBrk8tL1KUffFoTdcpM_xEd5GpiBQSYA1chCqd631ABxGTSahHBtXHkNzTLKCKa67a8eqJ0IEWwp/pub?gid=901949954&single=true&output=csv',
-            'INFLASI_UMUM'      => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJyBrk8tL1KUffFoTdcpM_xEd5GpiBQSYA1chCqd631ABxGTSahHBtXHkNzTLKCKa67a8eqJ0IEWwp/pub?gid=882681484&single=true&output=csv',
-            'IPM'               => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJyBrk8tL1KUffFoTdcpM_xEd5GpiBQSYA1chCqd631ABxGTSahHBtXHkNzTLKCKa67a8eqJ0IEWwp/pub?gid=896003102&single=true&output=csv',
-            'PDRB'              => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJyBrk8tL1KUffFoTdcpM_xEd5GpiBQSYA1chCqd631ABxGTSahHBtXHkNzTLKCKa67a8eqJ0IEWwp/pub?gid=1018033332&single=true&output=csv',
-            'KETENAGAKERJAAN'   => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJyBrk8tL1KUffFoTdcpM_xEd5GpiBQSYA1chCqd631ABxGTSahHBtXHkNzTLKCKa67a8eqJ0IEWwp/pub?gid=1275628956&single=true&output=csv',
-            'KESEJAHTERAAN'     => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTJyBrk8tL1KUffFoTdcpM_xEd5GpiBQSYA1chCqd631ABxGTSahHBtXHkNzTLKCKa67a8eqJ0IEWwp/pub?gid=2060752569&single=true&output=csv',
-        ];*/
+        $indicator = (new IndicatorModel())->where('code', $key)->first();
+        if (!$indicator) {
+            return $this->respondOk([], [], 'Unknown key');
+        }
 
-        $exec = getenv('CSV_URL'); // dari .env
-        log_message('debug', 'CSV EXEC URL = ' . ($exec ?: '(kosong)'));
-        log_message('debug', 'Indicator key = ' . $key);
+        // pilih region: ?region_id=ID (opsional). Jika tidak ada → pakai is_default=1 atau region pertama.
+        $regionId = (int) ($this->request->getGet('region_id') ?? 0);
+        $regionModel = new RegionModel();
+        if ($regionId > 0) {
+            $region = $regionModel->find($regionId);
+        } else {
+            $region = $regionModel->where('is_default',1)->first() ?? $regionModel->orderBy('id','asc')->first();
+        }
+        if (!$region) {
+            return $this->respondOk([], [], 'No region');
+        }
+        $regionId = (int)$region['id'];
 
-        $map = [
-            'LUAS_KEPENDUDUKAN' => $exec . '?sheet=LUAS_KEPENDUDUKAN',
-            'ANGKA_KEMISKINAN'  => $exec . '?sheet=ANGKA_KEMISKINAN',
-            'INFLASI_UMUM'      => $exec . '?sheet=INFLASI_UMUM',
-            'IPM'               => $exec . '?sheet=IPM',
-            'PDRB'              => $exec . '?sheet=PDRB',
-            'KETENAGAKERJAAN'   => $exec . '?sheet=KETENAGAKERJAAN',
-            'KESEJAHTERAAN'     => $exec . '?sheet=KESEJAHTERAAN',
-        ];
+        // Ambil semua baris (Kelompok/SubIndikator) untuk indikator ini
+        $rowModel = new IndicatorRowModel();
+        $rowsMeta = $rowModel->where('indicator_id', (int)$indicator['id'])
+            ->orderBy('sort_order','asc')->orderBy('id','asc')->findAll();
+        if (!$rowsMeta) {
+            return $this->respondOk([], [], 'No rows');
+        }
 
-        if (!isset($map[$key])) return $this->fail('Unknown key', 404);
-        $url = $map[$key];
+        // Ambil semua nilai untuk region ini
+        $valModel = new IndicatorValueModel();
+        $vals = $valModel->select('row_id, year, value')
+            ->where('region_id', $regionId)
+            ->whereIn('row_id', array_column($rowsMeta, 'id'))
+            ->orderBy('year','asc')
+            ->findAll();
 
-        $force = $this->request->getGet('nocache') === '1';
-        log_message('debug', "Fetch URL untuk {$key} = {$url} | nocache=" . ($force ? '1' : '0'));
-        $service = new CsvFetcher();
-        $json = $service->get($url, $force);
+        // Tahun unik (urut)
+        $years = [];
+        foreach ($vals as $v) {
+            $y = (int)$v['year'];
+            if ($y && !in_array($y, $years, true)) $years[] = $y;
+        }
+        sort($years);
 
-        // BANTUAN DEBUG: kalau kosong, kasih error jelas
-        if (empty($json['columns']) || empty($json['rows'])) {
-            log_message('error', "CSV kosong atau gagal parse untuk {$key} dari {$url}");
-            return $this->fail('CSV kosong/gagal diambil. Cek log.', 502);
+        // Jika belum ada data sama sekali, tetap kirim kolom dasar saja
+        $columns = array_merge(['Kelompok','SubIndikator'], array_map('strval', $years));
+
+        // index nilai: [row_id][year] => value
+        $map = [];
+        foreach ($vals as $v) {
+            $rid = (int)$v['row_id']; $y = (int)$v['year'];
+            $map[$rid][$y] = is_null($v['value']) ? null : (float)$v['value'];
+        }
+
+        // bentuk rows siap pivot
+        $outRows = [];
+        foreach ($rowsMeta as $rm) {
+            $row = [
+                'Kelompok'     => (string)($rm['kelompok'] ?? ''),
+                'SubIndikator' => (string)($rm['subindikator'] ?? ''),
+            ];
+            foreach ($years as $y) {
+                // NULL aman; frontend kamu sudah handle dengan toNumber()
+                $row[(string)$y] = $map[$rm['id']][$y] ?? null;
+            }
+            $outRows[] = $row;
         }
 
         return $this->response->setJSON([
             'ok'      => true,
             'source'  => $key,
-            'columns' => $json['columns'], // array of header
-            'rows'    => $json['rows'],    // array of associative row: ["Tahun"=>..., "X"=>...]
+            'region'  => $region['name'],
+            'columns' => $columns,
+            'rows'    => $outRows,
         ]);
     }
 
-    private function fail($msg, $status = 400)
+    private function respondOk(array $columns, array $rows, string $note = '')
     {
-        return $this->response->setStatusCode($status)->setJSON(['ok' => false, 'error' => $msg]);
+        return $this->response->setJSON([
+            'ok'      => true,          // <- tetap true agar frontend tidak throw Error
+            'note'    => $note,
+            'columns' => $columns,
+            'rows'    => $rows,
+        ]);
     }
 }

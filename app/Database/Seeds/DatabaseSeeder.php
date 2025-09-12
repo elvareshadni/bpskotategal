@@ -11,5 +11,7 @@ class DatabaseSeeder extends Seeder
         $this->call(UsersSeeder::class);
         $this->call(InfografisSeeder::class);
         $this->call(CarouselSeeder::class);
+        $this->call(RegionsSeeder::class);
+        $this->call(IndicatorsSeeder::class);
     }
 }

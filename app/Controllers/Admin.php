@@ -5,6 +5,11 @@ namespace App\Controllers;
 use App\Models\InfografisModel;
 use App\Models\CarouselModel;
 use App\Models\UserModel;
+use App\Models\RegionModel;
+use App\Models\IndicatorModel;
+use App\Models\IndicatorRowModel;
+use App\Models\IndicatorRowVarModel;
+use App\Models\IndicatorValueModel;
 
 class Admin extends BaseController
 {
@@ -263,8 +268,370 @@ class Admin extends BaseController
 
     public function dataIndikator()
     {
-        return view('Admin/kelola_data_indikator');
+        $regions = (new RegionModel())->orderBy('is_default', 'DESC')->orderBy('name', 'ASC')->findAll();
+        return view('Admin/data_indikator/landing', ['regions' => $regions]);
     }
+
+    // ====== Kelola Region ======
+    public function regions()
+    {
+        $regions = (new RegionModel())->orderBy('id', 'DESC')->findAll();
+        return view('Admin/regions/index', ['regions' => $regions]);
+    }
+
+    public function regionCreate()
+    {
+        $code = trim((string)$this->request->getPost('code_bps'));
+        $name = trim((string)$this->request->getPost('name'));
+        if ($name === '') return redirect()->back()->with('error', 'Nama wajib diisi');
+        (new RegionModel())->insert(['code_bps' => $code ?: null, 'name' => $name, 'is_default' => 0]);
+        return redirect()->to(base_url('admin/regions'))->with('success', 'Berhasil menambah region');
+    }
+
+    public function regionUpdate($id)
+    {
+        $code = trim((string)$this->request->getPost('code_bps'));
+        $name = trim((string)$this->request->getPost('name'));
+        (new RegionModel())->update((int)$id, ['code_bps' => $code ?: null, 'name' => $name]);
+        return redirect()->to(base_url('admin/regions'))->with('success', 'Berhasil memperbarui');
+    }
+
+    public function regionDelete($id)
+    {
+        (new RegionModel())->delete((int)$id);
+        return redirect()->to(base_url('admin/regions'))->with('success', 'Dihapus');
+    }
+
+    // ====== Kelola Indikator ======
+    public function indicators()
+    {
+        $regionM = new RegionModel();
+        $regions = $regionM->orderBy('is_default', 'DESC')->orderBy('name', 'ASC')->findAll();
+
+        // default Kota Tegal kalau ada
+        $default = null;
+        foreach ($regions as $r) {
+            if ((int)$r['is_default'] === 1) {
+                $default = $r;
+                break;
+            }
+        }
+        $currentRegionId = (int)($this->request->getGet('region_id') ?? ($default['id'] ?? ($regions[0]['id'] ?? 0)));
+
+        return view('Admin/indikator/index', [
+            'regions' => $regions,
+            'currentRegionId' => $currentRegionId
+        ]);
+    }
+
+    public function indicatorsList()
+    {
+        $regionId = (int)($this->request->getGet('region_id') ?? 0);
+        if ($regionId <= 0) return $this->response->setJSON(['ok' => false, 'error' => 'Region invalid']);
+        $rows = (new IndicatorModel())
+            ->where('region_id', $regionId)
+            ->orderBy('id', 'DESC')->findAll();
+
+        // tambahkan subindikator list ringkas
+        $rowM = new IndicatorRowModel();
+        $out = [];
+        foreach ($rows as $ind) {
+            $subs = $rowM->where('indicator_id', $ind['id'])->orderBy('sort_order', 'ASC')->findAll();
+            $out[] = [
+                'id' => $ind['id'],
+                'name' => $ind['name'],
+                'subcount' => count($subs),
+                'subs' => array_map(fn($s) => ['id' => $s['id'], 'subindikator' => $s['subindikator']], $subs),
+            ];
+        }
+        return $this->response->setJSON(['ok' => true, 'data' => $out]);
+    }
+
+    public function indicatorForm()
+    {
+        $id = (int)($this->request->getGet('id') ?? 0);
+        $indicator = null;
+        if ($id > 0) $indicator = (new IndicatorModel())->find($id);
+
+        $regions = (new RegionModel())->orderBy('name', 'ASC')->findAll();
+        $subs = $indicator ? (new IndicatorRowModel())->where('indicator_id', $indicator['id'])->orderBy('sort_order', 'ASC')->findAll() : [];
+
+        return view('Admin/indikator/form_indicator', [
+            'indicator' => $indicator,
+            'regions' => $regions,
+            'subs' => $subs
+        ]);
+    }
+
+    public function indicatorSave()
+    {
+        $id       = (int)$this->request->getPost('id');
+        $regionId = (int)$this->request->getPost('region_id');
+        $name     = trim((string)$this->request->getPost('name'));
+        $code     = trim((string)$this->request->getPost('code')) ?: null;
+
+        $indM = new IndicatorModel();
+
+        if ($id > 0) {
+            $indM->update($id, ['region_id' => $regionId, 'name' => $name, 'code' => $code]);
+        } else {
+            $id = $indM->insert(['region_id' => $regionId, 'name' => $name, 'code' => $code]);
+        }
+
+        // opsional: proses subindikator baru dari form (array sub_new[])
+        $subNew = (array)($this->request->getPost('sub_new') ?? []);
+        $rowM = new IndicatorRowModel();
+        $order = 1;
+        foreach ($subNew as $nm) {
+            $nm = trim($nm);
+            if ($nm === '') continue;
+            $rowM->insert([
+                'indicator_id' => $id,
+                'subindikator' => $nm,
+                'timeline' => 'yearly',
+                'data_type' => 'single',
+                'unit' => null,
+                'sort_order' => $order++,
+            ]);
+        }
+
+        return redirect()->to(base_url('admin/indicators'))->with('success', 'Indikator tersimpan');
+    }
+
+    public function indicatorDelete($id)
+    {
+        // cascade oleh FK (rows, values, vars akan ikut hilang)
+        (new IndicatorModel())->delete((int)$id);
+        return redirect()->to(base_url('admin/indicators'))->with('success', 'Indikator dihapus');
+    }
+
+    // ====== Subindikator ======
+    public function subindikatorForm()
+    {
+        $rowId = (int)($this->request->getGet('id') ?? 0);
+        $indicatorId = (int)($this->request->getGet('indicator_id') ?? 0);
+
+        $rowM = new IndicatorRowModel();
+        $varM = new IndicatorRowVarModel();
+
+        $row = $rowId > 0 ? $rowM->find($rowId) : null;
+        $vars = $row ? $varM->where('row_id', $row['id'])->orderBy('sort_order', 'ASC')->findAll() : [];
+
+        // region default utk grid data: ambil default region id (untuk render awal)
+        $regionDefault = (new RegionModel())->where('is_default', 1)->first();
+
+        return view('Admin/indikator/form_subindikator', [
+            'row' => $row,
+            'indicator_id' => $indicatorId ?: ($row['indicator_id'] ?? 0),
+            'vars' => $vars,
+            'regionDefaultId' => $regionDefault['id'] ?? 0,
+        ]);
+    }
+
+    public function subindikatorSave()
+    {
+        $rowM = new IndicatorRowModel();
+        $id   = (int)$this->request->getPost('id');
+        $data = [
+            'indicator_id' => (int)$this->request->getPost('indicator_id'),
+            'subindikator' => trim((string)$this->request->getPost('subindikator')),
+            'timeline'     => $this->request->getPost('timeline') === 'Triwulan' ? 'quarterly' : ($this->request->getPost('timeline') === 'Bulanan' ? 'monthly' : 'yearly'),
+            'data_type'    => $this->request->getPost('data_type') === 'Data Proporsi' ? 'proporsi' : 'single',
+            'unit'         => $this->request->getPost('unit') ?: null,
+        ];
+        if ($id > 0) {
+            $rowM->update($id, $data);
+        } else {
+            $id = $rowM->insert($data); // default Data Biasa & Tahunan sudah dicover mapping di atas
+        }
+        return redirect()->to(base_url('admin/subindicator/form?id=' . $id))->with('success', 'Disimpan');
+    }
+
+    public function subindikatorDelete($id)
+    {
+        (new IndicatorRowModel())->delete((int)$id);
+        return redirect()->to(base_url('admin/indicators'))->with('success', 'Subindikator dihapus');
+    }
+
+    // Variabel untuk Data Proporsi
+    public function varCreate()
+    {
+        $rowId = (int)$this->request->getPost('row_id');
+        $name  = trim((string)$this->request->getPost('name'));
+        if ($rowId <= 0 || $name === '') return $this->response->setJSON(['ok' => false, 'error' => 'Invalid']);
+        $vm = new IndicatorRowVarModel();
+        $vm->insert(['row_id' => $rowId, 'name' => $name, 'sort_order' => 999]);
+        return $this->response->setJSON(['ok' => true]);
+    }
+
+    public function varDelete($id)
+    {
+        (new IndicatorRowVarModel())->delete((int)$id);
+        return $this->response->setJSON(['ok' => true]);
+    }
+
+    // ====== AJAX untuk landing grid (yang sudah kamu tulis di JS) ======
+    public function ajaxIndicatorsByRegion($regionId)
+    {
+        $list = (new IndicatorModel())
+            ->select('id,name,code')
+            ->where('region_id', (int)$regionId)
+            ->orderBy('name', 'ASC')->findAll();
+        return $this->response->setJSON(['ok' => true, 'data' => $list]);
+    }
+
+    public function ajaxRowsByRegionIndicator($regionId, $indicatorId)
+    {
+        $rows = (new IndicatorRowModel())
+            ->select('id,subindikator,timeline,data_type')
+            ->where('indicator_id', (int)$indicatorId)
+            ->orderBy('sort_order', 'ASC')->findAll();
+
+        // sesuaikan field yang dipakai di landing.js (dataset.timeline, dataset.dtype)
+        $data = array_map(fn($r) => [
+            'id' => $r['id'],
+            'subindikator' => $r['subindikator'],
+            'timeline' => $r['timeline'],      // yearly/quarterly/monthly
+            'data_type' => $r['data_type'],    // single/proporsi
+        ], $rows);
+
+        return $this->response->setJSON(['ok' => true, 'data' => $data]);
+    }
+
+    public function gridFetch()
+    {
+        $regionId = (int)$this->request->getGet('region_id');
+        $rowId    = (int)$this->request->getGet('row_id');
+        $yFrom    = (int)($this->request->getGet('year_from') ?? 0);
+        $yTo      = (int)($this->request->getGet('year_to') ?? 0);
+
+        $row = (new IndicatorRowModel())->find($rowId);
+        if (!$row) return $this->response->setJSON(['ok' => false, 'error' => 'Row not found']);
+
+        $vars = [];
+        if ($row['data_type'] === 'proporsi') {
+            $vars = (new IndicatorRowVarModel())->where('row_id', $rowId)->orderBy('sort_order', 'ASC')->findAll();
+        }
+
+        // meta kolom untuk Tabulator
+        $meta = [
+            'timeline' => $row['timeline'],
+            'data_type' => $row['data_type'],
+            'unit' => $row['unit'],
+            'vars' => []
+        ];
+        if ($row['data_type'] === 'single') {
+            $meta['vars'][] = ['col' => 'val__single', 'name' => $row['subindikator']];
+        } else {
+            foreach ($vars as $v) $meta['vars'][] = ['col' => 'val__' . $v['id'], 'name' => $v['name']];
+        }
+
+        // siapkan periode rows
+        $rows = [];
+        $years = range($yFrom ?: date('Y') - 5, $yTo ?: date('Y'));
+        foreach ($years as $yy) {
+            if ($row['timeline'] === 'yearly') {
+                $rows[] = ['period' => (string)$yy, 'year' => $yy, 'quarter' => 0, 'month' => 0];
+            } elseif ($row['timeline'] === 'quarterly') {
+                foreach ([1, 2, 3, 4] as $q) {
+                    $rows[] = ['period' => "$yy Q$q", 'year' => $yy, 'quarter' => $q, 'month' => 0];
+                }
+            } else { // monthly
+                for ($m = 1; $m <= 12; $m++) {
+                    $rows[] = ['period' => sprintf('%d-%02d', $yy, $m), 'year' => $yy, 'quarter' => 0, 'month' => $m];
+                }
+            }
+        }
+
+        // ambil nilai
+        $valM = new IndicatorValueModel();
+        $valQ = $valM->where('row_id', $rowId)->where('region_id', $regionId);
+        if ($yFrom) $valQ->where('year >=', $yFrom);
+        if ($yTo)   $valQ->where('year <=', $yTo);
+        $vals = $valQ->findAll();
+
+        // index by (y,q,m,var)
+        $map = [];
+        foreach ($vals as $v) {
+            $key = $v['year'] . '|' . ((int)$v['quarter']) . '|' . ((int)$v['month']);
+            $vid = $row['data_type'] === 'single' ? 'single' : (string)$v['var_id'];
+            $map[$key][$vid] = is_null($v['value']) ? null : (float)$v['value'];
+        }
+
+        // masukkan ke rows
+        foreach ($rows as &$r) {
+            $key = $r['year'] . '|' . $r['quarter'] . '|' . $r['month'];
+            if ($row['data_type'] === 'single') {
+                $r['val__single'] = $map[$key]['single'] ?? null;
+            } else {
+                foreach ($vars as $v) {
+                    $r['val__' . $v['id']] = $map[$key][(string)$v['id']] ?? null;
+                }
+            }
+        }
+
+        return $this->response->setJSON(['ok' => true, 'meta' => $meta, 'rows' => $rows]);
+    }
+
+    public function gridSave()
+    {
+        $json = $this->request->getJSON(true);
+        $regionId = (int)($json['region_id'] ?? 0);
+        $rowId    = (int)($json['row_id'] ?? 0);
+        $entries  = (array)($json['entries'] ?? []);
+        if ($regionId <= 0 || $rowId <= 0) return $this->response->setJSON(['ok' => false, 'error' => 'Bad payload']);
+
+        $row = (new IndicatorRowModel())->find($rowId);
+        if (!$row) return $this->response->setJSON(['ok' => false, 'error' => 'Row not found']);
+
+        $valM = new IndicatorValueModel();
+
+        // Simpan per entry (idempoten: delete+insert atau upsert)
+        foreach ($entries as $e) {
+            $year = (int)($e['year'] ?? 0);
+            $q    = (int)($e['quarter'] ?? 0);
+            $m    = (int)($e['month'] ?? 0);
+            $var  = $e['var_id'] === '' ? null : ($e['var_id'] ?? null);
+            $val  = $e['value'];
+
+            // cari existing
+            $builder = $valM->where([
+                'row_id' => $rowId,
+                'region_id' => $regionId,
+                'year' => $year,
+                'quarter' => $q ?: null,
+                'month' => $m ?: null,
+            ]);
+            if ($row['data_type'] === 'proporsi') $builder->where('var_id', $var);
+            else $builder->where('var_id', null);
+
+            $found = $builder->first();
+
+            if ($val === null || $val === '') {
+                // kosong => hapus record kalau ada
+                if ($found) $valM->delete($found['id']);
+                continue;
+            }
+
+            $payload = [
+                'row_id' => $rowId,
+                'region_id' => $regionId,
+                'var_id' => $row['data_type'] === 'proporsi' ? (int)$var : null,
+                'year' => $year,
+                'quarter' => $q ?: null,
+                'month' => $m ?: null,
+                'value' => (float)$val,
+            ];
+
+            if ($found) {
+                $valM->update($found['id'], $payload);
+            } else {
+                $valM->insert($payload);
+            }
+        }
+    }
+
+
 
     public function laporanKunjungan()
     {
