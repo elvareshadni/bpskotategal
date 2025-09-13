@@ -350,6 +350,8 @@ class Admin extends BaseController
     public function indicatorForm()
     {
         $id = (int)($this->request->getGet('id') ?? 0);
+        $prefRegionId = (int)($this->request->getGet('region_id') ?? 0); // <- tambahan
+
         $indicator = null;
         if ($id > 0) $indicator = (new IndicatorModel())->find($id);
 
@@ -357,11 +359,13 @@ class Admin extends BaseController
         $subs = $indicator ? (new IndicatorRowModel())->where('indicator_id', $indicator['id'])->orderBy('sort_order', 'ASC')->findAll() : [];
 
         return view('Admin/indikator/form_indicator', [
-            'indicator' => $indicator,
-            'regions' => $regions,
-            'subs' => $subs
+            'indicator'     => $indicator,
+            'regions'       => $regions,
+            'subs'          => $subs,
+            'prefRegionId'  => $prefRegionId, // <- kirim ke view
         ]);
     }
+
 
     public function indicatorSave()
     {
@@ -378,21 +382,43 @@ class Admin extends BaseController
             $id = $indM->insert(['region_id' => $regionId, 'name' => $name, 'code' => $code]);
         }
 
-        // opsional: proses subindikator baru dari form (array sub_new[])
-        $subNew = (array)($this->request->getPost('sub_new') ?? []);
-        $rowM = new IndicatorRowModel();
-        $order = 1;
-        foreach ($subNew as $nm) {
-            $nm = trim($nm);
-            if ($nm === '') continue;
-            $rowM->insert([
-                'indicator_id' => $id,
-                'subindikator' => $nm,
-                'timeline' => 'yearly',
-                'data_type' => 'single',
-                'unit' => null,
-                'sort_order' => $order++,
-            ]);
+        // opsional: proses subindikator baru dari form (textarea "sub_new", dipisah per baris)
+        $subRaw = (string) ($this->request->getPost('sub_new') ?? '');
+        if ($subRaw !== '') {
+            // pecah baris; support \r\n (Windows), \n (Unix), \r (old Mac)
+            $lines = preg_split("/\r\n|\r|\n/", $subRaw);
+
+            // trim & buang baris kosong, deduplicate sambil pertahankan urutan
+            $clean = [];
+            $seen  = [];
+            foreach ($lines as $nm) {
+                $nm = trim($nm);
+                if ($nm === '') continue;
+                if (isset($seen[mb_strtolower($nm)])) continue;
+                $seen[mb_strtolower($nm)] = true;
+                $clean[] = $nm;
+            }
+
+            if (!empty($clean)) {
+                $rowM = new IndicatorRowModel();
+
+                // ambil sort_order terakhir subindikator existing agar berurutan rapi
+                $last = $rowM->where('indicator_id', $id)
+                    ->orderBy('sort_order', 'DESC')
+                    ->first();
+                $order = $last ? ((int)$last['sort_order'] + 1) : 1;
+
+                foreach ($clean as $nm) {
+                    $rowM->insert([
+                        'indicator_id' => $id,
+                        'subindikator' => $nm,
+                        'timeline'     => 'yearly',   // default seperti sebelumnya
+                        'data_type'    => 'single',   // default seperti sebelumnya
+                        'unit'         => null,
+                        'sort_order'   => $order++,
+                    ]);
+                }
+            }
         }
 
         return redirect()->to(base_url('admin/indicators'))->with('success', 'Indikator tersimpan');
@@ -408,23 +434,52 @@ class Admin extends BaseController
     // ====== Subindikator ======
     public function subindikatorForm()
     {
-        $rowId = (int)($this->request->getGet('id') ?? 0);
+        $rowId       = (int)($this->request->getGet('id') ?? 0);
         $indicatorId = (int)($this->request->getGet('indicator_id') ?? 0);
+        $regionParam = (int)($this->request->getGet('region_id') ?? 0); // <-- kalau halaman kirim region_id terpilih
 
         $rowM = new IndicatorRowModel();
         $varM = new IndicatorRowVarModel();
+        $indM = new IndicatorModel();
+        $regM = new RegionModel();
 
-        $row = $rowId > 0 ? $rowM->find($rowId) : null;
+        $row  = $rowId > 0 ? $rowM->find($rowId) : null;
         $vars = $row ? $varM->where('row_id', $row['id'])->orderBy('sort_order', 'ASC')->findAll() : [];
 
-        // region default utk grid data: ambil default region id (untuk render awal)
-        $regionDefault = (new RegionModel())->where('is_default', 1)->first();
+        // 1) Coba pakai region dari querystring (jika ada)
+        $selectedRegionId = $regionParam;
+
+        // 2) Kalau kosong, pakai region milik indikator/subindikator
+        if ($selectedRegionId <= 0) {
+            // Pastikan tahu indicator_id-nya
+            $resolvedIndicatorId = $indicatorId ?: ($row['indicator_id'] ?? 0);
+            if ($resolvedIndicatorId > 0) {
+                $indicator = $indM->find($resolvedIndicatorId);
+                if ($indicator) {
+                    $selectedRegionId = (int)$indicator['region_id'];
+                }
+            }
+        }
+
+        // 3) Kalau masih kosong, fallback ke default region
+        if ($selectedRegionId <= 0) {
+            $defaultRegion = $regM->where('is_default', 1)->first();
+            $selectedRegionId = (int)($defaultRegion['id'] ?? 0);
+        }
+
+        // Ambil data region terpilih untuk badge Kode BPS
+        $region = $selectedRegionId > 0 ? $regM->find($selectedRegionId) : null;
 
         return view('Admin/indikator/form_subindikator', [
-            'row' => $row,
-            'indicator_id' => $indicatorId ?: ($row['indicator_id'] ?? 0),
-            'vars' => $vars,
-            'regionDefaultId' => $regionDefault['id'] ?? 0,
+            'row'            => $row,
+            'indicator_id'   => $indicatorId ?: ($row['indicator_id'] ?? 0),
+            'vars'           => $vars,
+
+            // Penting: ID untuk request grid (tetap ID numerik)
+            'regionId'       => (int)($region['id'] ?? 0),
+
+            // Kode BPS yang ditampilkan di badge
+            'regionCode'     => $region['code_bps'] ?? null,
         ]);
     }
 
@@ -432,20 +487,32 @@ class Admin extends BaseController
     {
         $rowM = new IndicatorRowModel();
         $id   = (int)$this->request->getPost('id');
+
+        $timeline = $this->request->getPost('timeline');         // yearly|quarterly|monthly
+        $dtype    = $this->request->getPost('data_type');        // timeseries|jumlah_kategori|proporsi
+
+        $allowedTimeline = ['yearly', 'quarterly', 'monthly'];
+        $allowedDtype    = ['timeseries', 'jumlah_kategori', 'proporsi'];
+        if (!in_array($timeline, $allowedTimeline, true)) $timeline = 'yearly';
+        if (!in_array($dtype, $allowedDtype, true)) $dtype = 'timeseries';
+
         $data = [
             'indicator_id' => (int)$this->request->getPost('indicator_id'),
             'subindikator' => trim((string)$this->request->getPost('subindikator')),
-            'timeline'     => $this->request->getPost('timeline') === 'Triwulan' ? 'quarterly' : ($this->request->getPost('timeline') === 'Bulanan' ? 'monthly' : 'yearly'),
-            'data_type'    => $this->request->getPost('data_type') === 'Data Proporsi' ? 'proporsi' : 'single',
+            'timeline'     => $timeline,
+            'data_type'    => $dtype,
             'unit'         => $this->request->getPost('unit') ?: null,
+            'interpretasi' => $this->request->getPost('interpretasi') ?: null,
         ];
+
         if ($id > 0) {
             $rowM->update($id, $data);
         } else {
-            $id = $rowM->insert($data); // default Data Biasa & Tahunan sudah dicover mapping di atas
+            $id = $rowM->insert($data);
         }
         return redirect()->to(base_url('admin/subindicator/form?id=' . $id))->with('success', 'Disimpan');
     }
+
 
     public function subindikatorDelete($id)
     {
@@ -458,11 +525,30 @@ class Admin extends BaseController
     {
         $rowId = (int)$this->request->getPost('row_id');
         $name  = trim((string)$this->request->getPost('name'));
-        if ($rowId <= 0 || $name === '') return $this->response->setJSON(['ok' => false, 'error' => 'Invalid']);
+        if ($rowId <= 0 || $name === '') {
+            return $this->response->setJSON(['ok' => false, 'error' => 'Invalid']);
+        }
+
+        $db = \Config\Database::connect();
+        $mx = $db->table('indicator_row_vars')
+            ->selectMax('sort_order', 'mx')
+            ->where('row_id', $rowId)
+            ->get()->getRow('mx');
+
+        $next = (int)($mx ?? 0) + 1;
+
         $vm = new IndicatorRowVarModel();
-        $vm->insert(['row_id' => $rowId, 'name' => $name, 'sort_order' => 999]);
+        $vm->insert([
+            'row_id'     => $rowId,
+            'name'       => $name,
+            'sort_order' => $next,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
         return $this->response->setJSON(['ok' => true]);
     }
+
 
     public function varDelete($id)
     {
@@ -508,25 +594,26 @@ class Admin extends BaseController
         $row = (new IndicatorRowModel())->find($rowId);
         if (!$row) return $this->response->setJSON(['ok' => false, 'error' => 'Row not found']);
 
+        $isVarType = in_array($row['data_type'], ['jumlah_kategori', 'proporsi'], true);
+
         $vars = [];
-        if ($row['data_type'] === 'proporsi') {
+        if ($isVarType) {
             $vars = (new IndicatorRowVarModel())->where('row_id', $rowId)->orderBy('sort_order', 'ASC')->findAll();
         }
 
-        // meta kolom untuk Tabulator
         $meta = [
-            'timeline' => $row['timeline'],
-            'data_type' => $row['data_type'],
-            'unit' => $row['unit'],
-            'vars' => []
+            'timeline'     => $row['timeline'],
+            'data_type'    => $row['data_type'],
+            'unit'         => $row['unit'],
+            'interpretasi' => $row['interpretasi'],
+            'vars'         => []
         ];
-        if ($row['data_type'] === 'single') {
+        if (!$isVarType) {
             $meta['vars'][] = ['col' => 'val__single', 'name' => $row['subindikator']];
         } else {
             foreach ($vars as $v) $meta['vars'][] = ['col' => 'val__' . $v['id'], 'name' => $v['name']];
         }
 
-        // siapkan periode rows
         $rows = [];
         $years = range($yFrom ?: date('Y') - 5, $yTo ?: date('Y'));
         foreach ($years as $yy) {
@@ -536,42 +623,38 @@ class Admin extends BaseController
                 foreach ([1, 2, 3, 4] as $q) {
                     $rows[] = ['period' => "$yy Q$q", 'year' => $yy, 'quarter' => $q, 'month' => 0];
                 }
-            } else { // monthly
+            } else {
                 for ($m = 1; $m <= 12; $m++) {
                     $rows[] = ['period' => sprintf('%d-%02d', $yy, $m), 'year' => $yy, 'quarter' => 0, 'month' => $m];
                 }
             }
         }
 
-        // ambil nilai
         $valM = new IndicatorValueModel();
         $valQ = $valM->where('row_id', $rowId)->where('region_id', $regionId);
         if ($yFrom) $valQ->where('year >=', $yFrom);
         if ($yTo)   $valQ->where('year <=', $yTo);
         $vals = $valQ->findAll();
 
-        // index by (y,q,m,var)
         $map = [];
         foreach ($vals as $v) {
-            $key = $v['year'] . '|' . ((int)$v['quarter']) . '|' . ((int)$v['month']);
-            $vid = $row['data_type'] === 'single' ? 'single' : (string)$v['var_id'];
+            $key = $v['year'] . '|' . (int)$v['quarter'] . '|' . (int)$v['month'];
+            $vid = !$isVarType ? 'single' : (string)$v['var_id'];
             $map[$key][$vid] = is_null($v['value']) ? null : (float)$v['value'];
         }
 
-        // masukkan ke rows
         foreach ($rows as &$r) {
             $key = $r['year'] . '|' . $r['quarter'] . '|' . $r['month'];
-            if ($row['data_type'] === 'single') {
+            if (!$isVarType) {
                 $r['val__single'] = $map[$key]['single'] ?? null;
             } else {
-                foreach ($vars as $v) {
-                    $r['val__' . $v['id']] = $map[$key][(string)$v['id']] ?? null;
-                }
+                foreach ($vars as $v) $r['val__' . $v['id']] = $map[$key][(string)$v['id']] ?? null;
             }
         }
 
         return $this->response->setJSON(['ok' => true, 'meta' => $meta, 'rows' => $rows]);
     }
+
 
     public function gridSave()
     {
@@ -584,9 +667,10 @@ class Admin extends BaseController
         $row = (new IndicatorRowModel())->find($rowId);
         if (!$row) return $this->response->setJSON(['ok' => false, 'error' => 'Row not found']);
 
+        $isVarType = in_array($row['data_type'], ['jumlah_kategori', 'proporsi'], true);
+
         $valM = new IndicatorValueModel();
 
-        // Simpan per entry (idempoten: delete+insert atau upsert)
         foreach ($entries as $e) {
             $year = (int)($e['year'] ?? 0);
             $q    = (int)($e['quarter'] ?? 0);
@@ -594,7 +678,6 @@ class Admin extends BaseController
             $var  = $e['var_id'] === '' ? null : ($e['var_id'] ?? null);
             $val  = $e['value'];
 
-            // cari existing
             $builder = $valM->where([
                 'row_id' => $rowId,
                 'region_id' => $regionId,
@@ -602,13 +685,12 @@ class Admin extends BaseController
                 'quarter' => $q ?: null,
                 'month' => $m ?: null,
             ]);
-            if ($row['data_type'] === 'proporsi') $builder->where('var_id', $var);
+            if ($isVarType) $builder->where('var_id', (int)$var);
             else $builder->where('var_id', null);
 
             $found = $builder->first();
 
             if ($val === null || $val === '') {
-                // kosong => hapus record kalau ada
                 if ($found) $valM->delete($found['id']);
                 continue;
             }
@@ -616,19 +698,76 @@ class Admin extends BaseController
             $payload = [
                 'row_id' => $rowId,
                 'region_id' => $regionId,
-                'var_id' => $row['data_type'] === 'proporsi' ? (int)$var : null,
+                'var_id' => $isVarType ? (int)$var : null,
                 'year' => $year,
                 'quarter' => $q ?: null,
                 'month' => $m ?: null,
                 'value' => (float)$val,
             ];
 
-            if ($found) {
-                $valM->update($found['id'], $payload);
-            } else {
-                $valM->insert($payload);
-            }
+            if ($found) $valM->update($found['id'], $payload);
+            else $valM->insert($payload);
         }
+
+        return $this->response->setJSON(['ok' => true]);
+    }
+
+    public function gridDeleteYears()
+    {
+        $json = $this->request->getJSON(true);
+        $regionId = (int)($json['region_id'] ?? 0);
+        $rowId    = (int)($json['row_id'] ?? 0);
+        $years    = (array)($json['years'] ?? []);
+        $years    = array_values(array_unique(array_map('intval', $years)));
+
+        if ($regionId <= 0 || $rowId <= 0 || empty($years)) {
+            return $this->response->setJSON(['ok' => false, 'error' => 'Bad payload']);
+        }
+
+        $valM = new IndicatorValueModel();
+        $valM->where('row_id', $rowId)
+            ->where('region_id', $regionId)
+            ->whereIn('year', $years)
+            ->delete();
+
+        return $this->response->setJSON(['ok' => true, 'deleted_years' => $years]);
+    }
+
+    public function varUpdate($id)
+    {
+        $name = trim((string)$this->request->getPost('name'));
+        if ($id <= 0 || $name === '') {
+            return $this->response->setJSON(['ok' => false, 'error' => 'Invalid']);
+        }
+        $vm = new IndicatorRowVarModel();
+        $vm->update((int)$id, ['name' => $name]);
+        return $this->response->setJSON(['ok' => true]);
+    }
+
+    public function varDeleteBulk()
+    {
+        $ids = (array)$this->request->getPost('ids');
+        $ids = array_values(array_unique(array_map('intval', $ids)));
+        if (empty($ids)) {
+            return $this->response->setJSON(['ok' => false, 'error' => 'Empty']);
+        }
+        $vm = new IndicatorRowVarModel();
+        $vm->whereIn('id', $ids)->delete();
+        return $this->response->setJSON(['ok' => true, 'deleted' => $ids]);
+    }
+
+    public function varList($rowId)
+    {
+        $rowId = (int)$rowId;
+        if ($rowId <= 0) {
+            return $this->response->setJSON(['ok' => false, 'error' => 'Bad row id']);
+        }
+        $vars = (new IndicatorRowVarModel())
+            ->where('row_id', $rowId)
+            ->orderBy('sort_order', 'ASC')
+            ->findAll();
+
+        return $this->response->setJSON(['ok' => true, 'data' => $vars]);
     }
 
 

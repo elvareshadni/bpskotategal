@@ -11,8 +11,15 @@
         <div class="col-md-4">
             <label class="form-label">Kota/Kabupaten</label>
             <select class="form-select" name="region_id" required>
-                <?php foreach ($regions as $rg): ?>
-                    <option value="<?= $rg['id']; ?>" <?= isset($indicator) && $indicator['region_id'] == $rg['id'] ? 'selected' : ''; ?>>
+                <?php foreach ($regions as $rg):
+                    $selected = false;
+                    if (isset($indicator)) {
+                        $selected = ($indicator['region_id'] == $rg['id']);
+                    } else {
+                        $selected = (!empty($prefRegionId) && $prefRegionId == $rg['id']);
+                    }
+                ?>
+                    <option value="<?= $rg['id']; ?>" <?= $selected ? 'selected' : ''; ?>>
                         <?= esc($rg['name']); ?>
                     </option>
                 <?php endforeach; ?>
@@ -46,8 +53,10 @@
     <?php endif; ?>
 
     <div class="mb-3">
-        <label class="form-label">Tambah Subindikator (opsional, satu per baris)</label>
-        <textarea class="form-control" name="sub_new[]" rows="3" placeholder="Contoh:&#10;Jumlah Penduduk&#10;Rasio Jenis Kelamin"></textarea>
+        <label class="form-label">Tambah Subindikator</label>
+        <textarea class="form-control" name="sub_new" rows="3"
+            placeholder="Contoh:&#10;Jumlah Penduduk&#10;Rasio Jenis Kelamin"></textarea>
+        <small class="text-muted">Tulis satu subindikator per baris. Akan dibuat banyak sekaligus.</small>
     </div>
 
     <div class="d-flex gap-2">

@@ -58,6 +58,15 @@ $routes->group('admin', function ($routes) {
     $routes->post('subindicator/var/create', 'Admin::varCreate');      // {row_id, name}
     $routes->post('subindicator/var/delete/(:num)', 'Admin::varDelete/$1');
 
+    // === VARIABEL: rename, bulk delete, list ===
+    $routes->post('subindicator/var/update/(:num)', 'Admin::varUpdate/$1');     // rename 1 var
+    $routes->post('subindicator/var/delete-bulk', 'Admin::varDeleteBulk');      // hapus banyak var
+    $routes->get('subindicator/var/list/(:num)', 'Admin::varList/$1');          // list vars by row_id (JSON)
+
+    // === GRID: hapus tahun-tahun terpilih (multi) ===
+    $routes->post('data-indikator/grid/delete-years', 'Admin::gridDeleteYears');
+
+
     // === AJAX untuk landing grid kamu ===
     $routes->get('data-indikator/ajax/indicators/(:num)', 'Admin::ajaxIndicatorsByRegion/$1');
     $routes->get('data-indikator/ajax/rows/(:num)/(:num)', 'Admin::ajaxRowsByRegionIndicator/$1/$2');
