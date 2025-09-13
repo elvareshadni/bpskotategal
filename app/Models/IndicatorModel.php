@@ -8,7 +8,7 @@ class IndicatorModel extends Model
 {
     protected $table      = 'indicators';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['region_id','name','code'];
+    protected $allowedFields = ['region_id','name'];
     protected $useTimestamps = true;
     
 }

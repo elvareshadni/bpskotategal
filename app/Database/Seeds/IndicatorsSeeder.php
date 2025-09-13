@@ -16,7 +16,6 @@ class IndicatorsSeeder extends Seeder
         $this->db->table('indicators')->insert([
             'region_id' => $region['id'],
             'name'      => 'Penduduk dan Kepadatan',
-            'code'      => 'KEPEND',
         ]);
         $indicatorId = $this->db->insertID();
 

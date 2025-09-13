@@ -58,7 +58,7 @@
           <a href="<?= base_url('admin/subindicator/form'); ?>?id=${s.id}" class="link-primary">${s.subindikator}</a>
           <form action="<?= base_url('admin/subindicator/delete'); ?>/${s.id}" method="post" class="d-inline frm-del-sub">
             <?= csrf_field(); ?>
-            <button type="button" class="btn btn-link text-danger p-0 ms-2 btn-del-sub">hapus</button>
+            <button type="button" class="btn btn-link text-danger p-0 ms-2 btn-del-sub">Hapus</button>
           </form>
         </li>
       `).join('');

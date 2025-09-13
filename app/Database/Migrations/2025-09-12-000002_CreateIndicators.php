@@ -12,7 +12,6 @@ class CreateIndicators extends Migration
             'id'         => ['type'=>'INT','constraint'=>11,'unsigned'=>true,'auto_increment'=>true],
             'region_id'  => ['type'=>'INT','constraint'=>11,'unsigned'=>true],
             'name'       => ['type'=>'VARCHAR','constraint'=>150],
-            'code'       => ['type'=>'VARCHAR','constraint'=>50,'null'=>true], // opsional utk API by ?key
             'created_at' => ['type'=>'DATETIME','null'=>true],
             'updated_at' => ['type'=>'DATETIME','null'=>true],
         ]);

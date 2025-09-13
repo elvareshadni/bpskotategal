@@ -29,10 +29,6 @@
             <label class="form-label">Nama Indikator</label>
             <input class="form-control" name="name" required value="<?= esc($indicator['name'] ?? '') ?>">
         </div>
-        <div class="col-md-3">
-            <label class="form-label">Kode (opsional)</label>
-            <input class="form-control" name="code" value="<?= esc($indicator['code'] ?? '') ?>">
-        </div>
     </div>
 
     <hr>
