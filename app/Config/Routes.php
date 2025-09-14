@@ -20,6 +20,17 @@ $routes->group('user', function ($routes) {
 // API untuk data indikator (JSON)
 $routes->get('api/indikator', 'Indicators::index');
 
+// API untuk dashboard
+$routes->group('api', function ($routes) {
+    $routes->get('regions', 'Indicators::apiRegions');                 // list region
+    $routes->get('indicators', 'Indicators::apiIndicators');           // ?region_id=ID
+    $routes->get('rows', 'Indicators::apiRows');                       // ?indicator_id=ID
+    $routes->get('series', 'Indicators::apiSeries');                   // ?row_id=..&region_id=..&window=all|last3|last5|year=YYYY&quarter=Q&month=M
+    $routes->get('proportion', 'Indicators::apiProportion');           // ?row_id=..&region_id=..&year=..[&quarter=..|&month=..]
+    $routes->get('export/xlsx', 'Indicators::apiExportXlsx');          // unduh data yg sedang ditampilkan
+});
+
+
 // ADMIN
 $routes->group('admin', function ($routes) {
     $routes->get('/', 'Admin::index');
@@ -62,6 +73,9 @@ $routes->group('admin', function ($routes) {
     $routes->post('subindicator/var/update/(:num)', 'Admin::varUpdate/$1');     // rename 1 var
     $routes->post('subindicator/var/delete-bulk', 'Admin::varDeleteBulk');      // hapus banyak var
     $routes->get('subindicator/var/list/(:num)', 'Admin::varList/$1');          // list vars by row_id (JSON)
+
+    // === GRID: daftar tahun yang punya data ===
+    $routes->get('data-indikator/grid/years', 'Admin::gridYears');
 
     // === GRID: hapus tahun-tahun terpilih (multi) ===
     $routes->post('data-indikator/grid/delete-years', 'Admin::gridDeleteYears');

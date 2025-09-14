@@ -1,468 +1,447 @@
 <?= $this->extend('Template/index'); ?>
 <?= $this->section('content'); ?>
 
-<!-- Fixed Carousel (Single Image) -->
-<div class="carousel" style="height:450px;">
-  <img src="<?= base_url('img/slide1.jpg'); ?>"
-    class="d-block w-100"
-    style="height:490px; object-fit:cover;"
-    alt="Banner">
-  <div class="carousel-caption d-flex flex-column justify-content-center align-items-center text-center"
-    style="color:white; height:100%;">
+<!-- Banner -->
+<div class="carousel" style="height:420px;">
+  <img src="<?= base_url('img/slide1.jpg'); ?>" class="d-block w-100" style="height:420px; object-fit:cover;" alt="Banner">
+  <div class="carousel-caption d-flex flex-column justify-content-center align-items-center text-center" style="color:white; height:100%;">
     <h5 class="display-6 fw-bold">Pusat Data Statistik Kota Tegal</h5>
   </div>
 </div>
 
-<!-- Main Content -->
+<!-- DATA INDIKATOR STRATEGIS -->
 <div class="container mt-5" id="data-indikator">
-  <div class="stats-container">
-    <div class="row">
-      <!-- Data Indicator Strategis -->
+  <div class="stats-container stats-blue rounded-3 p-3 p-md-4 shadow-sm">
+    <div class="row g-4">
+      <!-- KIRI: CHART AREA -->
       <div class="col-lg-8">
-        <h2 class="section-title mb-4">DATA INDIKATOR STRATEGIS</h2>
-        <div id="indicator-placeholder" class="map-placeholder border rounded p-5 text-center bg-white shadow-sm">
-          <div id="indicator-container" class="border rounded p-4 bg-white shadow-sm">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-              <div class="pe-2">
-                <h3 id="indicator-title" class="mb-1">Pilih indikator di panel kanan</h3>
-                <small id="indicator-subtitle" class="text-muted d-block"></small>
-              </div>
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <div>
+            <h2 class="section-title mb-1 text-dark">DATA INDIKATOR STRATEGIS</h2>
+            <small class="text-muted">Pilih lokasi & indikator di panel kanan untuk melihat grafik</small>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <!-- Kontrol periode dinamis -->
+            <select id="window-select" class="form-select form-select-sm w-auto d-none">
+              <option value="all">Semua Tahun</option>
+              <option value="last3">3 Tahun Terakhir</option>
+              <option value="last5">5 Tahun Terakhir</option>
+            </select>
+            <select id="year-select" class="form-select form-select-sm w-auto d-none"></select>
+            <select id="q-select" class="form-select form-select-sm w-auto d-none">
+              <option value="1">Q1</option>
+              <option value="2">Q2</option>
+              <option value="3">Q3</option>
+              <option value="4">Q4</option>
+            </select>
+            <select id="m-select" class="form-select form-select-sm w-auto d-none">
+              <?php for ($i = 1; $i <= 12; $i++): ?><option value="<?= $i ?>"><?= $i ?></option><?php endfor; ?>
+            </select>
+            <button id="btn-refresh" class="btn btn-outline-primary btn-sm"><i class="fas fa-rotate"></i></button>
+          </div>
+        </div>
 
-              <div class="d-flex align-items-center gap-2 flex-wrap controls-wrap">
-                <select id="subindicator-select" class="form-select form-select-sm">
-                  <option value="">-</option>
-                </select>
+        <div class="card bg-white border-0 shadow chart-card">
+          <div class="card-body">
+            <h5 id="chart-title" class="mb-1">–</h5>
+            <small id="chart-sub" class="text-muted d-block mb-2">–</small>
+            <canvas id="bigChart" height="360"></canvas>
 
-                <!-- dropdown tahun khusus pie distribusi -->
-                <select id="year-left" class="form-select form-select-sm d-none"></select>
-                <select id="year-right" class="form-select form-select-sm d-none"></select>
-
-                <button id="refresh-btn" class="btn btn-outline-primary btn-sm">
-                  <i class="fas fa-rotate"></i>
-                </button>
-              </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button id="btn-download-chart" class="btn btn-primary btn-sm">Download Chart</button>
+              <button id="btn-download-data" class="btn btn-secondary btn-sm">Download Data (.xlsx)</button>
             </div>
 
-            <div class="row g-4">
-              <div class="col-lg-6">
-                <div class="chart-panel border rounded p-3 bg-white">
-                  <canvas id="chartLine" height="220"></canvas>
-                </div>
+            <hr class="my-3">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="small text-muted">Satuan</div>
+                <div id="unit-box" class="fw-semibold">–</div>
               </div>
-              <div class="col-lg-6">
-                <div class="chart-panel border rounded p-3 bg-white">
-                  <canvas id="chartBar" height="220"></canvas>
-                </div>
+              <div class="col-md-6">
+                <div class="small text-muted">Deskripsi / Interpretasi</div>
+                <div id="interpret-box" class="small">–</div>
               </div>
             </div>
           </div>
-
-
         </div>
       </div>
 
-      <!-- Sidebar Indikator -->
-      <!-- Sidebar Indikator (DINAMIS) -->
-      <div class="col-lg-4 mt-4 mt-lg-0">
-        <div class="bg-primary text-white p-3 rounded-top d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">INDIKATOR</h5>
-          <select id="region-select" class="form-select form-select-sm w-auto bg-white text-dark"></select>
-        </div>
-        <div class="border border-top-0 p-3 rounded-bottom bg-light" id="indicator-list">
-          <div class="text-muted">Memuat...</div>
-        </div>
-      </div>
-    </div>
-    <div class="mt-3">
-      <div class="card">
-        <div class="card-header bg-light">Deskripsi & Interpretasi</div>
-        <div class="card-body">
-          <div id="desc-text" class="mb-2 text-muted"></div>
-          <div id="interpret-text" class="small"></div>
+      <!-- KANAN: PANEL INDIKATOR -->
+      <div class="col-lg-4">
+        <div class="side-panel rounded-3 overflow-hidden">
+          <div class="bg-primary text-white p-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">INDIKATOR</h5>
+            <select id="region-select" class="form-select form-select-sm w-auto bg-white text-dark"></select>
+          </div>
+          <div class="p-3 border-bottom bg-light">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+              <input id="panel-search" type="text" class="form-control" placeholder="Cari indikator / subindikator…">
+            </div>
+          </div>
+          <div id="indicator-tree" class="panel-list p-2">
+            <div class="text-muted small">Memuat…</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<section class="py-5 bg-light" id="infografis">
-  <div class="container">
-    <h2 class="section-title mb-4">INFOGRAFIS</h2>
-    <div class="row g-3 mb-3">
-      <?php if (!empty($infografis)): ?>
-        <?php foreach ($infografis as $item): ?>
-          <div class="col-lg-3 col-md-6 mb-4">
-            <a href="<?= base_url('user/detail/' . $item['id']); ?>" class="text-decoration-none">
-              <div class="card h-100 shadow-sm border-0">
-                <div class="p-3 pb-0 bg-white">
-                  <img src="<?= base_url('img/' . $item['gambar']); ?>"
-                    class="img-fluid rounded border border-white"
-                    alt="<?= esc($item['judul']); ?>"
-                    style="max-width: auto; height: 100%; object-fit: cover;">
-                </div>
-                <div class="card-body pt-0">
-                  <small class="text-muted d-block mt-2 mb-0">
-                    <?= date('d M Y', strtotime($item['tanggal'])); ?>
-                  </small>
-                  <h6 class="card-title text-dark"><?= esc($item['judul']); ?></h6>
-                </div>
-              </div>
-            </a>
-          </div>
-        <?php endforeach; ?>
-      <?php else: ?>
-        <p class="text-muted">Belum ada data infografis.</p>
-      <?php endif; ?>
-    </div>
-
-    <div class="text-center mt-3">
-      <a href="<?= base_url('user/list'); ?>" class="btn btn-primary">Infografis Lainnya</a>
-    </div>
-  </div>
-</section>
 
 <?= $this->endSection(); ?>
 
-<!-- Chart.js -->
 <?= $this->section('scripts'); ?>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js" integrity="sha512-Y51n9m..." crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" crossorigin="anonymous"></script>
 <script>
-  let lineChart = null,
-    barChart = null,
-    pieLeft = null,
-    pieRight = null;
-  const $title = document.getElementById('indicator-title');
-  const $subtitle = document.getElementById('indicator-subtitle');
-  const $select = document.getElementById('subindicator-select');
-  const $yearL = document.getElementById('year-left');
-  const $yearR = document.getElementById('year-right');
-  const $refresh = document.getElementById('refresh-btn');
-  const $region = document.getElementById('region-select');
-  const $indicatorList = document.getElementById('indicator-list');
-  const $desc = document.getElementById('desc-text');
-  const $interp = document.getElementById('interpret-text');
+  // Elemen UI
+  let chart;
+  const $region   = document.getElementById('region-select');
+  const $tree     = document.getElementById('indicator-tree');
+  const $search   = document.getElementById('panel-search');
 
-  let currentIndicator = null,
-    rowsCache = [],
-    regionId = null,
-    currentRow = null,
-    currentRowMeta = null;
+  const $win   = document.getElementById('window-select');
+  const $year  = document.getElementById('year-select');
+  const $q     = document.getElementById('q-select');
+  const $m     = document.getElementById('m-select');
+  const $title = document.getElementById('chart-title');
+  const $sub   = document.getElementById('chart-sub');
+  const $unit  = document.getElementById('unit-box');
+  const $interp= document.getElementById('interpret-box');
+  const $refresh = document.getElementById('btn-refresh');
 
-  function ctx(id) {
-    return document.getElementById(id).getContext('2d');
-  }
+  // State
+  let regionId = null;
+  let indicatorCache = [];      // [{id,name,code,region_id}]
+  let rowsCacheByInd = {};      // {indicatorId: [rows]}
+  let current = { indicatorId: null, row: null }; // row = rowMeta terpilih
 
-  function resetCharts() {
-    [lineChart, barChart, pieLeft, pieRight].forEach(c => {
-      if (c) {
-        c.destroy();
-      }
-    });
-    lineChart = barChart = pieLeft = pieRight = null;
-  }
+  // Helpers
+  async function j(u){ const r=await fetch(u,{cache:'no-store'}); return r.json(); }
+  function resetChart(){ if(chart){ chart.destroy(); chart=null; } }
+  function shortLabel(s,max=64){ s=String(s||''); return s.length>max ? (s.slice(0,max-1)+'…') : s; }
+  function setOptions(sel, items){ sel.innerHTML=''; items.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); }); }
 
-  function human(s) {
-    return (s || '').replace(/_/g, ' ').replace(/\b\w/g, m => m.toUpperCase());
-  }
-
-  async function fetchJSON(url) {
-    const r = await fetch(url, {
-      cache: 'no-store'
-    });
-    return r.json();
-  }
-
-  async function loadRegions() {
-    const j = await fetchJSON('<?= base_url('api/regions'); ?>');
-    $region.innerHTML = '';
-    if (!j.ok) {
-      $region.innerHTML = '<option>Gagal</option>';
-      return;
-    }
-    j.regions.forEach(r => {
-      const o = document.createElement('option');
-      o.value = r.id;
-      o.textContent = r.name + (r.is_default ? ' (default)' : '');
-      if (r.is_default && !regionId) regionId = r.id;
+  // ------------- LOADERS -------------
+  async function loadRegions(){
+    const js = await j('<?= base_url('api/regions'); ?>');
+    if(!js.ok){ $region.innerHTML='<option>Gagal</option>'; return; }
+    $region.innerHTML='';
+    js.regions.forEach(r=>{
+      const o=document.createElement('option');
+      o.value=r.id; o.textContent=r.name + (r.is_default?' (default)':'');
       $region.appendChild(o);
+      if(r.is_default && !regionId) regionId = r.id;
     });
-    if (regionId) $region.value = regionId;
+    if(!regionId && js.regions.length) regionId = js.regions[0].id;
+    if(regionId) $region.value = regionId;
   }
 
-  async function loadIndicators() {
-    const j = await fetchJSON('<?= base_url('api/indicators'); ?>');
-    if (!j.ok) {
-      $indicatorList.innerHTML = '<div class="text-danger">Gagal memuat indikator</div>';
+  async function loadIndicators(){
+    const js = await j('<?= base_url('api/indicators'); ?>?region_id='+regionId);
+    indicatorCache = js.ok ? js.indicators : [];
+  }
+
+  async function ensureRows(indId){
+    if(rowsCacheByInd[indId]) return rowsCacheByInd[indId];
+    const js = await j('<?= base_url('api/rows'); ?>?indicator_id='+indId);
+    rowsCacheByInd[indId] = js.ok ? js.rows : [];
+    return rowsCacheByInd[indId];
+  }
+
+  // ------------- RENDER PANEL -------------
+  function renderTree(filtered=null){
+    const items = filtered ?? indicatorCache;
+    if(!items.length){ $tree.innerHTML = '<div class="text-muted small">Tidak ada indikator.</div>'; return; }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'tree-root';
+    items.forEach(ind=>{
+      const indDiv = document.createElement('div');
+      indDiv.className = 'ind-item';
+      indDiv.dataset.id = ind.id;
+
+      indDiv.innerHTML = `
+        <div class="ind-header d-flex align-items-center">
+          <button class="btn btn-sm btn-toggle me-2" aria-label="toggle"><i class="fa-solid fa-chevron-right"></i></button>
+          <div class="ind-name flex-1">${ind.name}</div>
+        </div>
+        <div class="sub-list d-none"></div>
+      `;
+      // toggle
+      indDiv.querySelector('.btn-toggle').onclick = async (e)=>{
+        e.stopPropagation();
+        await toggleSub(indDiv, ind.id);
+      };
+      // klik nama indikator => juga toggle
+      indDiv.querySelector('.ind-name').onclick = async ()=>{
+        await toggleSub(indDiv, ind.id);
+      };
+
+      wrap.appendChild(indDiv);
+    });
+    $tree.innerHTML='';
+    $tree.appendChild(wrap);
+  }
+
+  async function toggleSub(indDiv, indId){
+    const btn = indDiv.querySelector('.btn-toggle i');
+    const sub = indDiv.querySelector('.sub-list');
+    const isOpen = !sub.classList.contains('d-none');
+
+    if(isOpen){
+      sub.classList.add('d-none');
+      btn.classList.replace('fa-chevron-down','fa-chevron-right');
       return;
     }
-    $indicatorList.innerHTML = '';
-    j.indicators.forEach(ind => {
-      const d = document.createElement('div');
-      d.className = 'indicator-card mb-2';
-      d.textContent = ind.name;
-      d.style.cursor = 'pointer';
-      d.onclick = () => selectIndicator(ind);
-      $indicatorList.appendChild(d);
+    // open: load rows
+    const rows = await ensureRows(indId);
+    sub.innerHTML = rows.length ? rows.map(r=>`
+      <div class="sub-item" data-row-id="${r.id}" title="${r.subindikator}">
+        <i class="fa-regular fa-circle-dot me-2"></i>
+        <span class="sub-text">${r.subindikator}</span>
+        <span class="badge bg-light text-dark ms-2">${r.data_type}</span>
+        <span class="badge bg-light text-dark ms-1">${r.timeline}</span>
+      </div>
+    `).join('') : '<div class="text-muted small px-2">Belum ada subindikator.</div>';
+
+    sub.querySelectorAll('.sub-item').forEach(el=>{
+      el.onclick = ()=>{
+        sub.querySelectorAll('.sub-item.active').forEach(x=>x.classList.remove('active'));
+        el.classList.add('active');
+        const rid = +el.dataset.rowId;
+        const rowMeta = rows.find(r=>r.id===rid);
+        current.indicatorId = indId;
+        current.row = rowMeta;
+        setupPeriodControls(rowMeta);
+        draw();
+      };
     });
+
+    sub.classList.remove('d-none');
+    btn.classList.replace('fa-chevron-right','fa-chevron-down');
   }
 
-  async function selectIndicator(ind) {
-    currentIndicator = ind;
-    $title.textContent = ind.name;
-    $subtitle.textContent = '';
-    resetCharts();
-    $select.innerHTML = '<option value="">— Pilih SubIndikator —</option>';
-    $yearL.classList.add('d-none');
-    $yearR.classList.add('d-none');
+  // ------------- SEARCH -------------
+  function searchTree(q){
+    q = (q||'').trim().toLowerCase();
+    if(!q){ renderTree(); return; }
 
-    const j = await fetchJSON('<?= base_url('api/rows'); ?>?indicator_id=' + ind.id);
-    rowsCache = j.ok ? j.rows : [];
-    rowsCache.forEach((r, i) => {
-      const o = document.createElement('option');
-      const label = r.subindikator || r.kelompok || ('Baris #' + r.id);
-      o.value = r.id;
-      o.textContent = label + ' — [' + (r.data_type === 'PROPORTION' ? 'Proporsi' : 'Biasa') + ', ' + (r.timeline === 'YEAR' ? 'Tahunan' : (r.timeline === 'QUARTER' ? 'Triwulan' : 'Bulanan')) + ']';
-      $select.appendChild(o);
-    });
-  }
-
-  async function selectRow() {
-    resetCharts();
-    const rid = +$select.value;
-    currentRow = rowsCache.find(r => r.id === rid);
-    currentRowMeta = currentRow || null;
-    if (!currentRow) {
-      $desc.textContent = '';
-      $interp.textContent = '';
-      return;
-    }
-
-    if (currentRow.data_type === 'SINGLE') {
-      // filter timeline UI
-      if (currentRow.timeline === 'YEAR') {
-        // tampilkan filter window: all / last3 / last5
-        $yearL.classList.remove('d-none');
-        $yearR.classList.add('d-none');
-        $yearL.innerHTML = '<option value="all">Semua Data</option><option value="last3">3 Tahun Terakhir</option><option value="last5">5 Tahun Terakhir</option>';
-        $yearL.onchange = drawSeries;
-      } else {
-        // pilih tahun (untuk triwulan/bulanan)
-        const years = await probeYears(currentRow.id, regionId);
-        $yearL.classList.remove('d-none');
-        $yearR.classList.add('d-none');
-        $yearL.innerHTML = years.map(y => `<option>${y}</option>`).join('');
-        $yearL.onchange = drawSeries;
+    // filter indikator / subindikator yang cocok
+    const out = [];
+    indicatorCache.forEach(ind=>{
+      const matchInd = ind.name.toLowerCase().includes(q);
+      let subHit = [];
+      const rows = rowsCacheByInd[ind.id] || [];
+      subHit = rows.filter(r=> (r.subindikator||'').toLowerCase().includes(q));
+      if(matchInd || subHit.length){
+        out.push({...ind, __hits: subHit});
       }
-      await drawSeries();
-    } else {
-      // PROPORTION: tampilkan 2 selector periode kiri/kanan
-      const years = await probeYears(currentRow.id, regionId);
-      $yearL.classList.remove('d-none');
-      $yearR.classList.remove('d-none');
-      if (currentRow.timeline === 'YEAR') {
-        $yearL.innerHTML = years.map(y => `<option>${y}</option>`).join('');
-        $yearR.innerHTML = years.map(y => `<option>${y}</option>`).join('');
-        $yearL.value = years[Math.max(0, years.length - 2)] || '';
-        $yearR.value = years[Math.max(0, years.length - 1)] || '';
-        $yearL.onchange = drawProportion;
-        $yearR.onchange = drawProportion;
-      } else if (currentRow.timeline === 'QUARTER') {
-        // Tahun + triwulan via prompt sederhana (bisa diganti dropdown ganda bila mau)
-        $yearL.innerHTML = years.map(y => `<option>${y}</option>`).join('');
-        $yearR.innerHTML = years.map(y => `<option>${y}</option>`).join('');
-        $yearL.onchange = drawProportion;
-        $yearR.onchange = drawProportion;
-      } else {
-        $yearL.innerHTML = years.map(y => `<option>${y}</option>`).join('');
-        $yearR.innerHTML = years.map(y => `<option>${y}</option>`).join('');
-        $yearL.onchange = drawProportion;
-        $yearR.onchange = drawProportion;
-      }
-      await drawProportion();
+    });
+
+    // render: indikator yang cocok dan/atau yang punya subHit
+    const wrap = document.createElement('div');
+    out.forEach(ind=>{
+      const indDiv = document.createElement('div');
+      indDiv.className='ind-item';
+      indDiv.dataset.id = ind.id;
+      indDiv.innerHTML = `
+        <div class="ind-header d-flex align-items-center">
+          <button class="btn btn-sm btn-toggle me-2" aria-label="toggle"><i class="fa-solid fa-chevron-down"></i></button>
+          <div class="ind-name flex-1">${highlight(ind.name,q)}</div>
+        </div>
+        <div class="sub-list">
+          ${ (ind.__hits && ind.__hits.length)
+              ? ind.__hits.map(r=>`
+                <div class="sub-item" data-row-id="${r.id}" title="${r.subindikator}">
+                  <i class="fa-regular fa-circle-dot me-2"></i>
+                  <span class="sub-text">${highlight(r.subindikator,q)}</span>
+                  <span class="badge bg-light text-dark ms-2">${r.data_type}</span>
+                  <span class="badge bg-light text-dark ms-1">${r.timeline}</span>
+                </div>`).join('')
+              : '<div class="text-muted small px-2">Tidak ada subindikator cocok.</div>' }
+        </div>
+      `;
+      // jika klik sub saat hasil search
+      indDiv.querySelectorAll('.sub-item').forEach(el=>{
+        el.onclick = ()=>{
+          wrap.querySelectorAll('.sub-item.active').forEach(x=>x.classList.remove('active'));
+          el.classList.add('active');
+          const rid = +el.dataset.rowId;
+          const rows = rowsCacheByInd[ind.id] || [];
+          const rowMeta = rows.find(r=>r.id===rid);
+          current.indicatorId = ind.id;
+          current.row = rowMeta;
+          setupPeriodControls(rowMeta);
+          draw();
+        };
+      });
+      wrap.appendChild(indDiv);
+    });
+    $tree.innerHTML='';
+    $tree.appendChild(wrap);
+  }
+
+  function highlight(text,q){
+    if(!q) return text;
+    const esc = q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    return String(text).replace(new RegExp('('+esc+')','ig'), '<mark>$1</mark>');
+  }
+
+  // ------------- PERIODE & DRAW -------------
+  function setupPeriodControls(rowMeta){
+    // reset
+    [$win,$year,$q,$m].forEach(el=>el.classList.add('d-none'));
+    if(!rowMeta) return;
+
+    const t  = rowMeta.timeline;   // YEARLY|QUARTERLY|MONTHLY
+    const dt = rowMeta.data_type;  // TIMESERIES|JUMLAH_KATEGORI|PROPORSI
+    if(dt==='PROPORSI'){
+      $year.classList.remove('d-none');
+      if(t==='QUARTERLY') $q.classList.remove('d-none');
+      if(t==='MONTHLY')   $m.classList.remove('d-none');
+    }else{
+      if(t==='YEARLY') $win.classList.remove('d-none');
+      else $year.classList.remove('d-none');
     }
   }
 
-  async function probeYears(rowId, regionId) {
-    // ambil semua tahun yg ada nilai (pakai /api/series window=all untuk SINGLE, atau /api/proportion untuk PROPORTION dengan sweep)
-    // Supaya ringan, ambil dari series SINGLE (var 0) — backend sudah urutkan
-    const q = await fetchJSON('<?= base_url('api/series'); ?>?row_id=' + rowId + '&region_id=' + regionId + '&window=all');
-    if (q.ok && q.meta.timeline === 'YEAR') {
-      return (q.labels || []).map(Number);
+  async function probeYearsForRow(rowId){
+    const js = await j('<?= base_url('api/series'); ?>?row_id='+rowId+'&region_id='+regionId+'&window=all');
+    if(js.ok && (js.meta.timeline==='YEAR' || js.meta.timeline==='YEARLY')){
+      const ys = (js.labels||[]).map(x=>parseInt(x,10)).filter(Boolean);
+      if(ys.length){ setOptions($year, ys); $year.value = ys[ys.length-1]; return; }
     }
-    // fallback: range default
-    const now = new Date().getFullYear();
-    return [now - 5, now - 4, now - 3, now - 2, now - 1, now];
+    const now = (new Date()).getFullYear();
+    const ys = Array.from({length:6},(_,i)=> now-5+i);
+    setOptions($year, ys); $year.value = ys[ys.length-1];
   }
 
-  async function drawSeries() {
-    const windowVal = $yearL.classList.contains('d-none') ? 'all' : $yearL.value || 'all';
-    const j = await fetchJSON('<?= base_url('api/series'); ?>?row_id=' + currentRow.id + '&region_id=' + regionId + '&window=' + encodeURIComponent(windowVal));
-    if (!j.ok) {
-      alert(j.error || 'Gagal');
-      return;
+  async function draw(){
+    resetChart();
+    const row = current.row;
+    if(!row) return;
+
+    // set year default bila perlu
+    if(!$year.classList.contains('d-none') && !$year.value){
+      await probeYearsForRow(row.id);
     }
 
-    $desc.textContent = j.meta.desc || '';
-    $interp.textContent = j.meta.interpretasi || '';
-    const unit = j.meta.unit ? (' (' + j.meta.unit + ')') : '';
+    // build URL
+    let url='', chartType='line', subTxt='';
+    if(row.data_type==='PROPORSI'){
+      const p = new URLSearchParams({ row_id: row.id, region_id: regionId, year: $year.value||new Date().getFullYear() });
+      if(row.timeline==='QUARTERLY') p.set('quarter',$q.value||1);
+      if(row.timeline==='MONTHLY')   p.set('month',$m.value||1);
+      url = '<?= base_url('api/proportion'); ?>?'+p.toString();
+      chartType='pie'; subTxt='Data Proporsi (Pie Chart)';
+    }else{
+      const p = new URLSearchParams({ row_id: row.id, region_id: regionId });
+      if(row.timeline==='YEARLY') p.set('window',$win.value||'all');
+      else p.set('year',$year.value||new Date().getFullYear());
+      url = '<?= base_url('api/series'); ?>?'+p.toString();
+      chartType = (row.data_type==='JUMLAH_KATEGORI'?'bar':'line');
+      subTxt = (chartType==='bar'?'Data Jumlah Kategori (Bar Chart)':'Data Timeseries (Line Chart)');
+    }
 
-    resetCharts();
-    lineChart = new Chart(ctx('chartLine'), {
-      type: 'line',
+    const js = await j(url);
+    if(!js.ok){ alert('Gagal memuat data'); return; }
+
+    // Judul & meta
+    const unit = js.meta?.unit || '';
+    $title.textContent = shortLabel(row.subindikator, 88);
+    $sub.textContent   = subTxt;
+    $unit.textContent  = unit || '-';
+    $interp.textContent= js.meta?.interpretasi || (js.meta?.desc || '-') ;
+
+    const ctx = document.getElementById('bigChart').getContext('2d');
+    chart = new Chart(ctx, {
+      type: chartType,
       data: {
-        labels: j.labels,
+        labels: js.labels,
         datasets: [{
-          label: (currentRow.subindikator || currentRow.kelompok) + unit,
-          data: j.values,
+          label: shortLabel(row.subindikator + (unit?` (${unit})`:''), 60),
+          data: js.values,
           borderWidth: 2,
           tension: .25,
-          fill: true
+          fill: (chartType==='line')
         }]
       },
       options: {
-        plugins: {
-          legend: {
-            position: 'bottom'
+        plugins:{
+          legend:{ position:'bottom' },
+          tooltip:{
+            callbacks:{
+              label:(c)=>{
+                const v = (typeof c.parsed==='object') ? c.parsed.y : c.parsed;
+                const lbl = c.dataset.label ? c.dataset.label+': ' : '';
+                return lbl + (v ?? '-') + (unit?` ${unit}`:'');
+              }
+            }
           }
+        },
+        scales: (chartType==='pie')? {} : {
+          y:{ beginAtZero:false, ticks:{ callback:(v)=> v+(unit?` ${unit}`:'') } }
         }
       }
     });
-    barChart = new Chart(ctx('chartBar'), {
-      type: 'bar',
-      data: {
-        labels: j.labels,
-        datasets: [{
-          label: (currentRow.subindikator || currentRow.kelompok) + unit,
-          data: j.values
-        }]
-      },
-      options: {
-        plugins: {
-          legend: {
-            position: 'bottom'
-          }
-        }
-      }
-    });
+
+    // siapkan URL export sesuai tampilan sekarang
+    chart.__meta = {
+      title: row.subindikator, unit: unit, interpretasi: js.meta?.interpretasi || '',
+      exportUrl: '<?= base_url('api/export/xlsx'); ?>?jenis='+(row.data_type==='PROPORSI'?'proportion':'series')+'&'+url.split('?')[1]
+    };
   }
 
-  async function drawProportion() {
-    // Dapatkan periode kiri/kanan
-    const t = currentRow.timeline;
-    let leftQ = '',
-      rightQ = '',
-      leftM = '',
-      rightM = '';
-    let yL = parseInt($yearL.value || new Date().getFullYear());
-    let yR = parseInt($yearR.value || new Date().getFullYear());
-
-    if (t === 'QUARTER') {
-      leftQ = prompt('Triwulan kiri (1-4)?', '1') || '1';
-      rightQ = prompt('Triwulan kanan (1-4)?', '4') || '4';
-    } else if (t === 'MONTH') {
-      leftM = prompt('Bulan kiri (1-12)?', '1') || '1';
-      rightM = prompt('Bulan kanan (1-12)?', '12') || '12';
-    }
-
-    const paramsL = new URLSearchParams({
-      row_id: currentRow.id,
-      region_id: regionId,
-      year: yL
+  // ------------- EVENTS -------------
+  document.getElementById('btn-download-data').onclick = ()=>{ if(chart?.__meta?.exportUrl) window.location.href = chart.__meta.exportUrl; };
+  document.getElementById('btn-download-chart').onclick = ()=>{
+    if(!chart) return;
+    const canvas=chart.canvas, pad=24, txtH=16, blockH=pad*2+txtH*3;
+    const out=document.createElement('canvas'); out.width=canvas.width; out.height=canvas.height+blockH;
+    const g=out.getContext('2d');
+    g.fillStyle='#fff'; g.fillRect(0,0,out.width,out.height);
+    g.fillStyle='#111'; g.font='bold 16px sans-serif';
+    g.fillText(chart.__meta?.title || 'Chart', 16, 24);
+    g.font='12px sans-serif'; g.fillStyle='#444';
+    g.fillText('Satuan: '+(chart.__meta?.unit || '-'), 16, 24+txtH+4);
+    const text='Interpretasi: '+(chart.__meta?.interpretasi || '-'), maxW=out.width-32;
+    let line='', y=24+txtH+4+txtH+8;
+    text.split(' ').forEach(w=>{
+      const t=line?line+' '+w:w;
+      if(g.measureText(t).width>maxW){ g.fillText(line,16,y); y+=txtH+4; line=w; } else { line=t; }
     });
-    const paramsR = new URLSearchParams({
-      row_id: currentRow.id,
-      region_id: regionId,
-      year: yR
-    });
-    if (t === 'QUARTER') {
-      paramsL.set('quarter', leftQ);
-      paramsR.set('quarter', rightQ);
-    }
-    if (t === 'MONTH') {
-      paramsL.set('month', leftM);
-      paramsR.set('month', rightM);
-    }
+    if(line) g.fillText(line,16,y);
+    g.drawImage(canvas,0,blockH);
+    const a=document.createElement('a'); a.href=out.toDataURL('image/png'); a.download='chart_'+Date.now()+'.png'; a.click();
+  };
 
-    const [a, b] = await Promise.all([
-      fetchJSON('<?= base_url('api/proportion'); ?>?' + paramsL.toString()),
-      fetchJSON('<?= base_url('api/proportion'); ?>?' + paramsR.toString())
-    ]);
-    if (!a.ok || !b.ok) {
-      alert('Gagal memuat proporsi');
-      return;
-    }
+  [$win,$year,$q,$m].forEach(sel=> sel.addEventListener('change', draw));
+  $refresh.addEventListener('click', draw);
 
-    $desc.textContent = a.meta.desc || '';
-    $interp.textContent = a.meta.interpretasi || '';
-
-    resetCharts();
-    pieLeft = new Chart(ctx('chartLine'), {
-      type: 'pie',
-      data: {
-        labels: a.labels,
-        datasets: [{
-          label: 'Kiri',
-          data: a.values
-        }]
-      },
-      options: {
-        plugins: {
-          legend: {
-            position: 'bottom'
-          }
-        }
-      }
-    });
-    pieRight = new Chart(ctx('chartBar'), {
-      type: 'pie',
-      data: {
-        labels: b.labels,
-        datasets: [{
-          label: 'Kanan',
-          data: b.values
-        }]
-      },
-      options: {
-        plugins: {
-          legend: {
-            position: 'bottom'
-          }
-        }
-      }
-    });
-
-    $subtitle.textContent = (t === 'YEAR' ? ('Perbandingan ' + yL + ' vs ' + yR) :
-      t === 'QUARTER' ? ('Perbandingan ' + yL + '-Q' + leftQ + ' vs ' + yR + '-Q' + rightQ) :
-      ('Perbandingan ' + yL + '-' + leftM + ' vs ' + yR + '-' + rightM));
-  }
-
-  $region.onchange = async () => {
+  $region.onchange = async ()=>{
     regionId = +$region.value;
+    rowsCacheByInd = {};
     await loadIndicators();
-    resetUI();
-  };
-  $select.onchange = selectRow;
-  $refresh.onclick = () => {
-    if (currentIndicator) selectIndicator(currentIndicator);
+    renderTree();
   };
 
-  function resetUI() {
-    $title.textContent = 'Pilih indikator di panel kanan';
-    $subtitle.textContent = '';
-    $select.innerHTML = '<option value="">-</option>';
-    resetCharts();
-    $desc.textContent = '';
-    $interp.textContent = '';
-    $yearL.classList.add('d-none');
-    $yearR.classList.add('d-none');
-  }
+  $search.addEventListener('input', ()=>{
+    const q = $search.value;
+    if(!q){ renderTree(); return; }
+    // untuk hasil lebih akurat, pastikan semua rows sudah prefetched sekali
+    // (opsional) — di sini kita pakai yang sudah ada saja.
+    searchTree(q);
+  });
 
-  (async function init() {
+  // ------------- INIT -------------
+  (async function init(){
     await loadRegions();
-    if (!regionId && $region.options.length) regionId = +$region.options[0].value;
     await loadIndicators();
+    renderTree();
   })();
 </script>
-
 
 <?= $this->endSection(); ?>

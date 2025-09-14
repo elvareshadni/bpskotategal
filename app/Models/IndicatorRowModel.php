@@ -9,6 +9,6 @@ class IndicatorRowModel extends Model
     protected $table      = 'indicator_rows';
     protected $primaryKey = 'id';
     protected $returnType = 'array';
-    protected $allowedFields = ['indicator_id','subindikator','timeline','data_type','unit','sort_order'];
+    protected $allowedFields = ['indicator_id','subindikator','timeline','data_type','unit','interpretasi','sort_order']; // + interpretasi
     protected $useTimestamps = true;
 }

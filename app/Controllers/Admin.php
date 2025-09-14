@@ -712,6 +712,31 @@ class Admin extends BaseController
         return $this->response->setJSON(['ok' => true]);
     }
 
+    public function gridYears()
+    {
+        $regionId = (int)($this->request->getGet('region_id') ?? 0);
+        $rowId    = (int)($this->request->getGet('row_id') ?? 0);
+
+        if ($regionId <= 0 || $rowId <= 0) {
+            return $this->response->setJSON(['ok' => false, 'error' => 'Bad params']);
+        }
+
+        $valM = new IndicatorValueModel();
+
+        // Ambil tahun yang memang punya record (distinct)
+        $rows = $valM->select('year')
+            ->where('row_id', $rowId)
+            ->where('region_id', $regionId)
+            ->where('year IS NOT NULL', null, false)
+            ->groupBy('year')
+            ->orderBy('year', 'ASC')
+            ->findAll();
+
+        $years = array_map(static fn($r) => (int)$r['year'], $rows);
+
+        return $this->response->setJSON(['ok' => true, 'years' => $years]);
+    }
+
     public function gridDeleteYears()
     {
         $json = $this->request->getJSON(true);

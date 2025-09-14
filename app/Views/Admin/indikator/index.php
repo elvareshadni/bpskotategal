@@ -120,4 +120,19 @@
         await loadList();
     })();
 </script>
+<?php if (session()->getFlashdata('success')): ?>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            Swal.fire('Berhasil', <?= json_encode(session()->getFlashdata('success')); ?>, 'success');
+        });
+    </script>
+<?php endif; ?>
+<?php if (session()->getFlashdata('error')): ?>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            Swal.fire('Gagal', <?= json_encode(session()->getFlashdata('error')); ?>, 'error');
+        });
+    </script>
+<?php endif; ?>
+
 <?= $this->endSection(); ?>

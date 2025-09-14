@@ -170,6 +170,16 @@
                 return Number.isFinite(n) ? n : null;
             }
 
+            async function fetchExistingYears() {
+                const qs = new URLSearchParams({
+                    region_id: regionId,
+                    row_id: rowId
+                });
+                const res = await fetch(`<?= base_url('admin/data-indikator/grid/years'); ?>?` + qs.toString());
+                const js = await res.json();
+                return js.ok ? (js.years || []) : [];
+            }
+
             // ====== Ambil META satu kali (pakai tahun sekarang hanya untuk ambil struktur) ======
             async function fetchMetaOnce() {
                 const y = new Date().getFullYear();
@@ -634,10 +644,21 @@
                 });
             }
 
-            // ====== Init: ambil meta saja, grid kosong ======
+            // ====== Init: ambil meta, lalu auto-load tahun yang sudah ada datanya ======
             (async function init() {
-                await fetchMetaOnce();
-                // grid tetap kosong sampai admin menambah tahun secara manual
+                await fetchMetaOnce(); // bangun grid kosong + panel var jika perlu
+
+                const years = await fetchExistingYears();
+
+                if (Array.isArray(years) && years.length) {
+                    // load semua tahun yang ada, berurutan
+                    for (const y of years) {
+                        await addYear(y); // ini sudah merge ke grid & render panel tahun
+                    }
+                } else {
+                    // tidak ada data sama sekali => biarkan grid kosong (seperti sebelumnya)
+                    yearPanel && (yearPanel.style.display = 'none');
+                }
             })();
 
         })();
