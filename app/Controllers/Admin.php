@@ -510,6 +510,12 @@ class Admin extends BaseController
         } else {
             $id = $rowM->insert($data);
         }
+
+        if ($dtype !== 'timeseries') {
+            // untuk proporsi, kamu bisa ganti defaultName jadi 'Kategori' jika mau
+            $this->ensureOneVarAndMigrate($id, $dtype === 'proporsi' ? 'Kategori' : 'Jumlah');
+        }
+
         return redirect()->to(base_url('admin/subindicator/form?id=' . $id))->with('success', 'Disimpan');
     }
 
@@ -794,6 +800,34 @@ class Admin extends BaseController
 
         return $this->response->setJSON(['ok' => true, 'data' => $vars]);
     }
+
+    private function ensureOneVarAndMigrate(int $rowId, string $defaultName = 'Jumlah'): void
+    {
+        $vm = new IndicatorRowVarModel();
+        $db = \Config\Database::connect();
+
+        // Cek sudah ada var?
+        $exists = $vm->where('row_id', $rowId)->countAllResults();
+        if ($exists > 0) return;
+
+        // Buat 1 var default
+        $vm->insert([
+            'row_id'     => $rowId,
+            'name'       => $defaultName,
+            'sort_order' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+        $newVarId = (int)$vm->getInsertID();
+
+        // Migrasi data lama (kalau ada) dari var_id NULL → var default
+        $db->table('indicator_values')
+            ->where('row_id', $rowId)
+            ->where('var_id', null)
+            ->update(['var_id' => $newVarId, 'updated_at' => date('Y-m-d H:i:s')]);
+    }
+
+
 
 
 

@@ -71,7 +71,12 @@
 .sub-item.active { background:#dbeafe; outline:1px solid #bfdbfe; }
 
 .stats-blue { background: #ebf3ff; }    /* kartu besar biru muda */
-.chart-card { background:#fff; }
+.chart-card {
+    background:#fff;
+    height: 360px !important;   /* ubah angka ini kalau mau lebih tinggi/rendah */
+    max-height: 360px !important;
+    width: 100% !important;
+  }
 
 
 /* === Footer === */

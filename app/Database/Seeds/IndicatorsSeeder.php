@@ -24,6 +24,71 @@ class IndicatorsSeeder extends Seeder
         return (int) $this->db->insertID();
     }
 
+    // E:\laragon\www\bpskotategal\app\Database\Seeds\IndicatorsSeeder.php
+
+    private function addSingleVar(int $rowId, string $name = 'Jumlah'): int
+    {
+        $this->db->table('indicator_row_vars')->insert([
+            'row_id'     => $rowId,
+            'name'       => $name,
+            'sort_order' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+        return (int) $this->db->insertID();
+    }
+
+    private function addValuesSingleVar(int $rowId, int $regionId, int $varId, array $yearVal): void
+    {
+        foreach ($yearVal as $e) {
+            $this->db->table('indicator_values')->insert([
+                'row_id'    => $rowId,
+                'region_id' => $regionId,
+                'var_id'    => $varId,
+                'year'      => (int)$e['year'],
+                'quarter'   => null,
+                'month'     => null,
+                'value'     => is_null($e['value']) ? null : (float)$e['value'],
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+    }
+
+    private function addValuesQuarterlyVar(int $rowId, int $regionId, int $varId, int $year, array $qToVal): void
+    {
+        foreach ($qToVal as $q => $val) {
+            $this->db->table('indicator_values')->insert([
+                'row_id'    => $rowId,
+                'region_id' => $regionId,
+                'var_id'    => $varId,
+                'year'      => $year,
+                'quarter'   => $q,
+                'month'     => null,
+                'value'     => is_null($val) ? null : (float)$val,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+    }
+
+    private function addValuesMonthlyVar(int $rowId, int $regionId, int $varId, int $year, array $mToVal): void
+    {
+        foreach ($mToVal as $m => $val) {
+            $this->db->table('indicator_values')->insert([
+                'row_id'    => $rowId,
+                'region_id' => $regionId,
+                'var_id'    => $varId,
+                'year'      => $year,
+                'quarter'   => null,
+                'month'     => $m,
+                'value'     => is_null($val) ? null : (float)$val,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+    }
+
     private function addRow(int $indicatorId, string $sub, string $timeline, string $dtype, ?string $unit, int $order = 1, ?string $interpretasi = null): int
     {
         $this->db->table('indicator_rows')->insert([
@@ -493,6 +558,45 @@ class IndicatorsSeeder extends Seeder
             ['year' => 2022, 'value' => 330],
             ['year' => 2023, 'value' => 345],
             ['year' => 2024, 'value' => 360],
+        ]);
+
+        // --- D) Jumlah Kategori (Tahunan) → Bar
+        $indD = $this->addIndicator($idDummy, 'Contoh Jumlah Kategori Tahunan', 'D_Y_BAR');
+        $rowD = $this->addRow($indD, 'Jumlah UMKM Terdaftar', 'yearly', 'jumlah_kategori', 'unit', 1);
+        $varD = $this->addSingleVar($rowD, 'Jumlah'); // <— WAJIB ada var
+        $this->addValuesSingleVar($rowD, $idDummy, $varD, [
+            ['year' => 2019, 'value' => 5400],
+            ['year' => 2020, 'value' => 5600],
+            ['year' => 2021, 'value' => 5900],
+            ['year' => 2022, 'value' => 6200],
+            ['year' => 2023, 'value' => 6500],
+            ['year' => 2024, 'value' => 7000],
+        ]);
+
+        // --- BAR (TRIWULAN)
+        $indQB = $this->addIndicator($idDummy, 'Contoh Bar Triwulanan', 'D_Q_BAR');
+        $rowQB = $this->addRow($indQB, 'Produksi Hortikultura (Triwulanan)', 'quarterly', 'jumlah_kategori', 'ton', 1);
+        $varQB = $this->addSingleVar($rowQB, 'Jumlah');
+        $this->addValuesQuarterlyVar($rowQB, $idDummy, $varQB, 2023, [1 => 820, 2 => 900, 3 => 880, 4 => 950]);
+        $this->addValuesQuarterlyVar($rowQB, $idDummy, $varQB, 2024, [1 => 860, 2 => 940, 3 => 905, 4 => 980]);
+
+        // --- BAR (BULANAN)
+        $indMB = $this->addIndicator($idDummy, 'Contoh Bar Bulanan', 'D_M_BAR');
+        $rowMB = $this->addRow($indMB, 'Penjualan Ritel (Bulanan)', 'monthly', 'jumlah_kategori', 'Miliar Rupiah', 1);
+        $varMB = $this->addSingleVar($rowMB, 'Jumlah');
+        $this->addValuesMonthlyVar($rowMB, $idDummy, $varMB, 2024, [
+            1 => 85,
+            2 => 88,
+            3 => 92,
+            4 => 95,
+            5 => 98,
+            6 => 102,
+            7 => 110,
+            8 => 120,
+            9 => 108,
+            10 => 104,
+            11 => 100,
+            12 => 130
         ]);
     }
 }

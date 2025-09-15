@@ -89,6 +89,42 @@
   </div>
 </div>
 
+<section class="py-5 bg-light" id="infografis">
+  <div class="container">
+    <h2 class="section-title mb-4">INFOGRAFIS</h2>
+    <div class="row g-3 mb-3">
+      <?php if (!empty($infografis)): ?>
+        <?php foreach ($infografis as $item): ?>
+          <div class="col-lg-3 col-md-6 mb-4">
+            <a href="<?= base_url('user/detail/' . $item['id']); ?>" class="text-decoration-none">
+              <div class="card h-100 shadow-sm border-0">
+                <div class="p-3 pb-0 bg-white">
+                  <img src="<?= base_url('img/' . $item['gambar']); ?>"
+                    class="img-fluid rounded border border-white"
+                    alt="<?= esc($item['judul']); ?>"
+                    style="max-width: auto; height: 100%; object-fit: cover;">
+                </div>
+                <div class="card-body pt-0">
+                  <small class="text-muted d-block mt-2 mb-0">
+                    <?= date('d M Y', strtotime($item['tanggal'])); ?>
+                  </small>
+                  <h6 class="card-title text-dark"><?= esc($item['judul']); ?></h6>
+                </div>
+              </div>
+            </a>
+          </div>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <p class="text-muted">Belum ada data infografis.</p>
+      <?php endif; ?>
+    </div>
+
+    <div class="text-center mt-3">
+      <a href="<?= base_url('user/list'); ?>" class="btn btn-primary">Infografis Lainnya</a>
+    </div>
+  </div>
+</section>
+
 
 <?= $this->endSection(); ?>
 
@@ -262,10 +298,10 @@
   // ------------- SEARCH -------------
   async function searchTree(q) {
     q = (q || '').trim().toLowerCase();
-    
+
     // batalin proses search sebelumnya
     const mySeq = ++searchSeq;
-    
+
     if (!q) {
       renderTree();
       return;
@@ -399,15 +435,11 @@
     const row = current.row;
     if (!row) return;
 
-    // set year default bila perlu
     if (!$year.classList.contains('d-none') && !$year.value) {
       await probeYearsForRow(row.id);
     }
 
-    // build URL
-    let url = '',
-      chartType = 'line',
-      subTxt = '';
+    let url = '', chartType = 'line', subTxt = '';
     if (row.data_type === 'PROPORSI') {
       const p = new URLSearchParams({
         row_id: row.id,
@@ -415,29 +447,24 @@
         year: $year.value || new Date().getFullYear()
       });
       if (row.timeline === 'QUARTERLY') p.set('quarter', $q.value || 1);
-      if (row.timeline === 'MONTHLY') p.set('month', $m.value || 1);
+      if (row.timeline === 'MONTHLY')  p.set('month', $m.value || 1);
       url = '<?= base_url('api/proportion'); ?>?' + p.toString();
       chartType = 'pie';
       subTxt = 'Data Proporsi (Pie Chart)';
     } else {
-      const p = new URLSearchParams({
-        row_id: row.id,
-        region_id: regionId
-      });
+      const p = new URLSearchParams({ row_id: row.id, region_id: regionId });
       if (row.timeline === 'YEARLY') p.set('window', $win.value || 'all');
-      else p.set('year', $year.value || new Date().getFullYear());
+      else                          p.set('year', $year.value || new Date().getFullYear());
+
+      if (row.data_type === 'JUMLAH_KATEGORI') p.set('multi','1'); // ADDED (multi dataset)
       url = '<?= base_url('api/series'); ?>?' + p.toString();
       chartType = (row.data_type === 'JUMLAH_KATEGORI' ? 'bar' : 'line');
       subTxt = (chartType === 'bar' ? 'Data Jumlah Kategori (Bar Chart)' : 'Data Timeseries (Line Chart)');
     }
 
     const js = await j(url);
-    if (!js.ok) {
-      alert('Gagal memuat data');
-      return;
-    }
+    if (!js.ok) { alert('Gagal memuat data'); return; }
 
-    // Judul & meta
     const unit = js.meta?.unit || '';
     $title.textContent = shortLabel(row.subindikator, 88);
     $sub.textContent = subTxt;
@@ -445,23 +472,43 @@
     $interp.textContent = js.meta?.interpretasi || (js.meta?.desc || '-');
 
     const ctx = document.getElementById('bigChart').getContext('2d');
+     // ===== Siapkan datasets untuk Chart.js (pie / line single / bar multi) ===== // ADDED
+    let datasets = [];
+    if (row.data_type === 'PROPORSI') {
+      datasets = [{
+        label: shortLabel(row.subindikator + (unit ? ` (${unit})` : ''), 60),
+        data: js.values,
+        borderWidth: 2,
+        tension: .25,
+        fill: false
+      }];
+    } else if (row.data_type === 'JUMLAH_KATEGORI' && Array.isArray(js.datasets)) {
+      // MULTI VARIABEL BAR
+      datasets = js.datasets.map(ds => ({
+        label: shortLabel(ds.name, 40),
+        data: ds.values,
+        borderWidth: 2,
+        tension: .25,
+        fill: false
+      }));
+    } else {
+      // SINGLE SERIES (mode lama)
+      datasets = [{
+        label: shortLabel(row.subindikator + (unit ? ` (${unit})` : ''), 60),
+        data: js.values,
+        borderWidth: 2,
+        tension: .25,
+        fill: (chartType === 'line')
+      }];
+    }
+
+    // Render Chart
     chart = new Chart(ctx, {
       type: chartType,
-      data: {
-        labels: js.labels,
-        datasets: [{
-          label: shortLabel(row.subindikator + (unit ? ` (${unit})` : ''), 60),
-          data: js.values,
-          borderWidth: 2,
-          tension: .25,
-          fill: (chartType === 'line')
-        }]
-      },
+      data: { labels: js.labels, datasets },
       options: {
         plugins: {
-          legend: {
-            position: 'bottom'
-          },
+          legend: { position: 'bottom' },
           tooltip: {
             callbacks: {
               label: (c) => {
@@ -475,9 +522,7 @@
         scales: (chartType === 'pie') ? {} : {
           y: {
             beginAtZero: false,
-            ticks: {
-              callback: (v) => v + (unit ? ` ${unit}` : '')
-            }
+            ticks: { callback: (v) => v + (unit ? ` ${unit}` : '') }
           }
         }
       }
@@ -488,7 +533,9 @@
       title: row.subindikator,
       unit: unit,
       interpretasi: js.meta?.interpretasi || '',
-      exportUrl: '<?= base_url('api/export/xlsx'); ?>?jenis=' + (row.data_type === 'PROPORSI' ? 'proportion' : 'series') + '&' + url.split('?')[1]
+      exportUrl: '<?= base_url('api/export/xlsx'); ?>?jenis='
+        + (row.data_type === 'PROPORSI' ? 'proportion' : 'series')
+        + '&' + url.split('?')[1] // ini sudah mengandung multi=1 kalau JUMLAH_KATEGORI
     };
   }
 
