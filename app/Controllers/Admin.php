@@ -839,6 +839,145 @@ class Admin extends BaseController
         return view('Admin/laporan_kunjungan', $data);
     }
 
+
+    // ==========================
+    // Carousel CRUD
+    // ==========================
+    public function carousel()
+    {
+        $m = new CarouselModel();
+        $data['rows'] = $m->orderBy('id', 'DESC')->findAll();
+        return view('Admin/carousel_list', $data);
+    }
+
+    public function carouselAdd()
+    {
+        return view('Admin/carousel_add');
+    }
+
+    public function carouselSave()
+    {
+        $m = new CarouselModel();
+
+        $judul  = trim((string)$this->request->getPost('judul'));
+        $posisi = trim((string)$this->request->getPost('posisi'));
+        $link   = trim((string)$this->request->getPost('link_url'));   
+        $file   = $this->request->getFile('gambar');
+
+        $allowedPos = ['start', 'center', 'end'];
+        if (!in_array($posisi, $allowedPos, true)) $posisi = 'center';
+        if ($judul === '') return redirect()->back()->withInput()->with('error', 'Judul wajib diisi');
+
+        // Validasi link opsional
+        if ($link !== '' && !filter_var($link, FILTER_VALIDATE_URL)) {
+            return redirect()->back()->withInput()->with('error', 'URL link tidak valid.');
+        }
+
+        $newName = null;
+        if ($file && $file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
+            if (!in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/jpg'])) {
+                return redirect()->back()->withInput()->with('error', 'Format harus JPG/PNG');
+            }
+            if ($file->getSize() > 2 * 1024 * 1024) {
+                return redirect()->back()->withInput()->with('error', 'Ukuran maks 2MB');
+            }
+            $dir = FCPATH . 'img/carousel';
+            if (!is_dir($dir)) @mkdir($dir, 0775, true);
+            $newName = $file->getRandomName();
+            $file->move($dir, $newName);
+        } else {
+            return redirect()->back()->withInput()->with('error', 'Gambar wajib diunggah');
+        }
+
+        $m->insert([
+            'judul'    => $judul,
+            'posisi'   => $posisi,
+            'gambar'   => $newName,
+            'link_url' => $link ?: null,        
+        ]);
+
+        return redirect()->to(base_url('admin/carousel'))->with('success', 'Slide berhasil ditambahkan!');
+    }
+
+    public function carouselEdit($id)
+    {
+        $m   = new CarouselModel();
+        $row = $m->find($id);
+        if (!$row) return redirect()->to(base_url('admin/carousel'))->with('error', 'Data tidak ditemukan');
+        return view('Admin/carousel_edit', ['row' => $row]);
+    }
+
+    public function carouselUpdate($id)
+    {
+        $m   = new CarouselModel();
+        $row = $m->find($id);
+        if (!$row) return redirect()->to(base_url('admin/carousel'))->with('error', 'Data tidak ditemukan');
+
+        $judul  = trim((string)$this->request->getPost('judul'));
+        $posisi = trim((string)$this->request->getPost('posisi'));
+        $link   = trim((string)$this->request->getPost('link_url'));     
+        $file   = $this->request->getFile('gambar');
+
+        $allowedPos = ['start', 'center', 'end'];
+        if (!in_array($posisi, $allowedPos, true)) $posisi = 'center';
+        if ($judul === '') return redirect()->back()->withInput()->with('error', 'Judul wajib diisi');
+
+        if ($link !== '' && !filter_var($link, FILTER_VALIDATE_URL)) {
+            return redirect()->back()->withInput()->with('error', 'URL link tidak valid.');
+        }
+
+        $data = [
+            'judul'    => $judul,
+            'posisi'   => $posisi,
+            'link_url' => $link ?: null,        
+        ];
+
+        if ($file && $file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
+            if (!in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/jpg'])) {
+                return redirect()->back()->withInput()->with('error', 'Format harus JPG/PNG');
+            }
+            if ($file->getSize() > 2 * 1024 * 1024) {
+                return redirect()->back()->withInput()->with('error', 'Ukuran maks 2MB');
+            }
+            $dir = FCPATH . 'img/carousel';
+            if (!is_dir($dir)) @mkdir($dir, 0775, true);
+            $newName = $file->getRandomName();
+            if (!$file->move($dir, $newName)) {
+                return redirect()->back()->withInput()->with('error', 'Gagal menyimpan gambar');
+            }
+            $data['gambar'] = $newName;
+
+            // hapus file lama
+            $old = FCPATH . 'img/carousel/' . $row['gambar'];
+            if (!is_file($old)) $old = FCPATH . 'img/' . $row['gambar']; // fallback
+            if (is_file($old)) @unlink($old);
+        }
+
+        if (!$m->update($id, $data)) {
+            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui data');
+        }
+
+        return redirect()->to(base_url('admin/carousel'))->with('success', 'Slide berhasil diperbarui');
+    }
+
+
+    public function carouselDelete($id)
+    {
+        $m   = new CarouselModel();
+        $row = $m->find($id);
+        if ($row) {
+            $file = FCPATH . 'img/carousel/' . $row['gambar'];
+            if (!is_file($file)) {
+                // fallback: jika seeder/old file disimpan di /img
+                $file = FCPATH . 'img/' . $row['gambar'];
+            }
+            if (is_file($file)) @unlink($file);
+            $m->delete($id);
+        }
+        return redirect()->to(base_url('admin/carousel'))->with('success', 'Slide dihapus');
+    }
+
+
     // --- Infografis ---
     public function addInfografis()
     {

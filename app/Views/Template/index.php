@@ -17,7 +17,7 @@
 
 </head>
 
-<body style="background-color: #f8f9fa;">
+<body style="background-color: #86baeaff;">
 
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary py-3" style="font-size: 0.9rem;">

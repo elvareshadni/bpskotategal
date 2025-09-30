@@ -2,23 +2,104 @@
 <?= $this->section('content'); ?>
 
 <!-- Banner -->
-<div class="carousel" style="height:420px;">
-  <img src="<?= base_url('img/slide1.jpg'); ?>" class="d-block w-100" style="height:420px; object-fit:cover;" alt="Banner">
-  <div class="carousel-caption d-flex flex-column justify-content-center align-items-center text-center" style="color:white; height:100%;">
-    <h5 class="display-6 fw-bold">Pusat Data Statistik Kota Tegal</h5>
+<?php
+$slides = $carousel ?? [];
+// fallback gambar bila file dipindah
+$urlFor = function ($g) {
+  $p1 = FCPATH . 'img/carousel/' . $g;
+  $u1 = base_url('img/carousel/' . $g);
+  $p2 = FCPATH . 'img/' . $g;
+  $u2 = base_url('img/' . $g);
+  if (is_file($p1)) return $u1;
+  if (is_file($p2)) return $u2;
+  return base_url('img/slide1.jpg'); // fallback default
+};
+?>
+
+<div class="container mt-3" id="carousel">
+  <div class="hero-frame shadow-sm">
+    <div id="homeCarousel"
+         class="carousel slide carousel-fade hero-carousel"
+         data-bs-ride="carousel"
+         data-bs-interval="5000"
+         data-bs-touch="true"
+         data-bs-pause="hover"
+         aria-label="Hero Carousel">
+
+      <!-- Indicators -->
+      <div class="carousel-indicators">
+        <?php foreach ($slides as $i => $_): ?>
+          <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="<?= $i ?>"
+            class="<?= $i === 0 ? 'active' : '' ?>" aria-current="<?= $i === 0 ? 'true' : 'false' ?>"
+            aria-label="Slide <?= $i + 1 ?>"></button>
+        <?php endforeach; ?>
+      </div>
+
+      <!-- Slides -->
+      <div class="carousel-inner">
+        <?php if (!empty($slides)): foreach ($slides as $i => $s):
+          $img   = $urlFor($s['gambar']);
+          $align = ($s['posisi'] === 'start' ? 'start' : ($s['posisi'] === 'end' ? 'end' : 'center'));
+          $justify = $align === 'start' ? 'flex-start' : ($align === 'end' ? 'flex-end' : 'center');
+          $link  = trim((string)($s['link_url'] ?? ''));
+        ?>
+          <div class="carousel-item <?= $i === 0 ? 'active' : '' ?>">
+            <?php if ($link !== ''): ?>
+              <a href="<?= esc($link) ?>" target="_blank" rel="noopener" class="hero-slide d-block w-100 h-100">
+                <img src="<?= $img ?>" class="d-block w-100 h-100" alt="<?= esc($s['judul']); ?>">
+                <span class="hero-caption d-flex" style="justify-content: <?= $justify ?>;">
+                  <span class="inner text-<?= $align ?>">
+                    <h2 class="display-6 fw-bold mb-0"><?= esc($s['judul']); ?></h2>
+                  </span>
+                </span>
+              </a>
+            <?php else: ?>
+              <div class="hero-slide d-block w-100 h-100">
+                <img src="<?= $img ?>" class="d-block w-100 h-100" alt="<?= esc($s['judul']); ?>">
+                <span class="hero-caption d-flex" style="justify-content: <?= $justify ?>;">
+                  <span class="inner text-<?= $align ?>">
+                    <h2 class="display-6 fw-bold mb-0"><?= esc($s['judul']); ?></h2>
+                  </span>
+                </span>
+              </div>
+            <?php endif; ?>
+          </div>
+        <?php endforeach; else: ?>
+          <!-- Fallback 1 slide default bila belum ada data -->
+          <div class="carousel-item active">
+            <div class="hero-slide d-block w-100 h-100">
+              <img src="<?= base_url('img/slide1.jpg'); ?>" class="d-block w-100 h-100" alt="Banner">
+              <span class="hero-caption d-flex" style="justify-content:center;">
+                <span class="inner text-center">
+                  <h2 class="display-6 fw-bold mb-0">Pusat Data Statistik Kota Tegal</h2>
+                </span>
+              </span>
+            </div>
+          </div>
+        <?php endif; ?>
+      </div>
+
+      <!-- Controls -->
+      <button class="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev" aria-label="Sebelumnya">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next" aria-label="Berikutnya">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      </button>
+    </div>
   </div>
 </div>
 
 <!-- DATA INDIKATOR STRATEGIS -->
 <div class="container mt-5" id="data-indikator">
-  <div class="stats-container stats-blue rounded-3 p-3 p-md-4 shadow-sm">
+  <div class="stats-container stats-blue rounded-3 p-3 p-md-4 shadow-sm" style="background-color: #dcddeeff">
     <div class="row g-4">
       <!-- KIRI: CHART AREA -->
       <div class="col-lg-8">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
           <div>
-            <h2 class="section-title mb-1 text-dark">DATA INDIKATOR STRATEGIS</h2>
-            <small class="text-muted">Pilih lokasi & indikator di panel kanan untuk melihat grafik</small>
+            <h2 class="section-title mb-1 text-black">DATA INDIKATOR STRATEGIS</h2>
+            <small class="text-black">Pilih lokasi & indikator di panel kanan untuk melihat grafik</small>
           </div>
           <div class="d-flex gap-2 flex-wrap">
             <!-- Kontrol periode dinamis -->
@@ -41,7 +122,7 @@
           </div>
         </div>
 
-        <div class="card bg-white border-0 shadow chart-card">
+        <div class="card border-0 shadow chart-card" style="background-color: #f2f2f2ff;">
           <div class="card-body">
             <h5 id="chart-title" class="mb-1">–</h5>
             <small id="chart-sub" class="text-muted d-block mb-2">–</small>
@@ -57,11 +138,11 @@
             <hr class="my-3">
             <div class="row g-3">
               <div class="col-md-6">
-                <div class="small text-muted">Satuan</div>
+                <div class="small text-black">Satuan</div>
                 <div id="unit-box" class="fw-semibold">–</div>
               </div>
               <div class="col-md-6">
-                <div class="small text-muted">Deskripsi / Interpretasi</div>
+                <div class="small text-black">Deskripsi / Interpretasi</div>
                 <div id="interpret-box" class="small">–</div>
               </div>
             </div>
@@ -71,18 +152,18 @@
 
       <!-- KANAN: PANEL INDIKATOR -->
       <div class="col-lg-4">
-        <div class="side-panel rounded-3 overflow-hidden">
+        <div class="side-panel rounded-3 overflow-hidden" style="background-color: #f2f2f2ff;">
           <div class="bg-primary text-white p-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0">INDIKATOR</h5>
-            <select id="region-select" class="form-select form-select-sm w-auto bg-white text-dark"></select>
+            <select id="region-select" class="form-select form-select-sm w-auto bg-white text-black"></select>
           </div>
-          <div class="p-3 border-bottom bg-light">
+          <div class="p-3 border-bottom" style="background-color: #d0daffff;">
             <div class="input-group input-group-sm">
               <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
               <input id="panel-search" type="text" class="form-control" placeholder="Cari indikator / subindikator…">
             </div>
           </div>
-          <div id="indicator-tree" class="panel-list p-2">
+          <div id="indicator-tree" class="panel-list p-2" style="background-color: #f2f2f2ff;">
             <div class="text-muted small">Memuat…</div>
           </div>
         </div>
@@ -91,8 +172,9 @@
   </div>
 </div>
 
-<section class="py-5 bg-light" id="infografis">
-  <div class="container">
+<section class="container mt-5 bg"  id="infografis">
+  <div class="stats-container stats-blue rounded-3 p-3 p-md-4 shadow-sm" style="background-color: #dcddeeff">
+  <div class="container" >
     <h2 class="section-title mb-4">INFOGRAFIS</h2>
     <div class="row g-3 mb-3">
       <?php if (!empty($infografis)): ?>
@@ -110,7 +192,7 @@
                   <small class="text-muted d-block mt-2 mb-0">
                     <?= date('d M Y', strtotime($item['tanggal'])); ?>
                   </small>
-                  <h6 class="card-title text-dark"><?= esc($item['judul']); ?></h6>
+                  <h6 class="card-title text-black"><?= esc($item['judul']); ?></h6>
                 </div>
               </div>
             </a>
@@ -124,6 +206,7 @@
     <div class="text-center mt-3">
       <a href="<?= base_url('user/list'); ?>" class="btn btn-primary">Infografis Lainnya</a>
     </div>
+  </div>
   </div>
 </section>
 

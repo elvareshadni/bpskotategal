@@ -72,12 +72,15 @@
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
-            <!-- Nav Item - Edit carousel
+            <!-- Nav Item - Edit Carousel -->
             <li class="nav-item <?= uri_string() === 'admin/tambah-carousel' ? 'active' : '' ?>">
                 <a class="nav-link collapsed" href="<?= base_url('admin/tambah-carousel'); ?>">
-                    <span>Edit carousel</span>
+                    <span>Edit Carousel</span>
                 </a>
-            </li> -->
+            </li> 
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
 
             <!-- Nav Item - Edit Konten -->
             <li class="nav-item <?= uri_string() === 'admin/tambah-infografis' ? 'active' : '' ?>">

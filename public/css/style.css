@@ -137,7 +137,9 @@
 .chartjs-legend-bottom{ padding-top:.5rem; }
 
 /* Spacing to next section */
+#carousel{ margin-bottom:2.5rem; }
 #data-indikator{ margin-bottom:2.5rem; }
+#infografis{ margin-bottom:2.5rem; }
 
 /* ==============================
    Footer
@@ -172,7 +174,7 @@
    ============================== */
 .stats-container{
   background:#fff; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,.1);
-  padding:30px; margin-top:-80px; position:relative; z-index:10;
+  padding:30px; margin-top:0px; position:relative; z-index:10;
 }
 .map-placeholder{
   background:linear-gradient(45deg,#f8fafc,#e2e8f0);
@@ -181,7 +183,35 @@
 }
 
 /* Banner */
-.carousel-item img{ object-fit:cover; height:580px; }
+/* ===== Carousel ===== */
+.hero-carousel { height: 480px; }
+.hero-carousel .carousel-inner,
+.hero-carousel .carousel-item { height: 100%; }
+.hero-carousel .hero-slide { position: relative; }
+.hero-carousel img { object-fit: cover; height: 100%; width: 100%; display:block; }
+
+.hero-overlay {
+  position:absolute; inset:0;
+  background: linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.55) 100%);
+  pointer-events:none;
+}
+.hero-caption {
+  position:absolute; inset:0;
+  align-items: center; /* vertical center */
+  padding: 0 2rem;
+}
+.hero-caption .inner { color:#fff; max-width: 960px; }
+
+.hero-carousel .carousel-indicators [data-bs-target]{
+  width: 10px; height:10px; border-radius:50%; background:#fff; opacity:.6;
+}
+.hero-carousel .carousel-indicators .active{ opacity:1; }
+
+@media (max-width: 576px){
+  .hero-carousel { height: 360px; }
+  .hero-caption .inner h2 { font-size: 1.5rem; }
+}
+
 
 /* Controls (legacy helpers) */
 #subindicator-select{ min-width:260px; max-width:420px; }

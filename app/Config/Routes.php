@@ -36,11 +36,14 @@ $routes->group('admin', function ($routes) {
     $routes->get('laporan-kunjungan', 'Admin::laporanKunjungan');
 
     // Carousel
-    $routes->get('carousel', 'Admin::carousel');
-    $routes->get('carousel/add', 'Admin::carouselAdd');
-    $routes->post('carousel/save', 'Admin::carouselSave');
-    $routes->get('tambah-carousel', 'Admin::addcarousel');
-    $routes->get('edit-carousel/list', 'Admin::listcarousel');
+    $routes->get('carousel', 'Admin::carousel');                 // list
+    $routes->get('carousel/add', 'Admin::carouselAdd');          // form tambah
+    $routes->post('carousel/save', 'Admin::carouselSave');       // simpan tambah
+    $routes->get('carousel/edit/(:num)', 'Admin::carouselEdit/$1');     // form edit
+    $routes->post('carousel/update/(:num)', 'Admin::carouselUpdate/$1'); // simpan edit
+    $routes->get('carousel/delete/(:num)', 'Admin::carouselDelete/$1');  // hapus
+    $routes->get('tambah-carousel', 'Admin::carouselAdd');
+    $routes->get('edit-carousel/list', 'Admin::carousel');
 
     //Kelola Data Indikator
     $routes->get('data-indikator', 'Admin::dataIndikator');
