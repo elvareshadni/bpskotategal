@@ -17,9 +17,6 @@ $routes->group('user', function ($routes) {
     $routes->get('detail/(:num)', 'User::detail/$1');
 });
 
-// API untuk data indikator (JSON)
-$routes->get('api/indikator', 'Indicators::index');
-
 // API untuk dashboard
 $routes->group('api', function ($routes) {
     $routes->get('regions', 'Indicators::apiRegions');                 // list region
@@ -27,7 +24,7 @@ $routes->group('api', function ($routes) {
     $routes->get('rows', 'Indicators::apiRows');                       // ?indicator_id=ID
     $routes->get('series', 'Indicators::apiSeries');                   // ?row_id=..&region_id=..&window=all|last3|last5|year=YYYY&quarter=Q&month=M
     $routes->get('proportion', 'Indicators::apiProportion');           // ?row_id=..&region_id=..&year=..[&quarter=..|&month=..]
-    $routes->get('export/xlsx', 'Indicators::apiExportXlsx');          // unduh data yg sedang ditampilkan
+    $routes->get('export/indicator-xlsx', 'Api\Export::indicatorXlsx');          // unduh data indikator
 });
 
 

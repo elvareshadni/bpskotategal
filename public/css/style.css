@@ -1,202 +1,201 @@
-/* === Brand colors & navbar === */
-.navbar {
-  background: linear-gradient(135deg, #1e40af, #0e57cd) !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+/* ==============================
+   Brand colors & navbar
+   ============================== */
+.navbar{
+  background: linear-gradient(135deg,#1e40af,#0e57cd) !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,.1);
 }
 
 /* Nav & footer links */
 .navbar-nav .nav-link,
 .footer .nav-link,
-.footer .text-white-50 {
-  color: rgba(255, 255, 255, 0.5);
-  transition: color 0.3s ease;
+.footer .text-white-50{
+  color: rgba(255,255,255,.5);
+  transition: color .3s ease;
 }
 .navbar-nav .nav-link:hover,
 .navbar-nav .nav-link.active,
 .footer .nav-link:hover,
 .footer .nav-link.active,
-.footer .text-white-50:hover {
-  color: #fff !important;
+.footer .text-white-50:hover{
+  color:#fff !important;
 }
 
-/* === Cards & hover effects === */
-.indicator-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-left: 4px solid #3b82f6;
-  transition: all 0.3s ease;
+/* ==============================
+   Cards & hover effects
+   ============================== */
+.indicator-card{
+  background:#fff; border-radius:8px; padding:10px; margin-bottom:10px;
+  border-left:4px solid #3b82f6; transition:all .3s ease;
 }
-.indicator-card:hover {
-  transform: translateX(5px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
+.indicator-card:hover{ transform:translateX(5px); box-shadow:0 4px 15px rgba(0,0,0,.1); }
 
-.news-card {
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  height: 300px;
+.news-card{
+  background:#fff; border-radius:12px; overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,.08); transition:all .3s ease; height:300px;
 }
-.news-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-}
-.news-image {
-  width: 100%;
-  height: 100px;
-  background: linear-gradient(45deg, #e5e7eb, #f3f4f6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #6b7280;
+.news-card:hover{ transform:translateY(-5px); box-shadow:0 8px 30px rgba(0,0,0,.15); }
+.news-image{
+  width:100%; height:100px; background:linear-gradient(45deg,#e5e7eb,#f3f4f6);
+  display:flex; align-items:center; justify-content:center; color:#6b7280;
 }
 
-/* Panel indikator kanan */
-.side-panel { background: #f1f5ff; border: 1px solid #e0e7ff; }
-.panel-list { max-height: 540px; overflow: auto; background: #f8fafc; }
-
-.ind-item { border-bottom: 1px dashed #e5e7eb; padding: .25rem .25rem; }
-.ind-header { cursor: pointer; padding: .35rem .35rem; border-radius: .5rem; }
-.ind-header:hover { background: #eef2ff; }
-.btn-toggle { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; }
-.ind-name { font-weight: 600; }
-
-.sub-list { padding-left: 1.75rem; padding-bottom: .5rem; }
-.sub-item { display:flex; align-items:center; gap:.25rem; padding:.35rem .5rem; border-radius:.5rem; cursor:pointer; }
-.sub-item:hover { background:#e5e7eb; }
-.sub-item.active { background:#dbeafe; outline:1px solid #bfdbfe; }
-
-.stats-blue { background: #ebf3ff; }    /* kartu besar biru muda */
-.chart-card {
-    background:#fff;
-    height: 360px !important;   /* ubah angka ini kalau mau lebih tinggi/rendah */
-    max-height: 360px !important;
-    width: 100% !important;
-  }
-
-
-/* === Footer === */
-.footer {
-  background: linear-gradient(135deg, #1e40af, #0e57cd);
-  color: #fff;
-  padding: 40px 0 20px;
-}
-.text-footer {
-  color: #d3d3d3;
-  font-size: 0.95rem;
+/* ==============================
+   Right panel: INDICATOR
+   ============================== */
+.side-panel{
+  background:#f1f5ff; border:1px solid #e0e7ff;
+  display:flex; flex-direction:column; border-radius:.75rem;
 }
 
-/* === Section title === */
-.section-title {
-  font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 30px;
+/* Stick the blue title & the search bar */
+.side-panel > .bg-primary{ position:sticky; top:0; z-index:3; }
+.side-panel .p-3.border-bottom.bg-light{ position:sticky; top:56px; z-index:2; }
+
+/* Scroll only vertically; height diset dari JS agar sejajar card kiri */
+.panel-list{
+  overflow-y:auto; overflow-x:hidden; background:#f8fafc;
+  border-bottom-left-radius:.75rem; border-bottom-right-radius:.75rem;
+}
+
+/* Tree items */
+.ind-item{ border-bottom:1px dashed #e5e7eb; padding:.25rem .25rem; }
+
+.ind-header{
+  display:flex; align-items:center; gap:.5rem;
+  cursor:pointer; padding:.35rem .35rem; border-radius:.5rem;
+}
+.ind-header:hover{ background:#eef2ff; }
+.btn-toggle{ width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; }
+.ind-name{ font-weight:600; flex:1 1 auto; min-width:0; }
+
+.sub-list{ padding-left:1.75rem; padding-bottom:.5rem; }
+
+/* Sub-item: teks di baris utama, badge bisa pindah ke baris berikutnya */
+.sub-item{
+  display:flex; align-items:flex-start; gap:.35rem;
+  padding:.35rem .5rem; border-radius:.5rem; cursor:pointer;
+  flex-wrap:wrap; /* <— izinkan pindah baris */
+}
+.sub-item:hover{ background:#e5e7eb; }
+.sub-item.active{ background:#dbeafe; outline:1px solid #bfdbfe; }
+
+/* Teks subindikator: wrap per kata (bukan per huruf) */
+.sub-item .sub-text{
+  flex: 1 1 100%;
+  min-width: 0;
+  white-space: normal;      /* pecah di spasi */
+  word-break: normal;       /* jangan pecah per huruf */
+  overflow-wrap: break-word;/* pecah hanya kalau sangat panjang */
+  line-height: 1.25;
+}
+
+/* Badge meta di kanan; jika sempit mereka turun ke baris baru */
+.sub-item .badge{
+  flex: 0 0 auto;
+  margin-top: .125rem;
+}
+
+/* Full-bleed divider */
+.sub-list .sub-item{
   position: relative;
-  padding-bottom: 10px;
 }
-.section-title::after {
+.sub-list .sub-item::after{
   content: "";
   position: absolute;
+  left: -1.75rem;   /* samakan dengan padding-left .sub-list */
+  right: 0;
   bottom: 0;
-  left: 0;
-  width: 50px;
-  height: 3px;
-  background: #3b82f6;
+  height: 1px;
+  background: #e5e7eb;
+}
+.sub-list .sub-item:last-child::after{ display: none; }
+
+.sub-list .sub-item:hover{ background: #eef2ff; }
+.sub-list .sub-item.active{ background: #dbeafe; }
+
+
+/* ==============================
+   Chart area
+   ============================== */
+.stats-blue{ background:#ebf3ff; }
+
+/* Card follows content (no clipping) */
+.chart-card{
+  background:#fff; border-radius:.5rem;
+  width:100% !important; height:auto !important; max-height:none !important;
+  overflow:visible;
 }
 
-/* === Buttons === */
-.btn-primary {
-  background: linear-gradient(135deg, #002b6a, #002b6a);
-  border: none;
-  border-radius: 25px;
-  padding: 10px 25px;
-  transition: all 0.3s ease;
-}
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
-}
+/* Canvas wrapper controls height; Chart.js uses maintainAspectRatio:false */
+.chart-wrap{ position:relative; width:100%; height:340px; }
+@media (min-width:1200px){ .chart-wrap{ height:380px; } }
+@media (max-width:576px){  .chart-wrap{ height:280px; } }
 
-/* === Containers & misc === */
-.stats-container {
-  background: #fff;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  padding: 30px;
-  margin-top: -80px;
-  position: relative;
-  z-index: 10;
-}
+.chart-panel{ min-height:320px; }
+.chart-panel canvas{ width:100% !important; height:100% !important; }
+.chartjs-legend-bottom{ padding-top:.5rem; }
 
-.map-placeholder {
-  background: linear-gradient(45deg, #f8fafc, #e2e8f0);
-  border: 2px dashed #cbd5e1;
-  border-radius: 10px;
-  height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #64748b;
-  font-size: 18px;
+/* Spacing to next section */
+#data-indikator{ margin-bottom:2.5rem; }
+
+/* ==============================
+   Footer
+   ============================== */
+.footer{
+  background:linear-gradient(135deg,#1e40af,#0e57cd);
+  color:#fff; padding:40px 0 20px;
+}
+.text-footer{ color:#d3d3d3; font-size:.95rem; }
+
+/* ==============================
+   Section title
+   ============================== */
+.section-title{
+  font-weight:700; color:#1f2937; margin-bottom:30px; position:relative; padding-bottom:10px;
+}
+.section-title::after{
+  content:""; position:absolute; bottom:0; left:0; width:50px; height:3px; background:#3b82f6;
 }
 
-.carousel-item img {
-  object-fit: cover;
-  height: 580px;
+/* ==============================
+   Buttons
+   ============================== */
+.btn-primary{
+  background:linear-gradient(135deg,#002b6a,#002b6a); border:none;
+  border-radius:25px; padding:10px 25px; transition:all .3s ease;
+}
+.btn-primary:hover{ transform:translateY(-2px); box-shadow:0 5px 15px rgba(59,130,246,.4); }
+
+/* ==============================
+   Containers & misc
+   ============================== */
+.stats-container{
+  background:#fff; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,.1);
+  padding:30px; margin-top:-80px; position:relative; z-index:10;
+}
+.map-placeholder{
+  background:linear-gradient(45deg,#f8fafc,#e2e8f0);
+  border:2px dashed #cbd5e1; border-radius:10px; height:400px;
+  display:flex; align-items:center; justify-content:center; color:#64748b; font-size:18px;
 }
 
-/* === Controls === */
-#subindicator-select { min-width: 260px; max-width: 420px; }
-#year-left, #year-right { min-width: 120px; max-width: 160px; }
+/* Banner */
+.carousel-item img{ object-fit:cover; height:580px; }
 
-@media (max-width: 992px) {
-  .controls-wrap { width: 100%; }
-  #subindicator-select,
-  #year-left,
-  #year-right {
-    flex: 1 1 auto;
-    min-width: 0;
-  }
+/* Controls (legacy helpers) */
+#subindicator-select{ min-width:260px; max-width:420px; }
+#year-left, #year-right{ min-width:120px; max-width:160px; }
+@media (max-width:992px){
+  .controls-wrap{ width:100%; }
+  #subindicator-select, #year-left, #year-right{ flex:1 1 auto; min-width:0; }
 }
 
-/* === Chart cards === */
-.chart-panel { min-height: 320px; }
-.chart-panel canvas { width: 100% !important; height: 100% !important; }
-
-/* Legend spacing */
-.chartjs-legend-bottom { padding-top: 0.5rem; }
-
-/* Placeholder modes */
-#indicator-placeholder.map-placeholder { /* keep base look */ }
-#indicator-placeholder.charts-mode {
-  height: auto;
-  min-height: 0;
-  padding: 0;
-  background: transparent;
-  border: 0;
-}
-#indicator-placeholder.charts-mode > #indicator-container {
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-  margin-top: 0.25rem;
-}
-
-/* Chart header selects */
-.chart-header select { min-width: 120px; }
-@media (max-width: 576px) {
-  .chart-header select { min-width: 100px; }
-}
-
-/* === Sidebar gradient helper (apply this class to your sidebar element) === */
+/* Sidebar gradient helper (if you have a left sidebar) */
 .sidebar.bg-gradient-panel{
-  background-color: #1e40af !important; /* fallback */
-  background-image: linear-gradient(180deg, #1e40af 10%, #0e57cd 100%) !important;
-  background-size: cover;
+  background-color:#1e40af !important;
+  background-image:linear-gradient(180deg,#1e40af 10%,#0e57cd 100%) !important;
+  background-size:cover;
 }
 
   /*!

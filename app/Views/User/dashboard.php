@@ -45,7 +45,9 @@
           <div class="card-body">
             <h5 id="chart-title" class="mb-1">–</h5>
             <small id="chart-sub" class="text-muted d-block mb-2">–</small>
-            <canvas id="bigChart" height="150"></canvas>
+            <div class="chart-wrap">
+              <canvas id="bigChart"></canvas>
+            </div>
 
             <div class="d-flex flex-wrap gap-2 mt-3">
               <button id="btn-download-chart" class="btn btn-primary btn-sm">Download Chart</button>
@@ -219,6 +221,37 @@
     return rowsCacheByInd[indId];
   }
 
+  function mapDataType(dt) {
+    return dt === 'JUMLAH_KATEGORI' ? 'BARCHART' : dt;
+  }
+
+  function mapTimeline(tl) {
+    return ({
+      YEARLY: 'TAHUNAN',
+      QUARTERLY: 'TRIWULAN',
+      MONTHLY: 'BULANAN'
+    })[tl] || tl;
+  }
+
+  // Samakan tinggi panel kanan dengan tinggi card chart di kiri
+  function adjustPanelHeight() {
+    const card = document.querySelector('.chart-card');
+    const panel = document.querySelector('.side-panel');
+    const list = document.getElementById('indicator-tree');
+    if (!card || !panel || !list) return;
+
+    const head = panel.querySelector('.bg-primary');
+    const search = panel.querySelector('.p-3.border-bottom');
+    const cardH = card.getBoundingClientRect().height;
+    const minus = (head?.offsetHeight || 0) + (search?.offsetHeight || 0);
+    const h = Math.max(220, Math.floor(cardH - minus - 16)); // padding kecil
+
+    list.style.maxHeight = h + 'px';
+    list.style.height = h + 'px';
+  }
+  window.addEventListener('resize', adjustPanelHeight);
+
+
   // ------------- RENDER PANEL -------------
   function renderTree(filtered = null) {
     const items = filtered ?? indicatorCache;
@@ -255,6 +288,7 @@
     });
     $tree.innerHTML = '';
     $tree.appendChild(wrap);
+    adjustPanelHeight();
   }
 
   async function toggleSub(indDiv, indId) {
@@ -271,10 +305,9 @@
     const rows = await ensureRows(indId);
     sub.innerHTML = rows.length ? rows.map(r => `
       <div class="sub-item" data-row-id="${r.id}" title="${r.subindikator}">
-        <i class="fa-regular fa-circle-dot me-2"></i>
         <span class="sub-text">${r.subindikator}</span>
-        <span class="badge bg-light text-dark ms-2">${r.data_type}</span>
-        <span class="badge bg-light text-dark ms-1">${r.timeline}</span>
+        <span class="badge bg-light text-dark ms-2">${mapDataType(r.data_type)}</span>
+        <span class="badge bg-light text-dark ms-1">${mapTimeline(r.timeline)}</span>
       </div>
     `).join('') : '<div class="text-muted small px-2">Belum ada subindikator.</div>';
 
@@ -293,6 +326,7 @@
 
     sub.classList.remove('d-none');
     btn.classList.replace('fa-chevron-right', 'fa-chevron-down');
+    adjustPanelHeight();
   }
 
   // ------------- SEARCH -------------
@@ -357,10 +391,9 @@
           (ind.__hits && ind.__hits.length)
           ? ind.__hits.map(r=>`
               <div class="sub-item" data-row-id="${r.id}" title="${r.subindikator}">
-                <i class="fa-regular fa-circle-dot me-2"></i>
                 <span class="sub-text">${highlight(r.subindikator,q)}</span>
-                <span class="badge bg-light text-dark ms-2">${r.data_type}</span>
-                <span class="badge bg-light text-dark ms-1">${r.timeline}</span>
+                <span class="badge bg-light text-dark ms-2">${mapDataType(r.data_type)}</span>
+                <span class="badge bg-light text-dark ms-1">${mapTimeline(r.timeline)}</span>
               </div>
             `).join('')
           : '<div class="text-muted small px-2">Tidak ada subindikator cocok.</div>'
@@ -439,7 +472,9 @@
       await probeYearsForRow(row.id);
     }
 
-    let url = '', chartType = 'line', subTxt = '';
+    let url = '',
+      chartType = 'line',
+      subTxt = '';
     if (row.data_type === 'PROPORSI') {
       const p = new URLSearchParams({
         row_id: row.id,
@@ -447,23 +482,29 @@
         year: $year.value || new Date().getFullYear()
       });
       if (row.timeline === 'QUARTERLY') p.set('quarter', $q.value || 1);
-      if (row.timeline === 'MONTHLY')  p.set('month', $m.value || 1);
+      if (row.timeline === 'MONTHLY') p.set('month', $m.value || 1);
       url = '<?= base_url('api/proportion'); ?>?' + p.toString();
       chartType = 'pie';
       subTxt = 'Data Proporsi (Pie Chart)';
     } else {
-      const p = new URLSearchParams({ row_id: row.id, region_id: regionId });
+      const p = new URLSearchParams({
+        row_id: row.id,
+        region_id: regionId
+      });
       if (row.timeline === 'YEARLY') p.set('window', $win.value || 'all');
-      else                          p.set('year', $year.value || new Date().getFullYear());
+      else p.set('year', $year.value || new Date().getFullYear());
 
-      if (row.data_type === 'JUMLAH_KATEGORI') p.set('multi','1'); // ADDED (multi dataset)
+      if (row.data_type === 'JUMLAH_KATEGORI') p.set('multi', '1'); // ADDED (multi dataset)
       url = '<?= base_url('api/series'); ?>?' + p.toString();
       chartType = (row.data_type === 'JUMLAH_KATEGORI' ? 'bar' : 'line');
       subTxt = (chartType === 'bar' ? 'Data Jumlah Kategori (Bar Chart)' : 'Data Timeseries (Line Chart)');
     }
 
     const js = await j(url);
-    if (!js.ok) { alert('Gagal memuat data'); return; }
+    if (!js.ok) {
+      alert('Gagal memuat data');
+      return;
+    }
 
     const unit = js.meta?.unit || '';
     $title.textContent = shortLabel(row.subindikator, 88);
@@ -472,7 +513,7 @@
     $interp.textContent = js.meta?.interpretasi || (js.meta?.desc || '-');
 
     const ctx = document.getElementById('bigChart').getContext('2d');
-     // ===== Siapkan datasets untuk Chart.js (pie / line single / bar multi) ===== // ADDED
+    // ===== Siapkan datasets untuk Chart.js (pie / line single / bar multi) ===== // ADDED
     let datasets = [];
     if (row.data_type === 'PROPORSI') {
       datasets = [{
@@ -505,10 +546,17 @@
     // Render Chart
     chart = new Chart(ctx, {
       type: chartType,
-      data: { labels: js.labels, datasets },
+      data: {
+        labels: js.labels,
+        datasets
+      },
       options: {
+        responsive: true,
+        maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom' },
+          legend: {
+            position: 'bottom'
+          },
           tooltip: {
             callbacks: {
               label: (c) => {
@@ -522,7 +570,9 @@
         scales: (chartType === 'pie') ? {} : {
           y: {
             beginAtZero: false,
-            ticks: { callback: (v) => v + (unit ? ` ${unit}` : '') }
+            ticks: {
+              callback: (v) => v + (unit ? ` ${unit}` : '')
+            }
           }
         }
       }
@@ -533,10 +583,11 @@
       title: row.subindikator,
       unit: unit,
       interpretasi: js.meta?.interpretasi || '',
-      exportUrl: '<?= base_url('api/export/xlsx'); ?>?jenis='
-        + (row.data_type === 'PROPORSI' ? 'proportion' : 'series')
-        + '&' + url.split('?')[1] // ini sudah mengandung multi=1 kalau JUMLAH_KATEGORI
+      exportUrl: '<?= base_url('api/export/indicator-xlsx'); ?>' +
+        '?indicator_id=' + encodeURIComponent(current.indicatorId) +
+        '&region_id=' + encodeURIComponent(regionId)
     };
+    adjustPanelHeight();
   }
 
   // ------------- EVENTS -------------
@@ -621,6 +672,7 @@
     await loadRegions();
     await loadIndicators();
     renderTree();
+    adjustPanelHeight();
   })();
 </script>
 
