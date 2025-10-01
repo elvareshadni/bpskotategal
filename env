@@ -81,3 +81,10 @@ email.SMTPCrypto = "tls"
 email.mailType  = "html"
 email.charset   = "utf-8"
 email.wordWrap  = true
+
+#--------------------------------------------------------------------
+# GOOGLE OAUTH (BARU)
+#--------------------------------------------------------------------
+# GOOGLE_CLIENT_ID= "PASTE_CLIENT_ID_APPS_GOOGLEUSERCONTENT_COM"
+# GOOGLE_CLIENT_SECRET= "PASTE_CLIENT_SECRET"
+# GOOGLE_REDIRECT_URI="http://localhost:8080/auth/google/callback"
