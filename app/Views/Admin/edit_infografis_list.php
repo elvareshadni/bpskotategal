@@ -1,7 +1,7 @@
 <?= $this->extend('Admin/templates/index'); ?>
 <?= $this->section('content'); ?>
 
-<h1 class="h3 text-gray-800 mb-4">Edit Infografis — Daftar</h1>
+<h1 class="h3 text-gray-800 mb-4">Manajemen Infografis — Daftar</h1>
 
 <div class="container mt-5">
   <div class="d-flex justify-content-between align-items-center mb-4">

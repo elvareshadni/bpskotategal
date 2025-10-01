@@ -90,31 +90,50 @@
         </form>
 
         <!-- Garis pemisah -->
-        <hr class="my-5">
+        <hr class="my-3">
 
-        <!-- Form Ubah Password -->
+        <!-- Form Password (dinamis) -->
         <form action="<?= route_to('admin.password.update'); ?>" method="post" class="mx-auto" style="max-width: 520px;">
             <?= csrf_field(); ?>
+            <?php $isFirstSet = empty($user['password']); ?>
+            <?php if ($isFirstSet): ?>
+                <div class="alert alert-warning small">
+                    Akun Anda belum memiliki password. Tambahkan password agar bisa login via form selain Google.
+                </div>
+            <?php endif; ?>
 
-            <div class="row g-3 align-items-center mb-2">
-                <div class="col-4 text-end"><label class="col-form-label">Password Sekarang:</label></div>
-                <div class="col-8"><input type="password" name="current_password" class="form-control"></div>
-            </div>
-
-            <div class="row g-3 align-items-center mb-2">
-                <div class="col-4 text-end"><label class="col-form-label">Password Baru:</label></div>
-                <div class="col-8"><input type="password" name="new_password" class="form-control"></div>
-            </div>
-
-            <div class="row g-3 align-items-center mb-3">
-                <div class="col-4 text-end"><label class="col-form-label">Konfirmasi Password Baru:</label></div>
-                <div class="col-8"><input type="password" name="confirm_password" class="form-control"></div>
-            </div>
-
-            <div class="text-center">
-                <button class="btn btn-primary px-4">Ubah Password</button>
-            </div>
+            <?php if (!$isFirstSet): ?>
+                <div class="row g-3 align-items-center mb-2">
+                    <div class="col-4 text-end"><label class="col-form-label">Password Sekarang:</label></div>
+                    <div class="col-8"><input type="password" name="current_password" class="form-control"></div>
+                </div>
+                <div class="row g-3 align-items-center mb-2">
+                    <div class="col-4 text-end"><label class="col-form-label">Password Baru:</label></div>
+                    <div class="col-8"><input type="password" name="new_password" class="form-control"></div>
+                </div>
+                <div class="row g-3 align-items-center mb-3">
+                    <div class="col-4 text-end"><label class="col-form-label">Konfirmasi Password Baru:</label></div>
+                    <div class="col-8"><input type="password" name="confirm_password" class="form-control"></div>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-primary px-4">Ubah Password</button>
+                </div>
+            <?php else: ?>
+                <h6 class="mb-3">Tambahkan Password untuk Akun</h6>
+                <div class="row g-3 align-items-center mb-2">
+                    <div class="col-4 text-end"><label class="col-form-label">Password Baru:</label></div>
+                    <div class="col-8"><input type="password" name="new_password" class="form-control"></div>
+                </div>
+                <div class="row g-3 align-items-center mb-3">
+                    <div class="col-4 text-end"><label class="col-form-label">Konfirmasi Password Baru:</label></div>
+                    <div class="col-8"><input type="password" name="confirm_password" class="form-control"></div>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-primary px-4">Simpan Password</button>
+                </div>
+            <?php endif; ?>
         </form>
+
     </div>
 </div>
 

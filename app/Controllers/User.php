@@ -235,24 +235,33 @@ class User extends BaseController
 
         $errors = [];
 
-        // --- Validasi input ---
-        if ($currentPassword === '') {
-            $errors['current_password'] = 'Password sekarang wajib diisi.';
+        $user = $userModel->find($userId);
+        if (!$user) {
+            return redirect()->to('/login')->with('errors', ['User tidak ditemukan'])->with('error', 'User tidak ditemukan');
         }
+
+        $isFirstSet = empty($user['password']); // password masih NULL?
+
+        // Validasi dasar
         if ($newPassword === '') {
             $errors['new_password'] = 'Password baru wajib diisi.';
         } elseif (mb_strlen($newPassword) < 6) {
             $errors['new_password'] = 'Password baru minimal 6 karakter.';
         }
-        // Kalau ingin password kuat, aktifkan ini:
-        // elseif (!$this->isStrongPassword($newPassword)) {
-        //     $errors['new_password'] = 'Password baru harus mengandung huruf kecil, huruf besar, dan angka.';
-        // }
 
         if ($confirmPassword === '') {
             $errors['confirm_password'] = 'Konfirmasi password wajib diisi.';
         } elseif ($confirmPassword !== $newPassword) {
             $errors['confirm_password'] = 'Konfirmasi password tidak sama dengan Password baru.';
+        }
+
+        // Jika BUKAN pertama kali → current_password wajib & harus cocok
+        if (!$isFirstSet) {
+            if ($currentPassword === '') {
+                $errors['current_password'] = 'Password sekarang wajib diisi.';
+            } elseif (!password_verify($currentPassword, (string)$user['password'])) {
+                $errors['current_password'] = 'Password sekarang salah.';
+            }
         }
 
         if ($errors) {
@@ -261,18 +270,10 @@ class User extends BaseController
                 ->with('error', reset($errors));
         }
 
-        // --- Cek password lama cocok ---
-        $user = $userModel->find($userId);
-        if (!$user || !password_verify($currentPassword, $user['password'])) {
-            return redirect()->back()->withInput()
-                ->with('errors', ['current_password' => 'Password sekarang salah.'])
-                ->with('error', 'Password sekarang salah.');
-        }
-
-        // --- Update password baru ---
         try {
             $userModel->update($userId, [
-                'password' => password_hash($newPassword, PASSWORD_DEFAULT),
+                'password'       => password_hash($newPassword, PASSWORD_DEFAULT),
+                'auth_provider'  => 'local', // sekarang sudah bisa login via form
             ]);
         } catch (\Throwable $e) {
             log_message('error', 'Update password error: {0}', [$e->getMessage()]);
@@ -281,8 +282,9 @@ class User extends BaseController
                 ->with('error', 'Gagal mengubah password. Coba lagi.');
         }
 
-        return redirect()->route('user.profile')->with('msg', 'Password berhasil diubah.');
+        return redirect()->route('user.profile')->with('msg', $isFirstSet ? 'Password berhasil diset.' : 'Password berhasil diubah.');
     }
+
 
     // ==========================
     // Utilitas Validasi Lokal

@@ -121,6 +121,13 @@ $routes->post('reset-password', 'Home::doReset'); // POST: simpan password
 
 $routes->get('/logout', 'Home::logout', ['as' => 'logout']);
 
+// === GOOGLE OAUTH ===
+$routes->group('auth', function ($routes) {
+    $routes->get('google/redirect', 'GoogleAuth::redirect');
+    $routes->get('google/callback', 'GoogleAuth::callback');
+});
+
+
 
 // =======================
 // USER PROFILE

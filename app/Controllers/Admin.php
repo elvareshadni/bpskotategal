@@ -218,23 +218,33 @@ class Admin extends BaseController
 
         $errors = [];
 
-        if ($currentPassword === '') {
-            $errors['current_password'] = 'Password sekarang wajib diisi.';
+        $user = $userModel->find($userId);
+        if (!$user) {
+            return redirect()->to('/login')
+                ->with('errors', ['global' => 'User tidak ditemukan'])
+                ->with('error', 'User tidak ditemukan');
         }
+
+        $isFirstSet = empty($user['password']);
+
         if ($newPassword === '') {
             $errors['new_password'] = 'Password baru wajib diisi.';
         } elseif (mb_strlen($newPassword) < 6) {
             $errors['new_password'] = 'Password baru minimal 6 karakter.';
         }
-        // Jika ingin aturan kuat:
-        // elseif (!$this->isStrongPassword($newPassword)) {
-        //     $errors['new_password'] = 'Password baru harus mengandung huruf kecil, huruf besar, dan angka.';
-        // }
 
         if ($confirmPassword === '') {
             $errors['confirm_password'] = 'Konfirmasi password wajib diisi.';
         } elseif ($confirmPassword !== $newPassword) {
             $errors['confirm_password'] = 'Konfirmasi password tidak sama dengan Password baru.';
+        }
+
+        if (!$isFirstSet) {
+            if ($currentPassword === '') {
+                $errors['current_password'] = 'Password sekarang wajib diisi.';
+            } elseif (!password_verify($currentPassword, (string)$user['password'])) {
+                $errors['current_password'] = 'Password sekarang salah.';
+            }
         }
 
         if ($errors) {
@@ -243,16 +253,10 @@ class Admin extends BaseController
                 ->with('error', reset($errors));
         }
 
-        $user = $userModel->find($userId);
-        if (!$user || !password_verify($currentPassword, $user['password'])) {
-            return redirect()->back()->withInput()
-                ->with('errors', ['current_password' => 'Password sekarang salah.'])
-                ->with('error', 'Password sekarang salah.');
-        }
-
         try {
             $userModel->update($userId, [
-                'password' => password_hash($newPassword, PASSWORD_DEFAULT),
+                'password'      => password_hash($newPassword, PASSWORD_DEFAULT),
+                'auth_provider' => 'local',
             ]);
         } catch (\Throwable $e) {
             log_message('error', 'Admin updatePassword error: {0}', [$e->getMessage()]);
@@ -261,8 +265,9 @@ class Admin extends BaseController
                 ->with('error', 'Gagal mengubah password. Coba lagi.');
         }
 
-        return redirect()->route('admin.profile')->with('msg', 'Password berhasil diperbarui.');
+        return redirect()->route('admin.profile')->with('msg', $isFirstSet ? 'Password berhasil diset.' : 'Password berhasil diperbarui.');
     }
+
 
     // --- Kelola Data ---
 
@@ -861,7 +866,7 @@ class Admin extends BaseController
 
         $judul  = trim((string)$this->request->getPost('judul'));
         $posisi = trim((string)$this->request->getPost('posisi'));
-        $link   = trim((string)$this->request->getPost('link_url'));   
+        $link   = trim((string)$this->request->getPost('link_url'));
         $file   = $this->request->getFile('gambar');
 
         $allowedPos = ['start', 'center', 'end'];
@@ -893,7 +898,7 @@ class Admin extends BaseController
             'judul'    => $judul,
             'posisi'   => $posisi,
             'gambar'   => $newName,
-            'link_url' => $link ?: null,        
+            'link_url' => $link ?: null,
         ]);
 
         return redirect()->to(base_url('admin/carousel'))->with('success', 'Slide berhasil ditambahkan!');
@@ -915,7 +920,7 @@ class Admin extends BaseController
 
         $judul  = trim((string)$this->request->getPost('judul'));
         $posisi = trim((string)$this->request->getPost('posisi'));
-        $link   = trim((string)$this->request->getPost('link_url'));     
+        $link   = trim((string)$this->request->getPost('link_url'));
         $file   = $this->request->getFile('gambar');
 
         $allowedPos = ['start', 'center', 'end'];
@@ -929,7 +934,7 @@ class Admin extends BaseController
         $data = [
             'judul'    => $judul,
             'posisi'   => $posisi,
-            'link_url' => $link ?: null,        
+            'link_url' => $link ?: null,
         ];
 
         if ($file && $file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {

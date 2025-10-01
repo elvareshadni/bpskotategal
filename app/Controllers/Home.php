@@ -69,7 +69,24 @@ class Home extends BaseController
             ->orWhere('email', $login)
             ->first();
 
-        if (!$user || !password_verify($password, $user['password'])) {
+        if (!$user) {
+            return redirect()->back()
+                ->with('errors', ['login' => 'Username/Email atau password salah.'])
+                ->withInput();
+        }
+
+        // >>> BLOKIR: akun tanpa password (akun Google murni) tidak boleh pakai form login
+        if (empty($user['password'])) {
+            return redirect()->back()
+                ->with('errors', [
+                    'login' =>
+                    'Akun ini dibuat via Google Sign-In dan belum memiliki password. ' .
+                        'Silakan masuk memakai tombol "Sign in with Google", atau atur password terlebih dulu di My Profile.'
+                ])
+                ->withInput();
+        }
+
+        if (!password_verify($password, $user['password'])) {
             return redirect()->back()
                 ->with('errors', ['login' => 'Username/Email atau password salah.'])
                 ->withInput();
