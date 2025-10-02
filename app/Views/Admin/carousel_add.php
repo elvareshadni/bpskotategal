@@ -15,16 +15,6 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Posisi Teks</label>
-                <select class="form-select" name="posisi">
-                    <option value="start">Start (kiri)</option>
-                    <option value="center" selected>Center (tengah)</option>
-                    <option value="end">End (kanan)</option>
-                </select>
-                <small class="text-muted">Hanya sebagai metadata, sesuaikan kebutuhan tampilan.</small>
-            </div>
-
-            <div class="mb-3">
                 <label class="form-label">Gambar (JPG/PNG, maks 2MB)</label>
                 <input type="file" class="form-control" name="gambar" accept=".jpg,.jpeg,.png" required id="gambar">
                 <div class="mt-2" id="previewBox" style="display:none;">

@@ -12,12 +12,7 @@ class CreateCarousel extends Migration
             'id'         => ['type' => 'INT',     'unsigned' => true, 'auto_increment' => true],
             'judul'      => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
             'gambar'     => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => false],
-            'link_url'   => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],   // NEW
-            'posisi'     => [
-                'type'       => 'ENUM',
-                'constraint' => ['start', 'center', 'end'],
-                'default'    => 'center'
-            ],
+            'link_url'   => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
             'created_at' => ['type' => 'DATETIME', 'null' => true],
             'updated_at' => ['type' => 'DATETIME', 'null' => true],
         ]);

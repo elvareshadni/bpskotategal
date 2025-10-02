@@ -14,15 +14,6 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Posisi Teks</label>
-                <select class="form-select" name="posisi">
-                    <option value="start" <?= $row['posisi'] === 'start'  ? 'selected' : '' ?>>Start (kiri)</option>
-                    <option value="center" <?= $row['posisi'] === 'center' ? 'selected' : '' ?>>Center (tengah)</option>
-                    <option value="end" <?= $row['posisi'] === 'end'    ? 'selected' : '' ?>>End (kanan)</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
                 <label class="form-label">Gambar (opsional, JPG/PNG, maks 2MB)</label>
                 <input type="file" class="form-control" name="gambar" accept=".jpg,.jpeg,.png" id="gambar">
 

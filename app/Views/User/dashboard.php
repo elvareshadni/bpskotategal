@@ -36,31 +36,20 @@ $urlFor = function ($g) {
       </div>
 
       <!-- Slides -->
+      <!-- Slides -->
       <div class="carousel-inner">
         <?php if (!empty($slides)): foreach ($slides as $i => $s):
-            $img   = $urlFor($s['gambar']);
-            $align = ($s['posisi'] === 'start' ? 'start' : ($s['posisi'] === 'end' ? 'end' : 'center'));
-            $justify = $align === 'start' ? 'flex-start' : ($align === 'end' ? 'flex-end' : 'center');
-            $link  = trim((string)($s['link_url'] ?? ''));
+            $img  = $urlFor($s['gambar']);
+            $link = trim((string)($s['link_url'] ?? ''));
         ?>
             <div class="carousel-item <?= $i === 0 ? 'active' : '' ?>">
               <?php if ($link !== ''): ?>
                 <a href="<?= esc($link) ?>" target="_blank" rel="noopener" class="hero-slide d-block w-100 h-100">
                   <img src="<?= $img ?>" class="d-block w-100 h-100" alt="<?= esc($s['judul']); ?>">
-                  <span class="hero-caption d-flex" style="justify-content: <?= $justify ?>;">
-                    <span class="inner text-<?= $align ?>">
-                      <h2 class="display-6 fw-bold mb-0"><?= esc($s['judul']); ?></h2>
-                    </span>
-                  </span>
                 </a>
               <?php else: ?>
                 <div class="hero-slide d-block w-100 h-100">
                   <img src="<?= $img ?>" class="d-block w-100 h-100" alt="<?= esc($s['judul']); ?>">
-                  <span class="hero-caption d-flex" style="justify-content: <?= $justify ?>;">
-                    <span class="inner text-<?= $align ?>">
-                      <h2 class="display-6 fw-bold mb-0"><?= esc($s['judul']); ?></h2>
-                    </span>
-                  </span>
                 </div>
               <?php endif; ?>
             </div>
