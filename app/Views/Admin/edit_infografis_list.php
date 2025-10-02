@@ -3,162 +3,238 @@
 
 <h1 class="h3 text-gray-800 mb-4">Manajemen Infografis — Daftar</h1>
 
-<div class="container mt-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container mt-3">
+  <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
     <a href="<?= base_url('admin/tambah-infografis'); ?>" class="btn btn-primary">
       <i class="fas fa-plus"></i> Tambah Infografis
     </a>
+
+    <div class="d-flex flex-wrap gap-2 ms-auto">
+      <div class="input-group">
+        <span class="input-group-text"><i class="fas fa-search"></i></span>
+        <input id="searchInput" type="text" class="form-control" placeholder="Cari judul atau deskripsi…">
+      </div>
+
+      <select id="sortSelect" class="form-select">
+        <option value="newest" selected>Urutkan: Berdasarkan yang Terbaru</option>
+        <option value="oldest">Urutkan: Berdasarkan yang Terlama</option>
+        <option value="name">Urutkan: Berdasarkan Nama (A–Z)</option>
+      </select>
+
+      <select id="pageSize" class="form-select">
+        <option value="10" selected>Tampilkan 10</option>
+        <option value="25">Tampilkan 25</option>
+        <option value="50">Tampilkan 50</option>
+      </select>
+    </div>
   </div>
 
   <div class="card shadow">
     <div class="card-body">
       <div class="table-responsive">
-        <table class="table table-bordered mb-0">
+        <table class="table table-bordered mb-0" id="infoTable">
           <thead class="thead-light">
             <tr>
               <th style="width:60px;">No</th>
               <th>Judul</th>
               <th>Deskripsi</th>
               <th>Gambar</th>
-              <th>Tanggal</th>
+              <th style="width:160px;">Tanggal</th>
               <th style="width:200px;">Aksi</th>
             </tr>
           </thead>
-          <tbody>
-            <?php if (!empty($rows)): $no = 1;
-              foreach ($rows as $r): ?>
-                <tr>
-                  <td><?= $no++; ?></td>
-                  <td><?= esc($r['judul']); ?></td>
-
-                  <td><?= esc($r['deskripsi']); ?></td>
-
-                  <td>
-                    <?php if (!empty($r['gambar'])):
-                      $path = FCPATH . 'img/' . $r['gambar'];
-                      $url  = base_url('img/' . $r['gambar']);
-                      $exists = is_file($path);
-                    ?>
-                      <?php if ($exists): ?>
-                        <a href="<?= $url; ?>" target="_blank" rel="noopener">
-                          <img src="<?= $url; ?>" alt="<?= esc($r['judul']); ?>" style="height:60px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;">
-                        </a>
-                        <div class="small text-muted mt-1"><?= esc($r['gambar']); ?></div>
-                      <?php else: ?>
-                        <span class="badge bg-warning text-dark">File tidak ditemukan</span>
-                        <div class="small text-muted mt-1"><?= esc($r['gambar']); ?></div>
-                      <?php endif; ?>
-                    <?php else: ?>
-                      <span class="text-muted">—</span>
-                    <?php endif; ?>
-                  </td>
-
-                  <td><?= esc($r['tanggal']); ?></td>
-
-                  <td>
-                    <a href="<?= base_url('admin/edit-infografis/' . $r['id']); ?>" class="btn btn-sm btn-info">Edit</a>
-                    <button type="button"
-                      class="btn btn-sm btn-danger btn-delete"
-                      data-url="<?= base_url('admin/edit-infografis/delete/' . $r['id']); ?>"
-                      data-title="<?= esc($r['judul']); ?>"
-                      data-image="<?php
-                                  $imgPath = FCPATH . 'img/' . $r['gambar'];
-                                  if (!empty($r['gambar']) && is_file($imgPath)) echo base_url('img/' . $r['gambar']);
-                                  ?>">
-                      Hapus
-                    </button>
-
-                  </td>
-                </tr>
-              <?php endforeach;
-            else: ?>
-              <tr>
-                <td colspan="6" class="text-center">Belum ada data.</td>
-              </tr>
-            <?php endif; ?>
-          </tbody>
+          <tbody id="rowsBody"><!-- diisi JS --></tbody>
         </table>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="small text-muted" id="pageInfo">–</div>
+        <div class="btn-group">
+          <button class="btn btn-outline-secondary" id="prevBtn">&laquo;</button>
+          <button class="btn btn-outline-secondary" id="nextBtn">&raquo;</button>
+        </div>
       </div>
     </div>
   </div>
+</div>
 
-  <script>
-    (function() {
-      // Jika ingin hapus via POST + CSRF (lebih aman), aktifkan block "POST mode" di bawah
-      const USE_POST = false; // set true untuk kirim via POST
+<?php
+// Siapkan JSON data dari $rows
+$rowsJson = [];
+if (!empty($rows)) {
+  foreach ($rows as $r) {
+    $imgUrl = '';
+    if (!empty($r['gambar'])) {
+      $p = FCPATH . 'img/' . $r['gambar'];
+      if (is_file($p)) $imgUrl = base_url('img/' . $r['gambar']);
+    }
+    $rowsJson[] = [
+      'id'        => $r['id'],
+      'judul'     => $r['judul'] ?? '',
+      'deskripsi' => $r['deskripsi'] ?? '',
+      'gambar'    => $r['gambar'] ?? '',
+      'image_url' => $imgUrl,
+      'tanggal'   => $r['tanggal'] ?? '', // dipakai untuk sort Terbaru/Terlama
+    ];
+  }
+}
+?>
+<script id="rows-json" type="application/json">
+  <?= json_encode($rowsJson, JSON_UNESCAPED_SLASHES) ?>
+</script>
 
-      // Siapkan form POST + CSRF (opsional)
-      let postForm = null;
-      <?php if (function_exists('csrf_token')): ?>
-        const csrfName = '<?= csrf_token() ?>';
-        const csrfHash = '<?= csrf_hash() ?>';
-      <?php endif; ?>
+<script>
+  (function() {
+    const data = JSON.parse(document.getElementById('rows-json').textContent || '[]');
 
-      if (USE_POST) {
-        postForm = document.createElement('form');
-        postForm.method = 'post';
-        postForm.style.display = 'none';
-        if (csrfName && csrfHash) {
-          const i = document.createElement('input');
-          i.type = 'hidden';
-          i.name = csrfName;
-          i.value = csrfHash;
-          postForm.appendChild(i);
-        }
-        document.body.appendChild(postForm);
+    const $body = document.getElementById('rowsBody');
+    const $search = document.getElementById('searchInput');
+    const $sort = document.getElementById('sortSelect');
+    const $size = document.getElementById('pageSize');
+    const $prev = document.getElementById('prevBtn');
+    const $next = document.getElementById('nextBtn');
+    const $info = document.getElementById('pageInfo');
+
+    let page = 1;
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, m => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      } [m]));
+    }
+
+    function filteredSorted() {
+      const q = ($search.value || '').trim().toLowerCase();
+      let out = data.filter(r =>
+        r.judul.toLowerCase().includes(q) || (r.deskripsi || '').toLowerCase().includes(q)
+      );
+
+      switch ($sort.value) {
+        case 'name':
+          out.sort((a, b) => a.judul.localeCompare(b.judul, 'id'));
+          break;
+        case 'oldest':
+          out.sort((a, b) => new Date(a.tanggal || 0) - new Date(b.tanggal || 0));
+          break;
+        default: // newest
+          out.sort((a, b) => new Date(b.tanggal || 0) - new Date(a.tanggal || 0));
       }
+      return out;
+    }
 
+    function render() {
+      const size = parseInt($size.value, 10) || 10;
+      const rows = filteredSorted();
+      const total = rows.length;
+      const pages = Math.max(1, Math.ceil(total / size));
+      if (page > pages) page = pages;
+
+      const start = (page - 1) * size;
+      const slice = rows.slice(start, start + size);
+
+      let html = '';
+      slice.forEach((r, i) => {
+        const no = start + i + 1;
+        const imgHtml = r.image_url ?
+          `<a href="${r.image_url}" target="_blank" rel="noopener">
+             <img src="${r.image_url}" alt="${escapeHtml(r.judul)}" style="height:60px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;">
+           </a>
+           <div class="small text-muted mt-1">${escapeHtml(r.gambar)}</div>` :
+          `<span class="text-muted">—</span>`;
+
+        html += `<tr>
+        <td>${no}</td>
+        <td>${escapeHtml(r.judul)}</td>
+        <td>${escapeHtml(r.deskripsi)}</td>
+        <td>${imgHtml}</td>
+        <td>${escapeHtml(r.tanggal || '')}</td>
+        <td>
+          <a href="<?= base_url('admin/edit-infografis/'); ?>${r.id}" class="btn btn-sm btn-info">Edit</a>
+          <button type="button" class="btn btn-sm btn-danger btn-delete"
+                  data-url="<?= base_url('admin/edit-infografis/delete/'); ?>${r.id}"
+                  data-title="${escapeHtml(r.judul)}"
+                  data-image="${r.image_url || ''}">
+            Hapus
+          </button>
+        </td>
+      </tr>`;
+      });
+      $body.innerHTML = html;
+
+      const showFrom = total ? (start + 1) : 0;
+      const showTo = total ? (start + slice.length) : 0;
+      $info.textContent = `Menampilkan ${showFrom}–${showTo} dari ${total} data`;
+      $prev.disabled = (page <= 1);
+      $next.disabled = (page >= pages);
+
+      // bind tombol hapus (pakai SweetAlert jika ada)
       document.querySelectorAll('.btn-delete').forEach(btn => {
         btn.addEventListener('click', () => {
           const url = btn.dataset.url;
           const title = btn.dataset.title || '(tanpa judul)';
           const image = btn.dataset.image || '';
-
-          // HTML isi modal (judul + preview)
           const html = `
-        <div class="d-flex align-items-center" style="gap:12px;">
-          ${image ? `<img src="${image}" alt="" style="height:60px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;">` : ``}
-          <div>
-            <div class="fw-semibold">${title}</div>
-            <small class="text-muted">Aksi ini tidak bisa dibatalkan.</small>
-          </div>
-        </div>
-      `;
-
-          Swal.fire({
-            title: 'Anda yakin akan menghapus data ini?',
-            html,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Hapus',
-            cancelButtonText: 'Batal',
-            reverseButtons: true,
-            focusCancel: true,
-            buttonsStyling: false,
-            customClass: {
-              actions: 'd-flex justify-content-center gap-5 mt-3',
-              confirmButton: 'btn btn-danger me-2',
-              cancelButton: 'btn btn-secondary'
-            }
-          }).then((res) => {
-            if (!res.isConfirmed) return;
-
-            // Mode GET sederhana
-            if (!USE_POST) {
-              // optional: state "menghapus..."
-              Swal.showLoading();
-              window.location.href = url;
-              return;
-            }
-
-            // Mode POST + CSRF
-            postForm.action = url;
-            postForm.submit();
-          });
+          <div class="d-flex align-items-center" style="gap:12px;">
+            ${image ? `<img src="${image}" alt="" style="height:60px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb;">` : ``}
+            <div>
+              <div class="fw-semibold">${title}</div>
+              <small class="text-muted">Aksi ini tidak bisa dibatalkan.</small>
+            </div>
+          </div>`;
+          if (window.Swal) {
+            Swal.fire({
+              title: 'Hapus infografis ini?',
+              html,
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: 'Hapus',
+              cancelButtonText: 'Batal',
+              reverseButtons: true,
+              buttonsStyling: false,
+              customClass: {
+                actions: 'd-flex justify-content-center gap-5 mt-3',
+                confirmButton: 'btn btn-danger me-2',
+                cancelButton: 'btn btn-secondary'
+              }
+            }).then(res => {
+              if (res.isConfirmed) window.location.href = url;
+            });
+          } else {
+            if (confirm('Yakin hapus "' + title + '"?')) window.location.href = url;
+          }
         });
       });
-    })();
-  </script>
+    }
 
+    $search.addEventListener('input', () => {
+      page = 1;
+      render();
+    });
+    $sort.addEventListener('change', () => {
+      page = 1;
+      render();
+    });
+    $size.addEventListener('change', () => {
+      page = 1;
+      render();
+    });
+    $prev.addEventListener('click', () => {
+      if (page > 1) {
+        page--;
+        render();
+      }
+    });
+    $next.addEventListener('click', () => {
+      page++;
+      render();
+    });
 
-  <?= $this->endSection(); ?>
+    render();
+  })();
+</script>
+
+<?= $this->endSection(); ?>

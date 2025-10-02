@@ -18,6 +18,7 @@
 
             <select id="sortSelect" class="form-select">
                 <option value="newest" selected>Urutkan: Terbaru</option>
+                <option value="oldest">Urutkan: Terlama</option>
                 <option value="name">Urutkan: Nama (A–Z)</option>
             </select>
 
@@ -116,14 +117,19 @@ if (!empty($rows)) {
             const q = ($search.value || '').trim().toLowerCase();
             let out = data.filter(r => r.judul.toLowerCase().includes(q));
 
-            if ($sort.value === 'name') {
-                out.sort((a, b) => a.judul.localeCompare(b.judul, 'id'));
-            } else {
-                // newest
-                out.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+            switch ($sort.value) {
+                case 'name':
+                    out.sort((a, b) => a.judul.localeCompare(b.judul, 'id'));
+                    break;
+                case 'oldest':
+                    out.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+                    break;
+                default: // 'newest'
+                    out.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
             }
             return out;
         }
+
 
         function render() {
             const size = parseInt($size.value, 10) || 10;
