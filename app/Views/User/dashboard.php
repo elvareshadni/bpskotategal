@@ -19,12 +19,12 @@ $urlFor = function ($g) {
 <div class="container mt-3" id="carousel">
   <div class="hero-frame shadow-sm">
     <div id="homeCarousel"
-         class="carousel slide carousel-fade hero-carousel"
-         data-bs-ride="carousel"
-         data-bs-interval="5000"
-         data-bs-touch="true"
-         data-bs-pause="hover"
-         aria-label="Hero Carousel">
+      class="carousel slide carousel-fade hero-carousel"
+      data-bs-ride="carousel"
+      data-bs-interval="5000"
+      data-bs-touch="true"
+      data-bs-pause="hover"
+      aria-label="Hero Carousel">
 
       <!-- Indicators -->
       <div class="carousel-indicators">
@@ -38,33 +38,34 @@ $urlFor = function ($g) {
       <!-- Slides -->
       <div class="carousel-inner">
         <?php if (!empty($slides)): foreach ($slides as $i => $s):
-          $img   = $urlFor($s['gambar']);
-          $align = ($s['posisi'] === 'start' ? 'start' : ($s['posisi'] === 'end' ? 'end' : 'center'));
-          $justify = $align === 'start' ? 'flex-start' : ($align === 'end' ? 'flex-end' : 'center');
-          $link  = trim((string)($s['link_url'] ?? ''));
+            $img   = $urlFor($s['gambar']);
+            $align = ($s['posisi'] === 'start' ? 'start' : ($s['posisi'] === 'end' ? 'end' : 'center'));
+            $justify = $align === 'start' ? 'flex-start' : ($align === 'end' ? 'flex-end' : 'center');
+            $link  = trim((string)($s['link_url'] ?? ''));
         ?>
-          <div class="carousel-item <?= $i === 0 ? 'active' : '' ?>">
-            <?php if ($link !== ''): ?>
-              <a href="<?= esc($link) ?>" target="_blank" rel="noopener" class="hero-slide d-block w-100 h-100">
-                <img src="<?= $img ?>" class="d-block w-100 h-100" alt="<?= esc($s['judul']); ?>">
-                <span class="hero-caption d-flex" style="justify-content: <?= $justify ?>;">
-                  <span class="inner text-<?= $align ?>">
-                    <h2 class="display-6 fw-bold mb-0"><?= esc($s['judul']); ?></h2>
+            <div class="carousel-item <?= $i === 0 ? 'active' : '' ?>">
+              <?php if ($link !== ''): ?>
+                <a href="<?= esc($link) ?>" target="_blank" rel="noopener" class="hero-slide d-block w-100 h-100">
+                  <img src="<?= $img ?>" class="d-block w-100 h-100" alt="<?= esc($s['judul']); ?>">
+                  <span class="hero-caption d-flex" style="justify-content: <?= $justify ?>;">
+                    <span class="inner text-<?= $align ?>">
+                      <h2 class="display-6 fw-bold mb-0"><?= esc($s['judul']); ?></h2>
+                    </span>
                   </span>
-                </span>
-              </a>
-            <?php else: ?>
-              <div class="hero-slide d-block w-100 h-100">
-                <img src="<?= $img ?>" class="d-block w-100 h-100" alt="<?= esc($s['judul']); ?>">
-                <span class="hero-caption d-flex" style="justify-content: <?= $justify ?>;">
-                  <span class="inner text-<?= $align ?>">
-                    <h2 class="display-6 fw-bold mb-0"><?= esc($s['judul']); ?></h2>
+                </a>
+              <?php else: ?>
+                <div class="hero-slide d-block w-100 h-100">
+                  <img src="<?= $img ?>" class="d-block w-100 h-100" alt="<?= esc($s['judul']); ?>">
+                  <span class="hero-caption d-flex" style="justify-content: <?= $justify ?>;">
+                    <span class="inner text-<?= $align ?>">
+                      <h2 class="display-6 fw-bold mb-0"><?= esc($s['judul']); ?></h2>
+                    </span>
                   </span>
-                </span>
-              </div>
-            <?php endif; ?>
-          </div>
-        <?php endforeach; else: ?>
+                </div>
+              <?php endif; ?>
+            </div>
+          <?php endforeach;
+        else: ?>
           <!-- Fallback 1 slide default bila belum ada data -->
           <div class="carousel-item active">
             <div class="hero-slide d-block w-100 h-100">
@@ -172,41 +173,55 @@ $urlFor = function ($g) {
   </div>
 </div>
 
-<section class="container mt-5 bg"  id="infografis">
+<section class="container mt-5 bg" id="infografis">
   <div class="stats-container stats-blue rounded-3 p-3 p-md-4 shadow-sm" style="background-color: #dcddeeff">
-  <div class="container" >
-    <h2 class="section-title mb-4">INFOGRAFIS</h2>
-    <div class="row g-3 mb-3">
-      <?php if (!empty($infografis)): ?>
-        <?php foreach ($infografis as $item): ?>
-          <div class="col-lg-3 col-md-6 mb-4">
-            <a href="<?= base_url('user/detail/' . $item['id']); ?>" class="text-decoration-none">
-              <div class="card h-100 shadow-sm border-0">
-                <div class="p-3 pb-0 bg-white">
-                  <img src="<?= base_url('img/' . $item['gambar']); ?>"
-                    class="img-fluid rounded border border-white"
-                    alt="<?= esc($item['judul']); ?>"
-                    style="max-width: auto; height: 100%; object-fit: cover;">
-                </div>
-                <div class="card-body pt-0">
-                  <small class="text-muted d-block mt-2 mb-0">
-                    <?= date('d M Y', strtotime($item['tanggal'])); ?>
-                  </small>
-                  <h6 class="card-title text-black"><?= esc($item['judul']); ?></h6>
-                </div>
-              </div>
-            </a>
-          </div>
-        <?php endforeach; ?>
-      <?php else: ?>
-        <p class="text-muted">Belum ada data infografis.</p>
-      <?php endif; ?>
-    </div>
+    <div class="container">
+      <h2 class="section-title mb-4">INFOGRAFIS</h2>
+      <div class="row g-3 mb-3">
+        <?php
+        // Ambil semua infografis yg dikirim controller (bisa kosong)
+        $allInfo = $infografis ?? [];
 
-    <div class="text-center mt-3">
-      <a href="<?= base_url('user/list'); ?>" class="btn btn-primary">Infografis Lainnya</a>
+        // Urutkan DESC berdasarkan 'tanggal' (terbaru dulu)
+        usort($allInfo, static function ($a, $b) {
+          return strtotime($b['tanggal'] ?? '1970-01-01') <=> strtotime($a['tanggal'] ?? '1970-01-01');
+        });
+
+        // Ambil 4 item teratas
+        $showInfo = array_slice($allInfo, 0, 4);
+        ?>
+
+        <?php if (!empty($showInfo)): ?>
+          <?php foreach ($showInfo as $item): ?>
+            <div class="col-lg-3 col-md-6 mb-4">
+              <a href="<?= base_url('user/detail/' . $item['id']); ?>" class="text-decoration-none">
+                <div class="card h-100 shadow-sm border-0">
+                  <div class="p-3 pb-0 bg-white">
+                    <img src="<?= base_url('img/' . $item['gambar']); ?>"
+                      class="img-fluid rounded border border-white"
+                      alt="<?= esc($item['judul']); ?>"
+                      style="max-width:auto; height:100%; object-fit:cover;">
+                  </div>
+                  <div class="card-body pt-0">
+                    <small class="text-muted d-block mt-2 mb-0">
+                      <?= date('d M Y', strtotime($item['tanggal'])); ?>
+                    </small>
+                    <h6 class="card-title text-black"><?= esc($item['judul']); ?></h6>
+                  </div>
+                </div>
+              </a>
+            </div>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <p class="text-muted">Belum ada data infografis.</p>
+        <?php endif; ?>
+      </div>
+
+
+      <div class="text-center mt-3">
+        <a href="<?= base_url('user/list'); ?>" class="btn btn-primary">Infografis Lainnya</a>
+      </div>
     </div>
-  </div>
   </div>
 </section>
 

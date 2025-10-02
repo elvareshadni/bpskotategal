@@ -42,7 +42,7 @@
                     </form>
                 </div>
             </div>
-            <div class="col-lg-6">
+            <div class="col-lg-6" style="display: flex; background: linear-gradient(135deg, #0959C1, #0E5ECC);">
                 <div class="auth-left">
                     <div>
                         <h1 class="auth-title">Halo, Sobat!</h1>

@@ -4,7 +4,7 @@
 <div class="container d-flex justify-content-center align-items-center min-vh-100">
     <div class="auth-card">
         <div class="row g-0">
-            <div class="col-lg-6">
+            <div class="col-lg-6 d-flex">
                 <div class="auth-left">
                     <div>
                         <h1 class="auth-title">Selamat Datang Kembali!</h1>
