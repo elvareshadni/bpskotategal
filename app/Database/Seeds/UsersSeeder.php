@@ -19,9 +19,9 @@ class UsersSeeder extends Seeder
                 'role'     => 'admin',
             ],
             [
-                'username' => 'elvares',
-                'fullname' => 'elva',
-                'email'    => 'elvareshadni@gmail.com',
+                'username' => 'user',
+                'fullname' => 'User',
+                'email'    => 'user@gmail.com',
                 'phone'    => null,
                 'photo'    => null,
                 'password' => password_hash('user12345', PASSWORD_DEFAULT),

@@ -26,7 +26,7 @@ $routes->group('api', function ($routes) {
     $routes->get('proportion', 'Indicators::apiProportion');           // ?row_id=..&region_id=..&year=..[&quarter=..|&month=..]
     $routes->get('export/indicator-xlsx', 'Api\Export::indicatorXlsx');          // unduh data indikator
     $routes->get('export/indicator-template', 'Api\Export::indicatorTemplateXlsx'); // template import (xlsx)
-
+    $routes->get('periods', 'Indicators::periods'); // sesuaikan namespace controllermu
 });
 
 

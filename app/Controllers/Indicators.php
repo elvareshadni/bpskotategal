@@ -91,14 +91,20 @@ class Indicators extends BaseController
         // ======================= MULTI DATASET (JUMLAH_KATEGORI) ======================= // ADDED
         if ($dtype === 'jumlah_kategori' && $multi) {
             $varM = new IndicatorRowVarModel();
-            $vars = $varM->where('row_id', $rowId)->orderBy('sort_order','ASC')->findAll();
+            $vars = $varM->where('row_id', $rowId)->orderBy('sort_order', 'ASC')->findAll();
 
             if (empty($vars)) {
                 return $this->response->setJSON([
-                    'ok'=>true,'labels'=>[],'datasets'=>[],'meta'=>[
-                        'timeline'=>strtoupper($timeline),'unit'=>$row['unit'],
-                        'desc'=>$row['subindikator'],'interpretasi'=>$row['interpretasi'],
-                        'data_type'=>strtoupper($dtype),'vars'=>[]
+                    'ok' => true,
+                    'labels' => [],
+                    'datasets' => [],
+                    'meta' => [
+                        'timeline' => strtoupper($timeline),
+                        'unit' => $row['unit'],
+                        'desc' => $row['subindikator'],
+                        'interpretasi' => $row['interpretasi'],
+                        'data_type' => strtoupper($dtype),
+                        'vars' => []
                     ]
                 ]);
             }
@@ -111,33 +117,33 @@ class Indicators extends BaseController
                 // Gabungan semua tahun yang ada
                 $valM = new IndicatorValueModel();
                 $allYears = $valM->select('year')
-                    ->where('row_id',$rowId)->where('region_id',$regionId)
+                    ->where('row_id', $rowId)->where('region_id', $regionId)
                     ->where('year IS NOT NULL', null, false)
-                    ->groupBy('year')->orderBy('year','ASC')->findAll();
-                $years = array_values(array_unique(array_map(fn($r)=>(int)$r['year'],$allYears)));
+                    ->groupBy('year')->orderBy('year', 'ASC')->findAll();
+                $years = array_values(array_unique(array_map(fn($r) => (int)$r['year'], $allYears)));
 
                 if ($window === 'last3' || $window === 'last5') {
                     $take = $window === 'last3' ? 3 : 5;
-                    $years = array_slice($years, max(0,count($years)-$take));
+                    $years = array_slice($years, max(0, count($years) - $take));
                 } elseif ($year > 0) {
                     $years = [$year];
                 }
 
                 foreach ($years as $y) {
                     $labels[] = (string)$y;
-                    $periods[] = ['year'=>$y,'quarter'=>null,'month'=>null];
+                    $periods[] = ['year' => $y, 'quarter' => null, 'month' => null];
                 }
             } elseif ($timeline === 'quarterly') {
                 $y = $year ?: (int)date('Y');
-                foreach ([1,2,3,4] as $q) {
-                    $labels[] = $y.' Q'.$q;
-                    $periods[] = ['year'=>$y,'quarter'=>$q,'month'=>null];
+                foreach ([1, 2, 3, 4] as $q) {
+                    $labels[] = $y . ' Q' . $q;
+                    $periods[] = ['year' => $y, 'quarter' => $q, 'month' => null];
                 }
             } else { // monthly
                 $y = $year ?: (int)date('Y');
-                for ($m=1;$m<=12;$m++) {
-                    $labels[] = sprintf('%d-%02d',$y,$m);
-                    $periods[] = ['year'=>$y,'quarter'=>null,'month'=>$m];
+                for ($m = 1; $m <= 12; $m++) {
+                    $labels[] = sprintf('%d-%02d', $y, $m);
+                    $periods[] = ['year' => $y, 'quarter' => null, 'month' => $m];
                 }
             }
 
@@ -145,28 +151,28 @@ class Indicators extends BaseController
             $datasets = [];
             foreach ($vars as $v) {
                 $valM = new IndicatorValueModel(); // NEW per loop agar where tidak menumpuk
-                $q = $valM->where('row_id',$rowId)->where('region_id',$regionId)->where('var_id',(int)$v['id']);
+                $q = $valM->where('row_id', $rowId)->where('region_id', $regionId)->where('var_id', (int)$v['id']);
 
                 if ($timeline === 'yearly') {
-                    $yrs = array_map(fn($p)=>$p['year'],$periods);
-                    if (!empty($yrs)) $q->whereIn('year',$yrs);
-                    $q->orderBy('year','ASC');
+                    $yrs = array_map(fn($p) => $p['year'], $periods);
+                    if (!empty($yrs)) $q->whereIn('year', $yrs);
+                    $q->orderBy('year', 'ASC');
                 } elseif ($timeline === 'quarterly') {
-                    $q->where('year',$periods[0]['year'])->orderBy('quarter','ASC');
+                    $q->where('year', $periods[0]['year'])->orderBy('quarter', 'ASC');
                 } else {
-                    $q->where('year',$periods[0]['year'])->orderBy('month','ASC');
+                    $q->where('year', $periods[0]['year'])->orderBy('month', 'ASC');
                 }
 
                 $vals = $q->findAll();
                 $map = [];
                 foreach ($vals as $vv) {
-                    $ky = $vv['year'].'|'.(int)$vv['quarter'].'|'.(int)$vv['month'];
+                    $ky = $vv['year'] . '|' . (int)$vv['quarter'] . '|' . (int)$vv['month'];
                     $map[$ky] = is_null($vv['value']) ? null : (float)$vv['value'];
                 }
 
                 $data = [];
                 foreach ($periods as $p) {
-                    $ky = $p['year'].'|'.(int)$p['quarter'].'|'.(int)$p['month'];
+                    $ky = $p['year'] . '|' . (int)$p['quarter'] . '|' . (int)$p['month'];
                     $data[] = $map[$ky] ?? null;
                 }
 
@@ -178,16 +184,16 @@ class Indicators extends BaseController
             }
 
             return $this->response->setJSON([
-                'ok'=>true,
-                'labels'=>$labels,
-                'datasets'=>$datasets,
-                'meta'=>[
-                    'timeline'=>strtoupper($timeline),
-                    'unit'=>$row['unit'],
-                    'desc'=>$row['subindikator'],
-                    'interpretasi'=>$row['interpretasi'],
-                    'data_type'=>strtoupper($dtype),
-                    'vars'=>array_map(fn($v)=>['id'=>(int)$v['id'],'name'=>$v['name']],$vars),
+                'ok' => true,
+                'labels' => $labels,
+                'datasets' => $datasets,
+                'meta' => [
+                    'timeline' => strtoupper($timeline),
+                    'unit' => $row['unit'],
+                    'desc' => $row['subindikator'],
+                    'interpretasi' => $row['interpretasi'],
+                    'data_type' => strtoupper($dtype),
+                    'vars' => array_map(fn($v) => ['id' => (int)$v['id'], 'name' => $v['name']], $vars),
                 ]
             ]);
         }
@@ -207,11 +213,18 @@ class Indicators extends BaseController
 
             if (empty($vars)) {
                 return $this->response->setJSON([
-                    'ok' => true, 'labels' => [], 'values' => [], 'meta' => [
-                        'timeline'=>strtoupper($timeline),'unit'=>$row['unit'],
-                        'desc'=>$row['subindikator'],'interpretasi'=>$row['interpretasi'],
-                        'data_type'=>strtoupper($dtype),'var_id'=>null,'vars'=>[],
-                        'note'=>'No variables defined for jumlah_kategori'
+                    'ok' => true,
+                    'labels' => [],
+                    'values' => [],
+                    'meta' => [
+                        'timeline' => strtoupper($timeline),
+                        'unit' => $row['unit'],
+                        'desc' => $row['subindikator'],
+                        'interpretasi' => $row['interpretasi'],
+                        'data_type' => strtoupper($dtype),
+                        'var_id' => null,
+                        'vars' => [],
+                        'note' => 'No variables defined for jumlah_kategori'
                     ]
                 ]);
             }
@@ -256,11 +269,20 @@ class Indicators extends BaseController
             $map = [];
             foreach ($vals as $v) $map[(int)$v['year']] = is_null($v['value']) ? null : (float)$v['value'];
             ksort($map);
-            foreach ($map as $y => $val) { $labels[] = (string)$y; $values[] = $val; }
+            foreach ($map as $y => $val) {
+                $labels[] = (string)$y;
+                $values[] = $val;
+            }
         } elseif ($timeline === 'quarterly') {
-            foreach ($vals as $v) { $labels[] = $v['year'] . ' Q' . $v['quarter']; $values[] = is_null($v['value']) ? null : (float)$v['value']; }
+            foreach ($vals as $v) {
+                $labels[] = $v['year'] . ' Q' . $v['quarter'];
+                $values[] = is_null($v['value']) ? null : (float)$v['value'];
+            }
         } else {
-            foreach ($vals as $v) { $labels[] = sprintf('%d-%02d', $v['year'], $v['month']); $values[] = is_null($v['value']) ? null : (float)$v['value']; }
+            foreach ($vals as $v) {
+                $labels[] = sprintf('%d-%02d', $v['year'], $v['month']);
+                $values[] = is_null($v['value']) ? null : (float)$v['value'];
+            }
         }
 
         return $this->response->setJSON([
@@ -326,7 +348,67 @@ class Indicators extends BaseController
         ]);
     }
 
-    // Export CSV sederhana (Excel bisa buka)
+    public function periods()
+    {
+        $rowId    = (int) ($this->request->getGet('row_id') ?? 0);
+        $regionId = (int) ($this->request->getGet('region_id') ?? 0);
+
+        if (!$rowId || !$regionId) {
+            return $this->response->setJSON(['ok' => false, 'msg' => 'row_id & region_id wajib']);
+        }
+
+        $row = (new IndicatorRowModel())
+            ->select('timeline')
+            ->where('id', $rowId)
+            ->first();
+        if (!$row) {
+            return $this->response->setJSON(['ok' => false, 'msg' => 'Row tidak ditemukan']);
+        }
+
+        $vals = (new IndicatorValueModel())
+            ->select('year, quarter, month')
+            ->where('row_id', $rowId)
+            ->where('region_id', $regionId)
+            ->orderBy('year', 'ASC')
+            ->orderBy('quarter', 'ASC')
+            ->orderBy('month', 'ASC')
+            ->findAll();
+
+        $years = [];
+        $qByY = [];
+        $mByY = [];
+
+        foreach ($vals as $v) {
+            $y = (int) $v['year'];
+            if (!in_array($y, $years, true)) $years[] = $y;
+            if (!is_null($v['quarter'])) $qByY[$y][] = (int) $v['quarter'];
+            if (!is_null($v['month']))   $mByY[$y][] = (int) $v['month'];
+        }
+        sort($years);
+        foreach ($qByY as $y => &$qs) {
+            $qs = array_values(array_unique($qs));
+            sort($qs);
+        }
+        foreach ($mByY as $y => &$ms) {
+            $ms = array_values(array_unique($ms));
+            sort($ms);
+        }
+
+        $lastYear = count($years) ? end($years) : null;
+        $defQ = ($lastYear && !empty($qByY[$lastYear])) ? end($qByY[$lastYear]) : null;
+        $defM = ($lastYear && !empty($mByY[$lastYear])) ? end($mByY[$lastYear]) : null;
+
+        return $this->response->setJSON([
+            'ok'       => true,
+            'timeline' => strtoupper($row['timeline']),
+            'years'    => $years,
+            'quartersByYear' => $qByY,
+            'monthsByYear'   => $mByY,
+            'defaults' => ['year' => $lastYear, 'quarter' => $defQ, 'month' => $defM],
+        ]);
+    }
+
+    // Export .xlsx sederhana (Excel bisa buka)
     public function apiExportXlsx()
     {
         $jenis = (string)($this->request->getGet('jenis') ?? 'series');
@@ -339,19 +421,19 @@ class Indicators extends BaseController
 
             // ===== MULTI DATASET (bar multi variabel) ===== // ADDED
             if ($multi && !empty($payload['datasets'])) {
-                $headers = array_merge(['Label'], array_map(fn($d)=>$d['name'], $payload['datasets']));
-                $csv = implode(',', array_map(fn($h)=>'"'.str_replace('"','""',$h).'"', $headers))."\n";
+                $headers = array_merge(['Label'], array_map(fn($d) => $d['name'], $payload['datasets']));
+                $csv = implode(',', array_map(fn($h) => '"' . str_replace('"', '""', $h) . '"', $headers)) . "\n";
                 foreach ($payload['labels'] as $i => $lab) {
-                    $row = ['"'.str_replace('"','""',$lab).'"'];
+                    $row = ['"' . str_replace('"', '""', $lab) . '"'];
                     foreach ($payload['datasets'] as $ds) {
                         $val = $ds['values'][$i] ?? '';
                         $row[] = (is_null($val) ? '' : $val);
                     }
-                    $csv .= implode(',', $row)."\n";
+                    $csv .= implode(',', $row) . "\n";
                 }
-                $filename = 'series_multi_'.date('Ymd_His').'.csv';
-                return $this->response->setHeader('Content-Type','text/csv')
-                    ->setHeader('Content-Disposition','attachment; filename="'.$filename.'"')
+                $filename = 'series_multi_' . date('Ymd_His') . '.csv';
+                return $this->response->setHeader('Content-Type', 'text/csv')
+                    ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
                     ->setBody($csv);
             }
 

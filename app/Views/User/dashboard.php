@@ -277,6 +277,24 @@ $urlFor = function ($g) {
     });
   }
 
+  async function fetchPeriods(rowId) {
+    const js = await j('<?= base_url('api/periods'); ?>?row_id=' + rowId + '&region_id=' + regionId);
+    return js.ok ? js : {
+      ok: false
+    };
+  }
+
+  function setOptionsPairs(sel, items, toText = (v) => v) {
+    sel.innerHTML = '';
+    items.forEach(v => {
+      const o = document.createElement('option');
+      o.value = v;
+      o.textContent = toText(v);
+      sel.appendChild(o);
+    });
+  }
+
+
   // ------------- LOADERS -------------
   async function loadRegions() {
     const js = await j('<?= base_url('api/regions'); ?>');
@@ -515,22 +533,67 @@ $urlFor = function ($g) {
   }
 
   // ------------- PERIODE & DRAW -------------
-  function setupPeriodControls(rowMeta) {
-    // reset
+  async function setupPeriodControls(rowMeta) {
+    // reset visibilitas
     [$win, $year, $q, $m].forEach(el => el.classList.add('d-none'));
     if (!rowMeta) return;
 
     const t = rowMeta.timeline; // YEARLY|QUARTERLY|MONTHLY
     const dt = rowMeta.data_type; // TIMESERIES|JUMLAH_KATEGORI|PROPORSI
-    if (dt === 'PROPORSI') {
-      $year.classList.remove('d-none');
-      if (t === 'QUARTERLY') $q.classList.remove('d-none');
-      if (t === 'MONTHLY') $m.classList.remove('d-none');
-    } else {
-      if (t === 'YEARLY') $win.classList.remove('d-none');
-      else $year.classList.remove('d-none');
+
+    // YEARLY:
+    // - TIMESERIES/JUMLAH_KATEGORI: gunakan window (all/3/5), tidak perlu pilih tahun
+    // - PROPORSI: butuh pilih tahun yg tersedia
+    if (t === 'YEARLY') {
+      if (dt === 'PROPORSI') {
+        const p = await fetchPeriods(rowMeta.id);
+        const years = p.years || [];
+        if (years.length) {
+          setOptions($year, years);
+          $year.value = p.defaults?.year ?? years[years.length - 1];
+          $year.classList.remove('d-none');
+        }
+      } else {
+        $win.classList.remove('d-none'); // pakai window untuk line/bar yearly
+      }
+      return;
     }
+
+    // QUARTERLY / MONTHLY:
+    // tampilkan TAHUN yg tersedia; lalu (sesuai timeline) tampilkan kuartal/bulan yang tersedia untuk tahun terpilih
+    const p = await fetchPeriods(rowMeta.id);
+    const years = p.years || [];
+    if (!years.length) return; // tidak ada data, biarkan semua hidden
+
+    setOptions($year, years);
+    $year.value = p.defaults?.year ?? years[years.length - 1];
+    $year.classList.remove('d-none');
+
+    function refreshQuarterMonthForYear() {
+      const y = parseInt($year.value, 10);
+      if (t === 'QUARTERLY') {
+        const qs = (p.quartersByYear && p.quartersByYear[y]) ? p.quartersByYear[y] : [];
+        setOptionsPairs($q, qs);
+        if (qs.length) $q.value = qs[qs.length - 1];
+        $q.classList.toggle('d-none', qs.length === 0);
+        $m.classList.add('d-none');
+      } else if (t === 'MONTHLY') {
+        const ms = (p.monthsByYear && p.monthsByYear[y]) ? p.monthsByYear[y] : [];
+        setOptionsPairs($m, ms);
+        if (ms.length) $m.value = ms[ms.length - 1];
+        $m.classList.toggle('d-none', ms.length === 0);
+        $q.classList.add('d-none');
+      }
+    }
+
+    // init & on change
+    refreshQuarterMonthForYear();
+    $year.onchange = () => {
+      refreshQuarterMonthForYear();
+      draw(); // redraw saat tahun berubah
+    };
   }
+
 
   async function probeYearsForRow(rowId) {
     const js = await j('<?= base_url('api/series'); ?>?row_id=' + rowId + '&region_id=' + regionId + '&window=all');
