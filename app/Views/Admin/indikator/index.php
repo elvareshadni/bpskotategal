@@ -64,21 +64,27 @@
       `).join('');
 
                 return `
-        <div class="border rounded p-3 mb-3">
-          <div class="d-flex align-items-center">
-            <h6 class="mb-0">
-              <a href="<?= base_url('admin/indicator/form'); ?>?id=${it.id}" class="link-dark">${it.name}</a>
-            </h6>
-            <div class="ms-auto">
-              <form action="<?= base_url('admin/indicator/delete'); ?>/${it.id}" method="post" class="d-inline frm-del-ind">
-                <?= csrf_field(); ?>
-                <button type="button" class="btn btn-outline-danger btn-sm btn-del-ind">Hapus</button>
-              </form>
-            </div>
-          </div>
-          <div class="small text-muted mt-1">Subindikator: ${it.subcount}</div>
-          <ul class="mt-2 mb-0">${subs || '<em class="text-muted">Belum ada subindikator.</em>'}</ul>
-        </div>`;
+<div class="border rounded p-3 mb-3">
+  <div class="d-flex align-items-center flex-wrap gap-2">
+    <h6 class="mb-0 me-auto">
+      <a href="<?= base_url('admin/indicator/form'); ?>?id=${it.id}" class="link-dark">${it.name}</a>
+    </h6>
+    <a class="btn btn-outline-secondary btn-sm"
+       href="<?= base_url('api/export/indicator-template'); ?>?indicator_id=${it.id}&region_id=${document.getElementById('region_id').value}">
+       Download Template Import Data
+    </a>
+    <a class="btn btn-outline-primary btn-sm"
+       href="<?= base_url('admin/data-indikator/import'); ?>?indicator_id=${it.id}&region_id=${document.getElementById('region_id').value}">
+       Import Data
+    </a>
+    <form action="<?= base_url('admin/indicator/delete'); ?>/${it.id}" method="post" class="d-inline frm-del-ind ms-2">
+      <?= csrf_field(); ?>
+      <button type="button" class="btn btn-outline-danger btn-sm btn-del-ind">Hapus</button>
+    </form>
+  </div>
+  <div class="small text-muted mt-1">Subindikator: ${it.subcount}</div>
+  <ul class="mt-2 mb-0">${subs || '<em class="text-muted">Belum ada subindikator.</em>'}</ul>
+</div>`;
             }).join('');
 
             box.innerHTML = html || '<em class="text-muted">Belum ada indikator.</em>';

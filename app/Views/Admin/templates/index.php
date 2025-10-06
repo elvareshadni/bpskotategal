@@ -75,17 +75,17 @@
             <!-- Nav Item - Edit Carousel -->
             <li class="nav-item <?= uri_string() === 'admin/tambah-carousel' ? 'active' : '' ?>">
                 <a class="nav-link collapsed" href="<?= base_url('admin/tambah-carousel'); ?>">
-                    <span>Edit Carousel</span>
+                    <span>Manajemen Carousel</span>
                 </a>
             </li> 
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
-            <!-- Nav Item - Edit Konten -->
+            <!-- Nav Item - Edit Infografis -->
             <li class="nav-item <?= uri_string() === 'admin/tambah-infografis' ? 'active' : '' ?>">
                 <a class="nav-link collapsed" href="<?= base_url('admin/tambah-infografis'); ?>">
-                    <span>Edit Konten</span>
+                    <span>Manajemen Infografis</span>
                 </a>
             </li>
 

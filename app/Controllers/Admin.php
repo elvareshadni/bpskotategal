@@ -10,6 +10,8 @@ use App\Models\IndicatorModel;
 use App\Models\IndicatorRowModel;
 use App\Models\IndicatorRowVarModel;
 use App\Models\IndicatorValueModel;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+
 
 class Admin extends BaseController
 {
@@ -26,6 +28,17 @@ class Admin extends BaseController
             exit;
         }
     }
+
+    /**
+     * Compat helper untuk baca sel Excel tanpa getCellByColumnAndRow (tidak tersedia di sebagian versi PhpSpreadsheet).
+     */
+    private function xlGet(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet, int $col, int $row, bool $calculated = false)
+    {
+        $addr = Coordinate::stringFromColumnIndex($col) . $row;
+        $cell = $sheet->getCell($addr);
+        return $calculated ? $cell->getCalculatedValue() : $cell->getValue();
+    }
+
 
     public function profile()
     {
@@ -832,6 +845,253 @@ class Admin extends BaseController
             ->update(['var_id' => $newVarId, 'updated_at' => date('Y-m-d H:i:s')]);
     }
 
+    public function importForm()
+    {
+        $region_id    = (int)($this->request->getGet('region_id') ?? 0);
+        $indicator_id = (int)($this->request->getGet('indicator_id') ?? 0);
+        return view('Admin/data_indikator/import_form', compact('region_id', 'indicator_id'));
+    }
+
+    public function importUpload()
+    {
+        helper('text');
+
+        $regionId    = (int)$this->request->getPost('region_id');
+        $indicatorId = (int)$this->request->getPost('indicator_id');
+        $file        = $this->request->getFile('file');
+
+        if (!$regionId || !$indicatorId || !$file || !$file->isValid()) {
+            return redirect()->back()->with('error', 'Payload tidak lengkap.');
+        }
+        if (strtolower($file->getClientExtension()) !== 'xlsx') {
+            return redirect()->back()->with('error', 'File harus XLSX.');
+        }
+
+        $rowM = new \App\Models\IndicatorRowModel();
+        $varM = new \App\Models\IndicatorRowVarModel();
+        $valM = new \App\Models\IndicatorValueModel();
+
+        // Ambil subindikator existing
+        $rows = $rowM->where('indicator_id', $indicatorId)->findAll();
+        $byName = [];
+        foreach ($rows as $r) $byName[trim($r['subindikator'])] = $r;
+
+        // Siapkan sort_order berikutnya untuk subindikator baru
+        $db = \Config\Database::connect();
+        $mx = $db->table('indicator_rows')->selectMax('sort_order', 'mx')->where('indicator_id', $indicatorId)->get()->getRow('mx');
+        $nextSort = (int)($mx ?? 0) + 1;
+
+        try {
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+            $xlsx   = $reader->load($file->getTempName());
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', 'Gagal membaca XLSX: ' . $e->getMessage());
+        }
+
+        $imported = 0;
+        $createdVars = 0;
+        $createdRows = 0;
+
+        foreach ($xlsx->getAllSheets() as $sheet) {
+            $sheetName = trim($sheet->getTitle());
+            if ($sheetName === '') continue;
+
+            // ==== Header & deteksi struktur ====
+            // ==== Header & deteksi struktur ====
+            $hdrRow = 5; // kompatibel dengan Export/Template
+
+            // baca teks header kolom A (harus 'Periode', case-insensitive)
+            $first = (string) $this->xlGet($sheet, 1, $hdrRow);   // <-- tambahkan assignment + akhiri baris sebelumnya dengan ;
+            if ($first === '' || stripos($first, 'periode') === false) {
+                // bukan template kita → lewati sheet ini
+                continue;
+            }
+
+
+            // Kumpulkan header variabel dari kolom B..dst
+            $headers = [];
+            $col = 2;
+            while (true) {
+                $val = (string)$this->xlGet($sheet, $col, $hdrRow);
+                if ($val === '') break;
+                $headers[] = trim($val);
+                $col++;
+                if ($col > 300) break;
+            }
+
+            // Jika sheet belum dikenal → buat subindikator baru OTOMATIS
+            if (!isset($byName[$sheetName])) {
+                // Deteksi timeline dari nilai di kolom A (baris data pertama)
+                $detectTimeline = function () use ($sheet, $hdrRow): string {
+                    for ($r = $hdrRow + 1; $r < $hdrRow + 50; $r++) {
+                        $p = trim((string)$this->xlGet($sheet, 1, $r));
+                        if ($p === '') continue;
+                        if (preg_match('/^\d{4}\s*[-\/\.]\s*\d{1,2}$/', $p)) return 'monthly';
+                        if (preg_match('/^\d{4}.*?(Q|TW)\s*[1-4]$/i', $p))   return 'quarterly';
+                        if (preg_match('/^\d{4}$/', $p))                     return 'yearly';
+                    }
+                    return 'yearly';
+                };
+
+                // Deteksi data_type dari jumlah kolom & indikasi proporsi (%)
+                $detectDtype = function (array $hdrs): string {
+                    if (count($hdrs) <= 1) return 'timeseries';
+                    $joined = strtolower(implode(' ', $hdrs));
+                    if (str_contains($joined, '%') || str_contains($joined, '(%)') || str_contains($joined, 'proporsi')) {
+                        return 'proporsi';
+                    }
+                    return 'jumlah_kategori';
+                };
+
+                // Ambil unit dari header kolom pertama nilai (mis. "Nilai (Orang)")
+                $detectUnit = function (array $hdrs): ?string {
+                    if (!$hdrs) return null;
+                    if (preg_match('/\(([^)]+)\)/', $hdrs[0], $m)) return trim($m[1]);
+                    return null;
+                };
+
+                $timeline = $detectTimeline();
+                $dtype    = $detectDtype($headers);
+                $unit     = $detectUnit($headers);
+
+                $newRowId = $rowM->insert([
+                    'indicator_id' => $indicatorId,
+                    'subindikator' => $sheetName,
+                    'timeline'     => $timeline,
+                    'data_type'    => $dtype,
+                    'unit'         => $unit ?: null,
+                    'sort_order'   => $nextSort++,
+                ]);
+                $createdRows++;
+                $byName[$sheetName] = $rowM->find($newRowId);
+            }
+
+            // Ambil row meta yang pasti ada sekarang
+            $row = $byName[$sheetName];
+            $timeline = strtolower($row['timeline']);
+            $dtype    = strtolower($row['data_type']);
+
+            // Map var_id:
+            $varMap = []; // name => id ('' untuk timeseries)
+            if ($dtype === 'timeseries') {
+                $varMap['__single__'] = null;
+            } else {
+                // buat variabel jika belum ada
+                $existing = $varM->where('row_id', $row['id'])->orderBy('sort_order', 'ASC')->findAll();
+                $existByName = [];
+                foreach ($existing as $v) $existByName[trim($v['name'])] = (int)$v['id'];
+
+                foreach ($headers as $name) {
+                    // buang "(%)" atau "(Unit)" di ujung label
+                    $nm = preg_replace('/\s+\(.*\)$/', '', trim($name));
+                    if (!isset($existByName[$nm])) {
+                        $varM->insert([
+                            'row_id'     => $row['id'],
+                            'name'       => $nm,
+                            'sort_order' => count($existByName) + 1,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+                        $id = (int)$varM->getInsertID();
+                        $existByName[$nm] = $id;
+                        $createdVars++;
+                    }
+                    $varMap[$nm] = $existByName[$nm];
+                }
+            }
+
+            // Baca baris data mulai row 6
+            $r = $hdrRow + 1;
+            while (true) {
+                $periode = trim((string)$this->xlGet($sheet, 1, $r));
+                if ($periode === '') break;
+
+                $y = null;
+                $q = null;
+                $m = null;
+                if ($timeline === 'yearly') {
+                    $y = (int)preg_replace('/\D/', '', $periode);
+                } elseif ($timeline === 'quarterly') {
+                    if (preg_match('/(\d{4}).*?(Q|TW)\s*([1-4])/i', $periode, $mch)) {
+                        $y = (int)$mch[1];
+                        $q = (int)$mch[3];
+                    }
+                } else { // monthly
+                    if (preg_match('/(\d{4})[-\/\. ](\d{1,2})/', $periode, $mch)) {
+                        $y = (int)$mch[1];
+                        $m = (int)$mch[2];
+                    }
+                }
+                if (!$y) {
+                    $r++;
+                    continue;
+                }
+
+                if ($dtype === 'timeseries') {
+                    $val = $this->xlGet($sheet, 2, $r, true);
+                    $payload = [
+                        'row_id'    => $row['id'],
+                        'region_id' => $regionId,
+                        'var_id'    => null,
+                        'year'      => $y,
+                        'quarter'   => $q ?: null,
+                        'month'     => $m ?: null,
+                        'value'     => is_numeric($val) ? (float)$val : null,
+                    ];
+                    $this->upsertValue($valM, $payload);
+                    if ($payload['value'] !== null) $imported++;
+                } else {
+                    // multi kolom
+                    for ($c = 0; $c < count($headers); $c++) {
+                        $colIndex = 2 + $c;
+                        $headNm   = preg_replace('/\s+\(.*\)$/', '', trim($headers[$c]));
+                        $varId    = $varMap[$headNm] ?? null;
+                        if (!$varId) continue;
+                        $val = $this->xlGet($sheet, $colIndex, $r, true);
+                        $payload = [
+                            'row_id'    => $row['id'],
+                            'region_id' => $regionId,
+                            'var_id'    => $varId,
+                            'year'      => $y,
+                            'quarter'   => $q ?: null,
+                            'month'     => $m ?: null,
+                            'value'     => is_numeric($val) ? (float)$val : null,
+                        ];
+                        $this->upsertValue($valM, $payload);
+                        if ($payload['value'] !== null) $imported++;
+                    }
+                }
+
+                $r++;
+                if ($r > 50000) break;
+            }
+        }
+
+        return redirect()->back()->with('success', "Import selesai. Baris bernilai: {$imported}. Variabel baru: {$createdVars}. Subindikator baru: {$createdRows}.");
+    }
+
+    // Helper kecil untuk upsert
+    private function upsertValue(\App\Models\IndicatorValueModel $valM, array $payload): void
+    {
+        $builder = $valM->where([
+            'row_id' => $payload['row_id'],
+            'region_id' => $payload['region_id'],
+            'year' => $payload['year'],
+            'quarter' => $payload['quarter'],
+            'month' => $payload['month'],
+        ]);
+        if ($payload['var_id'] === null) $builder->where('var_id', null);
+        else                           $builder->where('var_id', (int)$payload['var_id']);
+
+        $found = $builder->first();
+        if ($payload['value'] === null) {
+            if ($found) $valM->delete((int)$found['id']);
+            return;
+        }
+
+        if ($found) $valM->update((int)$found['id'], $payload);
+        else        $valM->insert($payload);
+    }
 
 
 

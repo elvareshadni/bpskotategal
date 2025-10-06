@@ -25,6 +25,8 @@ $routes->group('api', function ($routes) {
     $routes->get('series', 'Indicators::apiSeries');                   // ?row_id=..&region_id=..&window=all|last3|last5|year=YYYY&quarter=Q&month=M
     $routes->get('proportion', 'Indicators::apiProportion');           // ?row_id=..&region_id=..&year=..[&quarter=..|&month=..]
     $routes->get('export/indicator-xlsx', 'Api\Export::indicatorXlsx');          // unduh data indikator
+    $routes->get('export/indicator-template', 'Api\Export::indicatorTemplateXlsx'); // template import (xlsx)
+
 });
 
 
@@ -64,6 +66,10 @@ $routes->group('admin', function ($routes) {
     $routes->get('subindicator/form', 'Admin::subindikatorForm');      // ?id= (edit) atau ?indicator_id=
     $routes->post('subindicator/save', 'Admin::subindikatorSave');     // create/update basic fields
     $routes->post('subindicator/delete/(:num)', 'Admin::subindikatorDelete/$1');
+
+    // === IMPORT FILE ===
+    $routes->get('data-indikator/import', 'Admin::importForm');     // form import (pilih file)
+    $routes->post('data-indikator/import', 'Admin::importUpload');  // unggah & proses
 
     // === VARIABEL (untuk data proporsi) ===
     $routes->post('subindicator/var/create', 'Admin::varCreate');      // {row_id, name}
