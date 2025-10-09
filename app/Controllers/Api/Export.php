@@ -161,6 +161,25 @@ class Export extends BaseController
             }
             usort($periods, fn($a, $b) => $this->periodSortTuple($timeline, $a) <=> $this->periodSortTuple($timeline, $b));
 
+            if (empty($periods)) {
+                $now = (int)date('Y');
+                if ($timeline === 'yearly') {
+                    for ($y = $now - 4; $y <= $now; $y++) {
+                        $periods[] = ['label' => (string)$y, 'year' => $y, 'quarter' => null, 'month' => null];
+                    }
+                } elseif ($timeline === 'quarterly') {
+                    $y = $now; // atau pilih tahun terakhir yang kamu mau
+                    for ($q = 1; $q <= 4; $q++) {
+                        $periods[] = ['label' => sprintf('%04d-Q%d', $y, $q), 'year' => $y, 'quarter' => $q, 'month' => null];
+                    }
+                } else { // monthly
+                    $y = $now;
+                    for ($m = 1; $m <= 12; $m++) {
+                        $periods[] = ['label' => sprintf('%04d-%02d', $y, $m), 'year' => $y, 'quarter' => null, 'month' => $m];
+                    }
+                }
+            }
+
             // Pivot
             $pivot = [];
             foreach ($values as $val) {
